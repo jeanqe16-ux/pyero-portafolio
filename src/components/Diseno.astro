@@ -1,0 +1,505 @@
+---
+import textos from '../data/textos.json';
+import { clientes } from '../data/clientes.json';
+import { posts, portadas } from '../data/diseno.json';
+
+const t = textos.diseno;
+const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
+
+// Solo se ofrecen como filtro los clientes que tienen piezas
+const conPiezas = clientes.filter((c) => [...posts, ...portadas].some((p) => p.cliente === c.id));
+const gruposPortadas = conPiezas
+  .map((c) => ({ ...c, portadas: portadas.filter((p) => p.cliente === c.id) }))
+  .filter((g) => g.portadas.length > 0);
+---
+
+<section class="seccion diseno" id="diseno">
+  <p class="etiqueta">{t.etiqueta}</p>
+  <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
+
+  <div class="filtros" role="group" aria-label={t.filtro}>
+    <button type="button" data-filtro="todos" aria-pressed="true">{t.todos}</button>
+    {
+      conPiezas.map((c) => (
+        <button type="button" data-filtro={c.id} aria-pressed="false">
+          {c.nombre}
+        </button>
+      ))
+    }
+  </div>
+
+  <h3>{t.posts}</h3>
+  <ul class="posts">
+    {
+      posts.map((p) => (
+        <li class="post" data-cliente={p.cliente}>
+          <div class="carrusel">
+            {p.imagenes.map((src) => (
+              <button
+                type="button"
+                class="abrir"
+                data-src={src}
+                data-titulo={p.titulo}
+                data-nombre={nombreDe(p.cliente)}
+                aria-label={`${t.ver} ${p.titulo}`}
+              >
+                <img src={src} alt={p.titulo} width="1080" height="1080" loading="lazy" decoding="async" />
+              </button>
+            ))}
+          </div>
+          {p.imagenes.length > 1 && (
+            <>
+              <span class="cuenta" aria-label={`${t.carrusel} ${p.imagenes.length}`}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="3" y="7" width="13" height="13" rx="2.5" />
+                  <path d="M8 4h10.5A2.5 2.5 0 0 1 21 6.5V17" stroke-linecap="round" />
+                </svg>
+                {p.imagenes.length}
+              </span>
+              <button type="button" class="paso paso-anterior" data-paso="-1" aria-label={t.anterior}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                  <path d="m14 6-6 6 6 6" />
+                </svg>
+              </button>
+              <button type="button" class="paso paso-siguiente" data-paso="1" aria-label={t.siguiente}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                  <path d="m10 6 6 6-6 6" />
+                </svg>
+              </button>
+            </>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="bloque-portadas">
+    <h3>{t.portadas}</h3>
+    {
+      gruposPortadas.map((g) => (
+        <div class="grupo" data-cliente={g.id}>
+          <h4>{g.nombre}</h4>
+          <ul class="portadas">
+            {g.portadas.map((p) => (
+              <li>
+                <button
+                  type="button"
+                  class="abrir"
+                  data-src={p.imagen}
+                  data-titulo={p.titulo}
+                  data-nombre={g.nombre}
+                  aria-label={`${t.ver} ${p.titulo}`}
+                >
+                  <img src={p.imagen} alt={p.titulo} width={p.ancho} height={p.alto} loading="lazy" decoding="async" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+
+  <dialog class="visor" aria-label={t.visor}>
+    <button type="button" class="visor-boton visor-cerrar" aria-label={t.cerrar}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+    <figure>
+      <img alt="" />
+      <figcaption>
+        <button type="button" class="visor-boton visor-anterior" aria-label={t.anterior}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="m14 6-6 6 6 6"></path>
+          </svg>
+        </button>
+        <p>
+          <strong class="visor-titulo"></strong>
+          <span class="visor-detalle"></span>
+        </p>
+        <button type="button" class="visor-boton visor-siguiente" aria-label={t.siguiente}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="m10 6 6 6-6 6"></path>
+          </svg>
+        </button>
+      </figcaption>
+    </figure>
+  </dialog>
+</section>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>('#diseno')!;
+  const visor = seccion.querySelector<HTMLDialogElement>('.visor')!;
+  const imagen = visor.querySelector('img')!;
+  const titulo = visor.querySelector('.visor-titulo')!;
+  const detalle = visor.querySelector('.visor-detalle')!;
+  let lista: HTMLElement[] = [];
+  let indice = 0;
+
+  // Filtro por cliente: oculta posts y grupos de portadas de los demás
+  const filtros = [...seccion.querySelectorAll<HTMLElement>('[data-filtro]')];
+  filtros.forEach((boton) =>
+    boton.addEventListener('click', () => {
+      const filtro = boton.dataset.filtro;
+      filtros.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
+      seccion.querySelectorAll<HTMLElement>('[data-cliente]').forEach((pieza) => {
+        pieza.hidden = filtro !== 'todos' && pieza.dataset.cliente !== filtro;
+      });
+      const bloque = seccion.querySelector<HTMLElement>('.bloque-portadas')!;
+      bloque.hidden = !bloque.querySelector('.grupo:not([hidden])');
+    }),
+  );
+
+  // El visor recorre solo las piezas visibles con el filtro actual
+  const mostrar = (i: number) => {
+    indice = (i + lista.length) % lista.length;
+    const pieza = lista[indice].dataset;
+    imagen.src = pieza.src!;
+    imagen.alt = pieza.titulo!;
+    titulo.textContent = pieza.titulo!;
+    detalle.textContent = `${pieza.nombre} · ${indice + 1} / ${lista.length}`;
+  };
+
+  seccion.addEventListener('click', (e) => {
+    const objetivo = e.target as HTMLElement;
+    const paso = objetivo.closest<HTMLElement>('.paso');
+    if (paso) {
+      const carrusel = paso.parentElement!.querySelector('.carrusel')!;
+      carrusel.scrollBy({ left: Number(paso.dataset.paso) * carrusel.clientWidth });
+      return;
+    }
+    const abrir = objetivo.closest<HTMLElement>('.abrir');
+    if (!abrir) return;
+    lista = [...seccion.querySelectorAll<HTMLElement>('.abrir')].filter((b) => !b.closest('[hidden]'));
+    mostrar(lista.indexOf(abrir));
+    visor.showModal();
+  });
+
+  visor.querySelector('.visor-anterior')!.addEventListener('click', () => mostrar(indice - 1));
+  visor.querySelector('.visor-siguiente')!.addEventListener('click', () => mostrar(indice + 1));
+  visor.querySelector('.visor-cerrar')!.addEventListener('click', () => visor.close());
+  visor.addEventListener('click', (e) => {
+    if (e.target === visor) visor.close();
+  });
+  visor.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') mostrar(indice - 1);
+    if (e.key === 'ArrowRight') mostrar(indice + 1);
+  });
+
+  // Deslizar con el dedo dentro del visor
+  let inicioX = 0;
+  visor.addEventListener('touchstart', (e) => (inicioX = e.changedTouches[0].clientX), { passive: true });
+  visor.addEventListener(
+    'touchend',
+    (e) => {
+      const dx = e.changedTouches[0].clientX - inicioX;
+      if (Math.abs(dx) > 48) mostrar(indice + (dx < 0 ? 1 : -1));
+    },
+    { passive: true },
+  );
+</script>
+
+<style>
+  .diseno {
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .filtros button {
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--negro);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .filtros button[aria-pressed='true'] {
+    background: var(--negro);
+    border-color: var(--negro);
+    color: #fff;
+  }
+
+  h3 {
+    margin: 2.5rem 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  h4 {
+    margin: 1.5rem 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gris);
+  }
+
+  h3 + .grupo h4 {
+    margin-top: 0;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  .posts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+  }
+
+  .post {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--superficie);
+  }
+
+  /* Un post con varias imágenes se desliza en horizontal */
+  .carrusel {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .carrusel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .abrir {
+    display: block;
+    flex: none;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    scroll-snap-align: start;
+  }
+
+  .abrir:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .abrir img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .cuenta,
+  .paso {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    background: rgb(10 10 10 / 0.72);
+    color: #fff;
+  }
+
+  .cuenta {
+    top: 0.6rem;
+    right: 0.6rem;
+    gap: 0.3rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    pointer-events: none;
+  }
+
+  .cuenta svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .paso {
+    top: 50%;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
+
+  .paso svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .paso-anterior {
+    left: 0.5rem;
+  }
+
+  .paso-siguiente {
+    right: 0.5rem;
+  }
+
+  .portadas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 0.75rem;
+  }
+
+  .portadas li {
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--superficie);
+  }
+
+  .portadas img {
+    height: auto;
+  }
+
+  /* Visor a pantalla completa */
+  .visor {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(10 10 10 / 0.94);
+    color: #fff;
+  }
+
+  .visor[open] {
+    display: grid;
+    place-items: center;
+  }
+
+  .visor::backdrop {
+    background: rgb(10 10 10 / 0.6);
+  }
+
+  .visor figure {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    margin: 0;
+    padding: 3.5rem 1rem 1.25rem;
+  }
+
+  .visor figure > img {
+    display: block;
+    max-width: min(100%, 1100px);
+    max-height: calc(100dvh - 10.5rem);
+    width: auto;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  figcaption {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  figcaption p {
+    display: grid;
+    gap: 0.15rem;
+    min-width: min(52vw, 22rem);
+    font-size: 0.9375rem;
+  }
+
+  .visor-titulo {
+    font-weight: 600;
+  }
+
+  .visor-detalle {
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    color: rgb(255 255 255 / 0.7);
+  }
+
+  .visor-boton {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: 50%;
+    background: none;
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .visor-boton svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .visor-cerrar {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .filtros button[aria-pressed='false']:hover {
+      border-color: var(--negro);
+    }
+
+    .abrir:hover img {
+      transform: scale(1.04);
+    }
+
+    .visor-boton:hover {
+      background: rgb(255 255 255 / 0.14);
+      border-color: rgb(255 255 255 / 0.6);
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .posts {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .posts {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+
+    .post,
+    .portadas li {
+      border-radius: 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .carrusel {
+      scroll-behavior: auto;
+    }
+  }
+</style>

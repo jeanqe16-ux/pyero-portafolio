@@ -1,0 +1,105 @@
+{
+  "posts": [
+    {
+      "cliente": "cero",
+      "titulo": "Perú es clave como las radiografías",
+      "imagenes": [
+        "/media/cero/posts/01-peru-es-clave.webp"
+      ]
+    },
+    {
+      "cliente": "cero",
+      "titulo": "Feliz San Valentín",
+      "imagenes": [
+        "/media/cero/posts/02-san-valentin.webp"
+      ]
+    },
+    {
+      "cliente": "cero",
+      "titulo": "Este marzo optimiza cada tratamiento",
+      "imagenes": [
+        "/media/cero/posts/03-marzo-planmeca-viso-g5.webp"
+      ]
+    },
+    {
+      "cliente": "clinica-dental-imagen",
+      "titulo": "Feliz día del padre",
+      "imagenes": [
+        "/media/clinica-dental-imagen/posts/01-dia-del-padre.webp"
+      ]
+    },
+    {
+      "cliente": "clinica-dental-imagen",
+      "titulo": "31 años de historia y grandeza",
+      "imagenes": [
+        "/media/clinica-dental-imagen/posts/02-31-anos-cumpleanos.webp"
+      ]
+    },
+    {
+      "cliente": "clinica-dental-imagen",
+      "titulo": "Perú es clave como tu salud bucal",
+      "imagenes": [
+        "/media/clinica-dental-imagen/posts/03-peru-es-clave.webp"
+      ]
+    },
+    {
+      "cliente": "clinica-zarate",
+      "titulo": "Qué hacer ante un atragantamiento",
+      "imagenes": [
+        "/media/clinica-zarate/posts/01-atragantamiento.webp"
+      ]
+    },
+    {
+      "cliente": "clinica-zarate",
+      "titulo": "Campaña ginecológica",
+      "imagenes": [
+        "/media/clinica-zarate/posts/02-campana-ginecologica.webp"
+      ]
+    },
+    {
+      "cliente": "clinica-zarate",
+      "titulo": "Día mundial de la osteoporosis",
+      "imagenes": [
+        "/media/clinica-zarate/posts/03-dia-de-la-osteoporosis.webp"
+      ]
+    },
+    {
+      "cliente": "clinica-zarate",
+      "titulo": "Rutinas de pesadilla que dañan tu piel",
+      "imagenes": [
+        "/media/clinica-zarate/posts/04-rutinas-de-pesadilla-1.webp",
+        "/media/clinica-zarate/posts/04-rutinas-de-pesadilla-2.webp"
+      ]
+    }
+  ],
+  "portadas": [
+    {
+      "cliente": "cero",
+      "titulo": "Diagnóstico radiográfico pensado en ellas",
+      "imagen": "/media/cero/portadas/01-marzo-pensado-en-ellas.webp",
+      "ancho": 1600,
+      "alto": 609
+    },
+    {
+      "cliente": "clinica-dental-imagen",
+      "titulo": "Orgullo peruano en cada sonrisa",
+      "imagen": "/media/clinica-dental-imagen/portadas/01-fiestas-patrias.webp",
+      "ancho": 1600,
+      "alto": 900
+    },
+    {
+      "cliente": "clinica-dental-imagen",
+      "titulo": "Sonríe sin miedo en Halloween",
+      "imagen": "/media/clinica-dental-imagen/portadas/02-halloween.webp",
+      "ancho": 1600,
+      "alto": 900
+    },
+    {
+      "cliente": "clinica-dental-imagen",
+      "titulo": "Feliz Navidad",
+      "imagen": "/media/clinica-dental-imagen/portadas/03-navidad.webp",
+      "ancho": 1600,
+      "alto": 900
+    }
+  ]
+}

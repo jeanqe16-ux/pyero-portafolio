@@ -1,15 +1,22 @@
 ---
 import textos from '../data/textos.json';
+import { clientes } from '../data/clientes.json';
 import { proyectos } from '../data/proyectos.json';
 import { creadores } from '../data/creadores.json';
 
+// Un cliente enlaza a su página de proyecto solo si existe una con el mismo slug
 const nombres = [
-  ...proyectos.map((p) => ({ nombre: p.nombre, logo: p.logo, enlace: `/proyectos/${p.slug}/`, externo: false })),
+  ...clientes.map((c) => ({
+    nombre: c.nombre,
+    logo: c.logo,
+    enlace: proyectos.some((p) => p.slug === c.id) ? `/proyectos/${c.id}/` : '',
+    externo: false,
+  })),
   ...creadores.map((c) => ({ nombre: c.handle, logo: '', enlace: c.enlace, externo: true })),
 ];
 
 // La lista se repite para que el loop no deje huecos en pantallas anchas
-const franja = Array.from({ length: 4 }, () => nombres).flat();
+const franja = Array.from({ length: 3 }, () => nombres).flat();
 ---
 
 <section class="franja" aria-label={textos.franja.etiqueta}>
@@ -46,7 +53,7 @@ const franja = Array.from({ length: 4 }, () => nombres).flat();
   .franja {
     background: var(--negro);
     color: #fff;
-    padding: 1.6rem 0;
+    padding: 1.5rem 0;
     overflow: hidden;
     /* Disolución en los bordes: los logos se desvanecen al salir */
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 88%, transparent);
@@ -56,7 +63,7 @@ const franja = Array.from({ length: 4 }, () => nombres).flat();
   .franja-pista {
     display: flex;
     width: max-content;
-    animation: franja 40s linear infinite;
+    animation: franja 60s linear infinite;
   }
 
   .franja ul {
@@ -67,15 +74,20 @@ const franja = Array.from({ length: 4 }, () => nombres).flat();
   .franja li {
     display: flex;
     align-items: center;
-    padding: 0 2.25rem;
+    padding: 0 clamp(1.5rem, 3vw, 2.5rem);
     font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: -0.03em;
     white-space: nowrap;
   }
 
+  .franja a {
+    display: flex;
+  }
+
   .franja img {
-    height: 2rem;
+    display: block;
+    height: clamp(2.75rem, 5vw, 3.5rem);
     width: auto;
     /* Fuerza cualquier logo a blanco */
     filter: brightness(0) invert(1);

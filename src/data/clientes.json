@@ -1,0 +1,24 @@
+{
+  "clientes": [
+    {
+      "id": "clinica-dental-imagen",
+      "nombre": "Clínica Dental Imagen",
+      "logo": "/media/clinica-dental-imagen/logo.png"
+    },
+    {
+      "id": "cero",
+      "nombre": "CERO Radiología",
+      "logo": "/media/cero/logo.png"
+    },
+    {
+      "id": "clinica-zarate",
+      "nombre": "Clínica Zárate",
+      "logo": "/media/clinica-zarate/logo.png"
+    },
+    {
+      "id": "alpacart",
+      "nombre": "Alpacart",
+      "logo": "/media/alpacart/logo.png"
+    }
+  ]
+}

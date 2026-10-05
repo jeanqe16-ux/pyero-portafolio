@@ -38,7 +38,6 @@ content:
           - { name: descripcion, label: Descripción corta, type: text }
           - { name: video, label: 'Reel del inicio (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm] } }
           - { name: poster, label: Portada del reel del inicio, type: image }
-          - { name: logo, label: 'Logo (se muestra en blanco en la franja)', type: image }
           - name: videos
             label: Videos de la página del proyecto
             type: object
@@ -47,6 +46,44 @@ content:
               - { name: titulo, label: Título, type: string }
               - { name: video, label: 'Video (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm] } }
               - { name: poster, label: Portada, type: image }
+
+  - name: clientes
+    label: Clientes y logos de la franja
+    type: file
+    path: src/data/clientes.json
+    fields:
+      - name: clientes
+        label: Clientes
+        type: object
+        list: true
+        fields:
+          - { name: id, label: 'Identificador (igual al de su carpeta y al slug de su proyecto)', type: string, required: true }
+          - { name: nombre, label: Nombre, type: string, required: true }
+          - { name: logo, label: 'Logo (PNG transparente, se muestra en blanco)', type: image }
+
+  - name: diseno
+    label: Diseño gráfico
+    type: file
+    path: src/data/diseno.json
+    fields:
+      - name: posts
+        label: Posts
+        type: object
+        list: true
+        fields:
+          - { name: cliente, label: Identificador del cliente, type: string, required: true }
+          - { name: titulo, label: Título, type: string, required: true }
+          - { name: imagenes, label: 'Imágenes (más de una forma un carrusel)', type: image, list: true }
+      - name: portadas
+        label: Portadas
+        type: object
+        list: true
+        fields:
+          - { name: cliente, label: Identificador del cliente, type: string, required: true }
+          - { name: titulo, label: Título, type: string, required: true }
+          - { name: imagen, label: Imagen, type: image }
+          - { name: ancho, label: Ancho en px, type: number }
+          - { name: alto, label: Alto en px, type: number }
 
   - name: creadores
     label: Creadores
@@ -145,6 +182,28 @@ content:
           - { name: volver, label: Enlace Volver, type: string }
           - { name: cotizar, label: Botón Cotizar, type: string }
           - { name: proximamente, label: Texto de video pendiente, type: string }
+      - name: diseno
+        label: Diseño gráfico
+        type: object
+        fields:
+          - { name: etiqueta, label: Etiqueta, type: string }
+          - name: titulo
+            label: Titular
+            type: object
+            fields:
+              - { name: antes, label: Antes de la palabra en naranja, type: string }
+              - { name: destacado, label: Palabra en naranja, type: string }
+              - { name: despues, label: Después de la palabra en naranja, type: string }
+          - { name: filtro, label: Descripción del filtro, type: string }
+          - { name: todos, label: Botón Todos, type: string }
+          - { name: posts, label: Título Posts, type: string }
+          - { name: portadas, label: Título Portadas, type: string }
+          - { name: ver, label: Texto Ver en grande, type: string }
+          - { name: carrusel, label: Texto Carrusel de, type: string }
+          - { name: anterior, label: Botón Anterior, type: string }
+          - { name: siguiente, label: Botón Siguiente, type: string }
+          - { name: cerrar, label: Botón Cerrar, type: string }
+          - { name: visor, label: Nombre del visor, type: string }
       - name: servicios
         label: Servicios
         type: object

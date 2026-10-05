@@ -5,19 +5,18 @@
       "nombre": "Clínica Dental Imagen",
       "categoria": "Posts, edición de video y motion",
       "descripcion": "Contenido para redes sociales, edición de video y motion graphics para la clínica.",
-      "video": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.mp4",
-      "poster": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.jpg",
-      "logo": "",
+      "video": "/media/clinica-dental-imagen/videos/clinica-dental-motion.mp4",
+      "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion.jpg",
       "videos": [
         {
           "titulo": "Aplicaciones clínicas",
-          "video": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.mp4",
-          "poster": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.jpg"
+          "video": "/media/clinica-dental-imagen/videos/clinica-dental-motion.mp4",
+          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion.jpg"
         },
         {
           "titulo": "Caso clínico",
-          "video": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion-2.mp4",
-          "poster": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion-2.jpg"
+          "video": "/media/clinica-dental-imagen/videos/clinica-dental-motion-2.mp4",
+          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion-2.jpg"
         }
       ]
     },
@@ -26,24 +25,23 @@
       "nombre": "CERO",
       "categoria": "Posts, edición de video y motion",
       "descripcion": "Contenido para redes sociales, edición de video y motion graphics para el centro especializado de radiología odontológica.",
-      "video": "/media/proyectos/cero/cero-regreso-a-clases.mp4",
-      "poster": "/media/proyectos/cero/cero-regreso-a-clases.jpg",
-      "logo": "",
+      "video": "/media/cero/videos/cero-regreso-a-clases.mp4",
+      "poster": "/media/cero/videos/cero-regreso-a-clases.jpg",
       "videos": [
         {
           "titulo": "Motion graphics",
-          "video": "/media/proyectos/cero/cero-motion.mp4",
-          "poster": "/media/proyectos/cero/cero-motion.jpg"
+          "video": "/media/cero/videos/cero-motion.mp4",
+          "poster": "/media/cero/videos/cero-motion.jpg"
         },
         {
           "titulo": "Regreso a clases",
-          "video": "/media/proyectos/cero/cero-regreso-a-clases.mp4",
-          "poster": "/media/proyectos/cero/cero-regreso-a-clases.jpg"
+          "video": "/media/cero/videos/cero-regreso-a-clases.mp4",
+          "poster": "/media/cero/videos/cero-regreso-a-clases.jpg"
         },
         {
           "titulo": "Ubicación",
-          "video": "/media/proyectos/cero/cero-ubicacion.mp4",
-          "poster": "/media/proyectos/cero/cero-ubicacion.jpg"
+          "video": "/media/cero/videos/cero-ubicacion.mp4",
+          "poster": "/media/cero/videos/cero-ubicacion.jpg"
         }
       ]
     }
