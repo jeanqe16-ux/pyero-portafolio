@@ -25,7 +25,13 @@ const franja = Array.from({ length: 3 }, () => nombres).flat();
       [0, 1].map((mitad) => (
         <ul aria-hidden={mitad === 1 ? 'true' : undefined}>
           {franja.map((n) => {
-            const contenido = n.logo ? <img src={n.logo} alt={n.nombre} loading="lazy" /> : <span>{n.nombre}</span>;
+            const contenido = n.logo ? (
+              <span class="logo" style={`--logo:url('${n.logo}')`}>
+                <img src={n.logo} alt={n.nombre} loading="lazy" />
+              </span>
+            ) : (
+              <span class="nombre">{n.nombre}</span>
+            );
             return (
               <li>
                 {n.enlace ? (
@@ -85,12 +91,26 @@ const franja = Array.from({ length: 3 }, () => nombres).flat();
     display: flex;
   }
 
-  .franja img {
+  /* El logo se pinta con una máscara para poder teñirlo; la imagen solo aporta el tamaño y el texto alternativo */
+  .logo {
+    display: block;
+    background-color: currentColor;
+    -webkit-mask: var(--logo) center / contain no-repeat;
+    mask: var(--logo) center / contain no-repeat;
+  }
+
+  .logo img {
     display: block;
     height: clamp(2.75rem, 5vw, 3.5rem);
     width: auto;
-    /* Fuerza cualquier logo a blanco */
-    filter: brightness(0) invert(1);
+    opacity: 0;
+  }
+
+  .franja li {
+    filter: drop-shadow(0 0 0 transparent);
+    transition:
+      color 0.3s ease,
+      filter 0.3s ease;
   }
 
   @keyframes franja {
@@ -99,9 +119,11 @@ const franja = Array.from({ length: 3 }, () => nombres).flat();
     }
   }
 
+  /* Al pasar el mouse el logo se tiñe de naranja con un resplandor leve; el loop nunca se detiene */
   @media (hover: hover) and (pointer: fine) {
-    .franja:hover .franja-pista {
-      animation-play-state: paused;
+    .franja li:hover {
+      color: var(--acento);
+      filter: drop-shadow(0 0 14px rgb(251 142 31 / 0.45));
     }
   }
 

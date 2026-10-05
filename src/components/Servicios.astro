@@ -1,6 +1,7 @@
 ---
 import textos from '../data/textos.json';
 import { servicios } from '../data/servicios.json';
+import { posts } from '../data/diseno.json';
 
 const t = textos.servicios;
 ---
@@ -48,13 +49,21 @@ const t = textos.servicios;
               )}
             </svg>
           </div>
-          <div class="media">
-            {s.video ? (
-              <video src={s.video} poster={s.poster || undefined} autoplay muted loop playsinline preload="none" />
-            ) : (
-              <span>{t.proximamente}</span>
-            )}
-          </div>
+          {s.media === 'posts' ? (
+            <div class="media pase" role="img" aria-label={t.pase}>
+              {posts.map((p, n) => (
+                <img data-src={p.imagenes[0]} alt="" width="1080" height="1080" decoding="async" class:list={{ activa: n === 0 }} />
+              ))}
+            </div>
+          ) : (
+            <div class="media">
+              {s.video ? (
+                <video data-src={s.video} poster={s.poster || undefined} muted loop playsinline preload="none" />
+              ) : (
+                <span>{t.proximamente}</span>
+              )}
+            </div>
+          )}
           <h3>{s.titulo}</h3>
           <p>{s.texto}</p>
           <p class="ideal">
@@ -66,10 +75,58 @@ const t = textos.servicios;
   </ol>
 
   <div class="acciones">
-    <a class="boton boton-oscuro" href="#proyectos">{t.ctaProyectos}</a>
+    <a class="boton boton-oscuro" href="#reels">{t.ctaProyectos}</a>
     <a class="boton boton-claro" href="#contacto">{t.ctaCotizar}</a>
   </div>
 </section>
+
+<script>
+  const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Los videos se descargan y reproducen solo mientras su tarjeta está a la vista
+  const observador = new IntersectionObserver(
+    (entradas) =>
+      entradas.forEach(({ target, isIntersecting }) => {
+        const video = target as HTMLVideoElement;
+        if (!isIntersecting) return video.pause();
+        if (!video.src) video.src = video.dataset.src!;
+        if (!reducir) video.play().catch(() => {});
+      }),
+    { rootMargin: '150px' },
+  );
+  document.querySelectorAll<HTMLVideoElement>('#servicios video[data-src]').forEach((video) => observador.observe(video));
+
+  // Pase de posts con disolución; cada imagen se descarga justo antes de mostrarse
+  document.querySelectorAll<HTMLElement>('#servicios .pase').forEach((pase) => {
+    const imagenes = [...pase.querySelectorAll('img')];
+    let actual = 0;
+    let reloj = 0;
+    const cargar = (n: number) => {
+      const imagen = imagenes[n % imagenes.length];
+      if (!imagen.getAttribute('src')) imagen.src = imagen.dataset.src!;
+      return imagen;
+    };
+    const avanzar = () => {
+      const siguiente = cargar(actual + 1);
+      if (!siguiente.complete) return;
+      imagenes[actual].classList.remove('activa');
+      siguiente.classList.add('activa');
+      actual = (actual + 1) % imagenes.length;
+      cargar(actual + 1);
+    };
+    new IntersectionObserver(
+      ([entrada]) => {
+        window.clearInterval(reloj);
+        if (!entrada.isIntersecting) return;
+        cargar(actual);
+        if (reducir) return;
+        cargar(actual + 1);
+        reloj = window.setInterval(avanzar, 2500);
+      },
+      { rootMargin: '150px' },
+    ).observe(pase);
+  });
+</script>
 
 <style>
   .subtitulo {
@@ -133,6 +190,24 @@ const t = textos.servicios;
     background: #fff;
     color: var(--gris);
     font-size: 0.875rem;
+  }
+
+  .pase {
+    position: relative;
+  }
+
+  .pase img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.9s ease;
+  }
+
+  .pase img.activa {
+    opacity: 1;
   }
 
   .media video {

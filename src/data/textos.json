@@ -22,8 +22,6 @@
     "etiqueta": "Marcas y creadores con los que he trabajado"
   },
   "proyectos": {
-    "etiqueta": "Proyectos",
-    "titulo": "Videos por marca",
     "etiquetaPagina": "Proyecto",
     "volver": "Volver",
     "cotizar": "Cotizar mi proyecto",
@@ -58,7 +56,8 @@
     "idealPara": "Ideal para:",
     "proximamente": "Próximamente",
     "ctaProyectos": "Ver proyectos",
-    "ctaCotizar": "Cotizar mi proyecto"
+    "ctaCotizar": "Cotizar mi proyecto",
+    "pase": "Muestra de posts diseñados para redes"
   },
   "sobre": {
     "etiqueta": "Sobre mí",

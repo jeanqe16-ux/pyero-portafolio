@@ -5,16 +5,18 @@
       "texto": "Reels, TikToks y Shorts con ritmo, subtítulos, color y sonido pensados para retener desde el primer segundo.",
       "ideal": "creadores de IA y tecnología que explican ideas complejas.",
       "icono": "video",
-      "video": "",
-      "poster": ""
+      "video": "/media/servicios/edicion-de-video.mp4",
+      "poster": "/media/servicios/edicion-de-video.webp",
+      "media": "video"
     },
     {
       "titulo": "Motion graphics",
       "texto": "Textos, logos y gráficos animados que explican tu mensaje y le dan a tu contenido una identidad que se reconoce.",
       "ideal": "marcas que quieren verse consistentes en cada video.",
       "icono": "animacion",
-      "video": "",
-      "poster": ""
+      "video": "/media/servicios/motion-graphics.mp4",
+      "poster": "/media/servicios/motion-graphics.webp",
+      "media": "video"
     },
     {
       "titulo": "Diseño gráfico para redes",
@@ -22,7 +24,8 @@
       "ideal": "perfiles que quieren una imagen profesional y ordenada.",
       "icono": "diseno",
       "video": "",
-      "poster": ""
+      "poster": "",
+      "media": "posts"
     }
   ]
 }

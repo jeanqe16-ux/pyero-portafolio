@@ -119,7 +119,12 @@ content:
             type: select
             options:
               values: [video, animacion, diseno]
-          - { name: video, label: 'Video en loop (cuadrado 1080x1080)', type: file, options: { extensions: [mp4, webm] } }
+          - name: media
+            label: Qué muestra la tarjeta
+            type: select
+            options:
+              values: [video, posts]
+          - { name: video, label: 'Video en loop (cuadrado, sin audio)', type: file, options: { extensions: [mp4, webm] } }
           - { name: poster, label: Portada del video, type: image }
 
   - name: herramientas
@@ -173,11 +178,9 @@ content:
         fields:
           - { name: etiqueta, label: Descripción para lectores de pantalla, type: string }
       - name: proyectos
-        label: Proyectos
+        label: Páginas de proyecto
         type: object
         fields:
-          - { name: etiqueta, label: Etiqueta, type: string }
-          - { name: titulo, label: Titular, type: string }
           - { name: etiquetaPagina, label: Etiqueta en la página de proyecto, type: string }
           - { name: volver, label: Enlace Volver, type: string }
           - { name: cotizar, label: Botón Cotizar, type: string }
@@ -219,6 +222,7 @@ content:
           - { name: subtitulo, label: Subtítulo, type: text }
           - { name: idealPara, label: Texto Ideal para, type: string }
           - { name: proximamente, label: Texto de video pendiente, type: string }
+          - { name: pase, label: Descripción del pase de posts, type: string }
           - { name: ctaProyectos, label: Botón Ver proyectos, type: string }
           - { name: ctaCotizar, label: Botón Cotizar, type: string }
       - name: sobre

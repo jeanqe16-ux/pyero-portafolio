@@ -22,7 +22,7 @@ src/
     servicios.json   Copy, icono y video de cada servicio
     herramientas.json  Nombre, sigla y colores de cada herramienta
   layouts/Base.astro   <head>, SEO, header, footer, WhatsApp flotante, animación de entrada
-  components/        Hero, Franja, Proyectos, Diseno, Servicios, Sobre, Herramientas, Contacto, Redes
+  components/        Hero, Franja, Diseno, Servicios, Sobre, Herramientas, Contacto, Redes
   pages/index.astro
   pages/proyectos/[slug].astro   Plantilla única por marca
   styles/global.css  Variables, base, botones, navegación
@@ -30,10 +30,12 @@ src/
   assets/            Foto de "Sobre mí" (foto-pyero.jpg|png|webp|avif)
 public/media/<cliente>/   logo.png, videos/, posts/, portadas/ (ruta pública /media/...)
 public/media/creadores/videos/   Reels de creadores
+public/media/servicios/   Loops cuadrados de las tarjetas de Servicios
+scripts/generar-loops.sh   Regenera esos loops con ffmpeg desde el material fuente
 .pages.yml           Configuración de Pages CMS sobre los JSON de src/data
 ```
 
-Orden de secciones en la portada: Hero (reels en abanico) → franja negra de marcas → Proyectos (botones por marca) → Diseño gráfico (posts y portadas con filtro y visor) → Servicios → Sobre mí (con herramientas) → Contacto.
+Orden de secciones en la portada: Hero (reels en abanico) → franja negra de marcas → Diseño gráfico (posts y portadas con filtro y visor) → Servicios → Sobre mí (con herramientas) → Contacto.
 
 ## Decisiones tomadas
 
@@ -52,6 +54,9 @@ Orden de secciones en la portada: Hero (reels en abanico) → franja negra de ma
 - **Material fuente**: `videos-originales/` y `material-original/` están en `.gitignore`; solo se versiona lo optimizado en `public/media/`.
 - **Medios**: videos en H.264 con `+faststart` (máximo 1080p, idealmente menos de 10 MB), imágenes en WebP de máximo 1600 px, logos en PNG blanco transparente.
 - **Clientes**: el `id` de `clientes.json` es el nombre de su carpeta en `public/media/`, el valor de `cliente` en `diseno.json` y, si tiene página, el `slug` en `proyectos.json`. Clínica Zárate y Alpacart no tienen página de proyecto.
+- **Sin sección "Videos por marca"**: se eliminó; las páginas `/proyectos/[slug]` siguen existiendo y se llega a ellas desde los logos de la franja. Los enlaces "Ver proyectos" y "Volver" apuntan a `#reels` (los reels del hero).
+- **Franja**: el loop nunca se pausa. Los logos se pintan con `mask` para poder teñirlos de naranja al pasar el mouse.
+- **Tarjetas de Servicios**: `media: "video"` reproduce un loop pregenerado (720x720, sin audio) que solo se descarga cuando la tarjeta entra en pantalla; `media: "posts"` muestra un pase con disolución de los posts de `diseno.json`. Si cambian los videos fuente, volver a correr `bash scripts/generar-loops.sh`.
 - **Carruseles**: un post con varias rutas en `imagenes` se muestra como carrusel deslizable.
 - **Git**: un commit por fase. Identidad configurada solo en este repositorio.
 
@@ -59,7 +64,7 @@ Orden de secciones en la portada: Hero (reels en abanico) → franja negra de ma
 
 - Fase 3: icono de YouTube con contador de vistas en "Eleva tu contenido" (sube al acercar el cursor, conteo único en táctil).
 - Fase 4: franja pequeña de logos en gris ("Elevando tu marca"), con datos en `src/data/marcas.json`.
-- Subir la foto a `src/assets/foto-pyero.jpg` y los videos cuadrados de servicios.
+- Subir la foto a `src/assets/foto-pyero.jpg`.
 - Los tres videos de CERO están sin audio; confirmar cuál era el que no tenía sound design y restaurar el audio de los otros.
 - Confirmar los handles de redes y agregar los enlaces de @Loreimp y @Basee44 en `creadores.json`.
 - Definir `site` en `astro.config.mjs` cuando haya dominio, para que las URL de Open Graph salgan absolutas.
