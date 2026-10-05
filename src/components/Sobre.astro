@@ -1,6 +1,6 @@
 ---
 import textos from '../data/textos.json';
-import { herramientas } from '../data/herramientas.json';
+import Herramientas from './Herramientas.astro';
 
 const t = textos.sobre;
 ---
@@ -14,9 +14,7 @@ const t = textos.sobre;
     <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
     {t.parrafos.map((p) => <p class="texto">{p}</p>)}
     <p class="etiqueta herramientas-titulo">{t.herramientas}</p>
-    <ul class="herramientas">
-      {herramientas.map((h) => <li>{h.nombre}</li>)}
-    </ul>
+    <Herramientas />
   </div>
 </section>
 
@@ -51,20 +49,6 @@ const t = textos.sobre;
 
   .herramientas-titulo {
     margin: 2.25rem 0 0.75rem;
-  }
-
-  .herramientas {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .herramientas li {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--linea);
-    border-radius: 999px;
-    font-size: 0.875rem;
-    font-weight: 500;
   }
 
   @media (max-width: 820px) {

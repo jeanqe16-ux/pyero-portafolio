@@ -1,0 +1,104 @@
+---
+import { herramientas } from '../data/herramientas.json';
+---
+
+<ul class="herramientas">
+  {
+    herramientas.map((h) => (
+      <li class="herramienta" style={`--marca:${h.color};--brillo:${h.brillo}`}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" />
+          {h.sigla ? (
+            <text x="12" y="16" text-anchor="middle" fill="currentColor" stroke="none" font-size="10" font-weight="700">
+              {h.sigla}
+            </text>
+          ) : (
+            <path d="M7.5 9H14l3 6M7.5 15H14l3-6" stroke-linecap="round" stroke-linejoin="round" />
+          )}
+        </svg>
+        <span>{h.nombre}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  // El resplandor sigue al mouse dentro de cada chip
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll<HTMLElement>('.herramienta').forEach((chip) => {
+      chip.addEventListener('pointermove', (e) => {
+        const caja = chip.getBoundingClientRect();
+        chip.style.setProperty('--x', `${e.clientX - caja.left}px`);
+        chip.style.setProperty('--y', `${e.clientY - caja.top}px`);
+      });
+    });
+  }
+</script>
+
+<style>
+  .herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .herramienta {
+    --x: 50%;
+    --y: 50%;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem 0.5rem 0.6rem;
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    overflow: hidden;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: border-color 0.2s ease;
+  }
+
+  .herramienta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle 4rem at var(--x) var(--y),
+      color-mix(in srgb, var(--brillo) 38%, transparent),
+      transparent
+    );
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  .herramienta svg {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #8a8a8a;
+    transition: color 0.2s ease;
+  }
+
+  .herramienta span {
+    position: relative;
+  }
+
+  .herramienta text {
+    font-family: inherit;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .herramienta:hover {
+      border-color: var(--marca);
+    }
+
+    .herramienta:hover svg {
+      color: var(--marca);
+    }
+
+    .herramienta:hover::before {
+      opacity: 1;
+    }
+  }
+</style>

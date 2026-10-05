@@ -1,9 +1,9 @@
 {
   "herramientas": [
-    { "nombre": "After Effects" },
-    { "nombre": "Premiere Pro" },
-    { "nombre": "Photoshop" },
-    { "nombre": "Illustrator" },
-    { "nombre": "CapCut" }
+    { "nombre": "After Effects", "sigla": "Ae", "color": "#9999FF", "brillo": "#9999FF" },
+    { "nombre": "Premiere Pro", "sigla": "Pr", "color": "#9999FF", "brillo": "#9999FF" },
+    { "nombre": "Photoshop", "sigla": "Ps", "color": "#31A8FF", "brillo": "#31A8FF" },
+    { "nombre": "Illustrator", "sigla": "Ai", "color": "#FF9A00", "brillo": "#FF9A00" },
+    { "nombre": "CapCut", "sigla": "", "color": "#000000", "brillo": "#00D8F0" }
   ]
 }
