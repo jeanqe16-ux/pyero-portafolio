@@ -214,18 +214,32 @@ h2 em {
   z-index: 60;
   display: grid;
   place-items: center;
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 3.25rem;
+  height: 3.25rem;
   border-radius: 50%;
   background: #25d366;
   color: #fff;
-  box-shadow: 0 12px 28px -8px rgb(37 211 102 / 0.75);
+  box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.45);
   transition: transform 0.25s ease;
 }
 
 .flotante svg {
-  width: 1.9rem;
-  height: 1.9rem;
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+/* Entrada al hacer scroll: solo si el script marcó <html class="animar"> */
+.animar main > :not(.hero) {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.animar main > .visible:not(.hero) {
+  opacity: 1;
+  transform: none;
 }
 
 /* Gradiente de Instagram compartido por todos los iconos de redes */
@@ -270,6 +284,11 @@ h2 em {
 }
 
 @media (max-width: 480px) {
+  .flotante {
+    right: 0.9rem;
+    bottom: 0.9rem;
+  }
+
   .nav-acciones .redes {
     display: none;
   }

@@ -12,6 +12,10 @@ interface Props {
 }
 
 const { titulo = site.seo.titulo, descripcion = site.seo.descripcion } = Astro.props;
+
+// Con `site` definido en astro.config.mjs las URL de Open Graph salen absolutas
+const urlPagina = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
 ---
 
 <!doctype html>
@@ -21,7 +25,21 @@ const { titulo = site.seo.titulo, descripcion = site.seo.descripcion } = Astro.p
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>
     <meta name="description" content={descripcion} />
+    <link rel="canonical" href={urlPagina} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_PE" />
+    <meta property="og:site_name" content={site.marca + site.marcaSufijo} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={urlPagina} />
+    <meta property="og:image" content={imagen} />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      // Activa la animación de entrada solo si el usuario no pidió menos movimiento
+      if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches)
+        document.documentElement.classList.add('animar');
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&display=swap" rel="stylesheet" />
@@ -73,5 +91,20 @@ const { titulo = site.seo.titulo, descripcion = site.seo.descripcion } = Astro.p
     >
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d={iconoWhatsapp} fill="currentColor"></path></svg>
     </a>
+    <script>
+      // Entrada sutil de cada sección al hacer scroll
+      if (document.documentElement.classList.contains('animar')) {
+        const observador = new IntersectionObserver(
+          (entradas) =>
+            entradas.forEach((entrada) => {
+              if (!entrada.isIntersecting) return;
+              entrada.target.classList.add('visible');
+              observador.unobserve(entrada.target);
+            }),
+          { rootMargin: '0px 0px -8% 0px' },
+        );
+        document.querySelectorAll('main > :not(.hero)').forEach((seccion) => observador.observe(seccion));
+      }
+    </script>
   </body>
 </html>
