@@ -21,6 +21,14 @@
   "franja": {
     "etiqueta": "Marcas y creadores con los que he trabajado"
   },
+  "proyectos": {
+    "etiqueta": "Proyectos",
+    "titulo": "Videos por marca",
+    "etiquetaPagina": "Proyecto",
+    "volver": "Volver",
+    "cotizar": "Cotizar mi proyecto",
+    "proximamente": "Próximamente"
+  },
   "servicios": {
     "etiqueta": "Servicios",
     "titulo": {

@@ -7,7 +7,12 @@
       "descripcion": "Contenido para redes sociales, edición de video y motion graphics para la clínica.",
       "video": "",
       "poster": "",
-      "logo": ""
+      "logo": "",
+      "videos": [
+        { "titulo": "Video 01", "video": "", "poster": "" },
+        { "titulo": "Video 02", "video": "", "poster": "" },
+        { "titulo": "Video 03", "video": "", "poster": "" }
+      ]
     },
     {
       "slug": "cero",
@@ -16,16 +21,12 @@
       "descripcion": "Contenido para redes sociales, edición de video y motion graphics para el centro especializado de radiología odontológica.",
       "video": "",
       "poster": "",
-      "logo": ""
-    },
-    {
-      "slug": "alpacart",
-      "nombre": "Alpacart",
-      "categoria": "Contenido para marca de moda",
-      "descripcion": "Contenido audiovisual para una marca de ropa de lana de alpaca.",
-      "video": "",
-      "poster": "",
-      "logo": ""
+      "logo": "",
+      "videos": [
+        { "titulo": "Video 01", "video": "", "poster": "" },
+        { "titulo": "Video 02", "video": "", "poster": "" },
+        { "titulo": "Video 03", "video": "", "poster": "" }
+      ]
     }
   ]
 }
