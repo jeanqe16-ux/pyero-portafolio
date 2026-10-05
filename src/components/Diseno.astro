@@ -6,98 +6,103 @@ import { posts, portadas } from '../data/diseno.json';
 const t = textos.diseno;
 const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
 
-// Solo se ofrecen como filtro los clientes que tienen piezas
-const conPiezas = clientes.filter((c) => [...posts, ...portadas].some((p) => p.cliente === c.id));
-const gruposPortadas = conPiezas
-  .map((c) => ({ ...c, portadas: portadas.filter((p) => p.cliente === c.id) }))
-  .filter((g) => g.portadas.length > 0);
+// Solo se ofrecen como filtro las empresas que tienen posts; la primera queda seleccionada
+const empresas = clientes.filter((c) => posts.some((p) => p.cliente === c.id));
+const inicial = empresas[0]?.id;
+
+// Listas que recorre el visor: las imágenes de cada empresa (los carruseles aportan todas las suyas) y las portadas
+const listas: Record<string, { src: string; titulo: string; nombre: string }[]> = {};
+const tarjetas = posts.map((p) => {
+  const lista = (listas[p.cliente] ??= []);
+  const indice = lista.length;
+  lista.push(...p.imagenes.map((src) => ({ src, titulo: p.titulo, nombre: nombreDe(p.cliente) })));
+  return { ...p, indice };
+});
+listas.portadas = portadas.map((p) => ({ src: p.imagen, titulo: p.titulo, nombre: nombreDe(p.cliente) }));
 ---
 
-<section class="seccion diseno" id="diseno">
+<section class="seccion diseno" id="diseno" data-listas={JSON.stringify(listas)}>
   <p class="etiqueta">{t.etiqueta}</p>
   <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
 
-  <div class="filtros" role="group" aria-label={t.filtro}>
-    <button type="button" data-filtro="todos" aria-pressed="true">{t.todos}</button>
-    {
-      conPiezas.map((c) => (
-        <button type="button" data-filtro={c.id} aria-pressed="false">
-          {c.nombre}
-        </button>
-      ))
-    }
+  <div class="cabecera">
+    <h3>{t.posts}</h3>
+    <div class="filtros" role="group" aria-label={t.filtro}>
+      {
+        empresas.map((c) => (
+          <button type="button" data-filtro={c.id} aria-pressed={c.id === inicial ? 'true' : 'false'}>
+            {c.nombre}
+          </button>
+        ))
+      }
+    </div>
   </div>
 
-  <h3>{t.posts}</h3>
   <ul class="posts">
     {
-      posts.map((p) => (
-        <li class="post" data-cliente={p.cliente}>
-          <div class="carrusel">
-            {p.imagenes.map((src) => (
-              <button
-                type="button"
-                class="abrir"
-                data-src={src}
-                data-titulo={p.titulo}
-                data-nombre={nombreDe(p.cliente)}
-                aria-label={`${t.ver} ${p.titulo}`}
-              >
-                <img src={src} alt={p.titulo} width="1080" height="1080" loading="lazy" decoding="async" />
-              </button>
-            ))}
-          </div>
-          {p.imagenes.length > 1 && (
-            <>
-              <span class="cuenta" aria-label={`${t.carrusel} ${p.imagenes.length}`}>
+      tarjetas.map((p) => (
+        <li data-cliente={p.cliente} hidden={p.cliente !== inicial}>
+          <button type="button" class="tarjeta abrir" data-lista={p.cliente} data-indice={p.indice} aria-label={`${t.ver} ${p.titulo}`}>
+            <img src={p.imagenes[0]} alt="" width="1080" height="1080" loading="lazy" decoding="async" />
+            <span class="flecha" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17 17 7M9 7h8v8" />
+              </svg>
+            </span>
+            {p.imagenes.length > 1 && (
+              <span class="cuenta">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <rect x="3" y="7" width="13" height="13" rx="2.5" />
                   <path d="M8 4h10.5A2.5 2.5 0 0 1 21 6.5V17" stroke-linecap="round" />
                 </svg>
                 {p.imagenes.length}
               </span>
-              <button type="button" class="paso paso-anterior" data-paso="-1" aria-label={t.anterior}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-                  <path d="m14 6-6 6 6 6" />
-                </svg>
-              </button>
-              <button type="button" class="paso paso-siguiente" data-paso="1" aria-label={t.siguiente}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-                  <path d="m10 6 6 6-6 6" />
-                </svg>
-              </button>
-            </>
-          )}
+            )}
+            <span class="rotulo">
+              <strong>{nombreDe(p.cliente)}</strong>
+              <span>{p.titulo}</span>
+            </span>
+          </button>
         </li>
       ))
     }
   </ul>
 
-  <div class="bloque-portadas">
-    <h3>{t.portadas}</h3>
-    {
-      gruposPortadas.map((g) => (
-        <div class="grupo" data-cliente={g.id}>
-          <h4>{g.nombre}</h4>
-          <ul class="portadas">
-            {g.portadas.map((p) => (
+  <h3 class="titulo-portadas">{t.portadas}</h3>
+  <div class="carrusel">
+    <div class="pista">
+      {
+        // La tanda central es la real; las de los lados son copias para que el loop no tenga fin
+        [0, 1, 2].map((tanda) => (
+          <ul class="tanda" aria-hidden={tanda !== 1 ? 'true' : undefined}>
+            {portadas.map((p, i) => (
               <li>
                 <button
                   type="button"
-                  class="abrir"
-                  data-src={p.imagen}
-                  data-titulo={p.titulo}
-                  data-nombre={g.nombre}
+                  class="portada abrir"
+                  data-lista="portadas"
+                  data-indice={i}
+                  tabindex={tanda !== 1 ? -1 : undefined}
                   aria-label={`${t.ver} ${p.titulo}`}
                 >
-                  <img src={p.imagen} alt={p.titulo} width={p.ancho} height={p.alto} loading="lazy" decoding="async" />
+                  <img src={p.imagen} alt="" width={p.ancho} height={p.alto} loading="lazy" decoding="async" />
                 </button>
               </li>
             ))}
           </ul>
-        </div>
-      ))
-    }
+        ))
+      }
+    </div>
+    <button type="button" class="paso paso-anterior" data-paso="-1" aria-label={t.anterior}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="m14 6-6 6 6 6"></path>
+      </svg>
+    </button>
+    <button type="button" class="paso paso-siguiente" data-paso="1" aria-label={t.siguiente}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="m10 6 6 6-6 6"></path>
+      </svg>
+    </button>
   </div>
 
   <dialog class="visor" aria-label={t.visor}>
@@ -130,49 +135,42 @@ const gruposPortadas = conPiezas
 
 <script>
   const seccion = document.querySelector<HTMLElement>('#diseno')!;
+  const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Filtro por empresa: siempre hay una seleccionada
+  const filtros = [...seccion.querySelectorAll<HTMLElement>('[data-filtro]')];
+  filtros.forEach((boton) =>
+    boton.addEventListener('click', () => {
+      filtros.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
+      seccion.querySelectorAll<HTMLElement>('.posts [data-cliente]').forEach((post) => {
+        post.hidden = post.dataset.cliente !== boton.dataset.filtro;
+      });
+    }),
+  );
+
+  // Visor: recorre los posts de la empresa elegida o todas las portadas
+  const listas: Record<string, { src: string; titulo: string; nombre: string }[]> = JSON.parse(seccion.dataset.listas!);
   const visor = seccion.querySelector<HTMLDialogElement>('.visor')!;
   const imagen = visor.querySelector('img')!;
   const titulo = visor.querySelector('.visor-titulo')!;
   const detalle = visor.querySelector('.visor-detalle')!;
-  let lista: HTMLElement[] = [];
+  let lista = listas.portadas;
   let indice = 0;
 
-  // Filtro por cliente: oculta posts y grupos de portadas de los demás
-  const filtros = [...seccion.querySelectorAll<HTMLElement>('[data-filtro]')];
-  filtros.forEach((boton) =>
-    boton.addEventListener('click', () => {
-      const filtro = boton.dataset.filtro;
-      filtros.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
-      seccion.querySelectorAll<HTMLElement>('[data-cliente]').forEach((pieza) => {
-        pieza.hidden = filtro !== 'todos' && pieza.dataset.cliente !== filtro;
-      });
-      const bloque = seccion.querySelector<HTMLElement>('.bloque-portadas')!;
-      bloque.hidden = !bloque.querySelector('.grupo:not([hidden])');
-    }),
-  );
-
-  // El visor recorre solo las piezas visibles con el filtro actual
   const mostrar = (i: number) => {
     indice = (i + lista.length) % lista.length;
-    const pieza = lista[indice].dataset;
-    imagen.src = pieza.src!;
-    imagen.alt = pieza.titulo!;
-    titulo.textContent = pieza.titulo!;
+    const pieza = lista[indice];
+    imagen.src = pieza.src;
+    imagen.alt = pieza.titulo;
+    titulo.textContent = pieza.titulo;
     detalle.textContent = `${pieza.nombre} · ${indice + 1} / ${lista.length}`;
   };
 
   seccion.addEventListener('click', (e) => {
-    const objetivo = e.target as HTMLElement;
-    const paso = objetivo.closest<HTMLElement>('.paso');
-    if (paso) {
-      const carrusel = paso.parentElement!.querySelector('.carrusel')!;
-      carrusel.scrollBy({ left: Number(paso.dataset.paso) * carrusel.clientWidth });
-      return;
-    }
-    const abrir = objetivo.closest<HTMLElement>('.abrir');
+    const abrir = (e.target as HTMLElement).closest<HTMLElement>('.abrir');
     if (!abrir) return;
-    lista = [...seccion.querySelectorAll<HTMLElement>('.abrir')].filter((b) => !b.closest('[hidden]'));
-    mostrar(lista.indexOf(abrir));
+    lista = listas[abrir.dataset.lista!];
+    mostrar(Number(abrir.dataset.indice));
     visor.showModal();
   });
 
@@ -187,7 +185,6 @@ const gruposPortadas = conPiezas
     if (e.key === 'ArrowRight') mostrar(indice + 1);
   });
 
-  // Deslizar con el dedo dentro del visor
   let inicioX = 0;
   visor.addEventListener('touchstart', (e) => (inicioX = e.changedTouches[0].clientX), { passive: true });
   visor.addEventListener(
@@ -198,6 +195,92 @@ const gruposPortadas = conPiezas
     },
     { passive: true },
   );
+
+  // Carrusel de portadas: se desplaza solo, lento y sin fin; con el dedo o las flechas se mueve a mano
+  const carrusel = seccion.querySelector<HTMLElement>('.carrusel')!;
+  const pista = carrusel.querySelector<HTMLElement>('.pista')!;
+  const tandas = pista.querySelectorAll<HTMLElement>('.tanda');
+  const VELOCIDAD = 18; // px por segundo
+  const VELOCIDAD_LENTA = 5;
+  let periodo = 0;
+  let posicion = 0;
+  let pendiente = 0; // desplazamiento de las flechas que falta aplicar
+  let lento = false;
+  let aMano = false;
+  let espera = 0;
+  let ultimo = 0;
+  let cuadro = 0;
+
+  const medir = () => {
+    periodo = tandas[1].offsetLeft - tandas[0].offsetLeft;
+  };
+
+  const animar = (ahora: number) => {
+    const dt = Math.min((ahora - ultimo) / 1000, 0.1);
+    ultimo = ahora;
+    const antes = posicion;
+    if (aMano) {
+      posicion = pista.scrollLeft;
+    } else {
+      // El contenido avanza de izquierda a derecha, así que el scroll retrocede
+      if (!reducir) posicion -= (lento ? VELOCIDAD_LENTA : VELOCIDAD) * dt;
+      const tramo = reducir ? pendiente : pendiente * Math.min(1, dt * 7);
+      posicion += tramo;
+      pendiente -= tramo;
+    }
+    // Al salir de la tanda central se salta una tanda: como son idénticas, no se nota
+    if (posicion < periodo * 0.5) posicion += periodo;
+    else if (posicion >= periodo * 1.5) posicion -= periodo;
+    if (!aMano || Math.abs(posicion - antes) > periodo / 2) pista.scrollLeft = posicion;
+    cuadro = requestAnimationFrame(animar);
+  };
+
+  // Mientras se desliza a mano (dedo o trackpad) el movimiento automático espera
+  const tomar = () => {
+    aMano = true;
+    pendiente = 0;
+    window.clearTimeout(espera);
+  };
+  const soltar = () => {
+    window.clearTimeout(espera);
+    espera = window.setTimeout(() => (aMano = false), 1500);
+  };
+  pista.addEventListener('touchstart', tomar, { passive: true });
+  pista.addEventListener('touchend', soltar, { passive: true });
+  pista.addEventListener('touchcancel', soltar, { passive: true });
+  pista.addEventListener(
+    'wheel',
+    (e) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      tomar();
+      soltar();
+    },
+    { passive: true },
+  );
+
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    carrusel.addEventListener('pointerenter', () => (lento = true));
+    carrusel.addEventListener('pointerleave', () => (lento = false));
+  }
+
+  carrusel.querySelectorAll<HTMLElement>('.paso').forEach((boton) =>
+    boton.addEventListener('click', () => {
+      aMano = false;
+      pendiente += Number(boton.dataset.paso) * Math.min(pista.clientWidth * 0.75, 520);
+    }),
+  );
+
+  // Solo se anima mientras el carrusel está en pantalla
+  new IntersectionObserver(([entrada]) => {
+    cancelAnimationFrame(cuadro);
+    if (!entrada.isIntersecting) return;
+    medir();
+    if (!posicion) posicion = periodo;
+    pista.scrollLeft = posicion;
+    ultimo = performance.now();
+    cuadro = requestAnimationFrame(animar);
+  }).observe(carrusel);
+  window.addEventListener('resize', medir);
 </script>
 
 <style>
@@ -205,11 +288,29 @@ const gruposPortadas = conPiezas
     border-bottom: 1px solid var(--linea);
   }
 
+  .cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin: 2.5rem 0 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .titulo-portadas {
+    margin: 3.5rem 0 1.25rem;
+  }
+
   .filtros {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 2rem;
   }
 
   .filtros button {
@@ -234,69 +335,40 @@ const gruposPortadas = conPiezas
     color: #fff;
   }
 
-  h3 {
-    margin: 2.5rem 0 1rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-  }
-
-  h4 {
-    margin: 1.5rem 0 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--gris);
-  }
-
-  h3 + .grupo h4 {
-    margin-top: 0;
-  }
-
   [hidden] {
     display: none !important;
   }
 
+  /* Posts: tarjetas verticales */
   .posts {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
-  .post {
+  .tarjeta,
+  .portada {
     position: relative;
-    aspect-ratio: 1 / 1;
-    border-radius: 18px;
-    overflow: hidden;
-    background: var(--superficie);
-  }
-
-  /* Un post con varias imágenes se desliza en horizontal */
-  .carrusel {
-    display: flex;
-    height: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-  }
-
-  .carrusel::-webkit-scrollbar {
-    display: none;
-  }
-
-  .abrir {
     display: block;
-    flex: none;
     width: 100%;
     padding: 0;
     border: 0;
-    background: none;
-    cursor: zoom-in;
-    scroll-snap-align: start;
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--superficie);
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .tarjeta {
+    aspect-ratio: 4 / 5;
   }
 
   .abrir:focus-visible {
-    outline-offset: -3px;
+    outline-offset: 3px;
+    border-radius: 24px;
   }
 
   .abrir img {
@@ -304,27 +376,43 @@ const gruposPortadas = conPiezas
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  .cuenta,
-  .paso {
+  .flecha {
     position: absolute;
-    display: inline-flex;
-    align-items: center;
-    background: rgb(10 10 10 / 0.72);
-    color: #fff;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--negro);
+    box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.5);
+    transition:
+      background 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .flecha svg {
+    width: 1.1rem;
+    height: 1.1rem;
   }
 
   .cuenta {
-    top: 0.6rem;
-    right: 0.6rem;
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    display: inline-flex;
+    align-items: center;
     gap: 0.3rem;
-    padding: 0.25rem 0.55rem;
+    padding: 0.3rem 0.6rem;
     border-radius: 999px;
+    background: rgb(10 10 10 / 0.72);
     font-size: 0.75rem;
     font-weight: 600;
-    pointer-events: none;
   }
 
   .cuenta svg {
@@ -332,45 +420,93 @@ const gruposPortadas = conPiezas
     height: 0.9rem;
   }
 
+  .rotulo {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    gap: 0.1rem;
+    padding: 3.5rem 1rem 1rem;
+    background: linear-gradient(transparent, rgb(0 0 0 / 0.72));
+    line-height: 1.3;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.45);
+  }
+
+  .rotulo strong {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .rotulo span {
+    font-size: 0.8125rem;
+    color: rgb(255 255 255 / 0.88);
+  }
+
+  /* Portadas: carrusel continuo que se sale de los márgenes de la sección */
+  .carrusel {
+    position: relative;
+    margin-inline: -1.5rem;
+  }
+
+  .pista {
+    display: flex;
+    gap: 1rem;
+    padding-inline: 1.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .pista::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tanda {
+    display: flex;
+    flex: none;
+    gap: 1rem;
+  }
+
+  .portada {
+    height: clamp(150px, 24vw, 270px);
+    width: auto;
+  }
+
+  .portada img {
+    width: auto;
+  }
+
   .paso {
+    position: absolute;
     top: 50%;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
     padding: 0;
     border: 0;
     border-radius: 50%;
+    background: #fff;
+    color: var(--negro);
+    box-shadow: 0 8px 20px -8px rgb(0 0 0 / 0.5);
     transform: translateY(-50%);
     cursor: pointer;
+    transition:
+      background 0.25s ease,
+      transform 0.25s ease;
   }
 
   .paso svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.2rem;
+    height: 1.2rem;
   }
 
   .paso-anterior {
-    left: 0.5rem;
+    left: 0.75rem;
   }
 
   .paso-siguiente {
-    right: 0.5rem;
-  }
-
-  .portadas {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-    gap: 0.75rem;
-  }
-
-  .portadas li {
-    border-radius: 18px;
-    overflow: hidden;
-    background: var(--superficie);
-  }
-
-  .portadas img {
-    height: auto;
+    right: 0.75rem;
   }
 
   /* Visor a pantalla completa */
@@ -409,7 +545,7 @@ const gruposPortadas = conPiezas
     max-height: calc(100dvh - 10.5rem);
     width: auto;
     height: auto;
-    border-radius: 12px;
+    border-radius: 24px;
   }
 
   figcaption {
@@ -470,7 +606,17 @@ const gruposPortadas = conPiezas
     }
 
     .abrir:hover img {
-      transform: scale(1.04);
+      transform: scale(1.06);
+    }
+
+    .tarjeta:hover .flecha {
+      background: var(--acento);
+      transform: rotate(45deg);
+    }
+
+    .paso:hover {
+      background: var(--acento);
+      transform: translateY(-50%) scale(1.08);
     }
 
     .visor-boton:hover {
@@ -485,21 +631,52 @@ const gruposPortadas = conPiezas
     }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .posts {
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
 
-    .post,
-    .portadas li {
-      border-radius: 14px;
+    .flecha {
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 2rem;
+      height: 2rem;
     }
-  }
 
-  @media (prefers-reduced-motion: reduce) {
-    .carrusel {
-      scroll-behavior: auto;
+    .cuenta {
+      top: 0.5rem;
+      left: 0.5rem;
+    }
+
+    .rotulo {
+      padding: 2.5rem 0.75rem 0.75rem;
+    }
+
+    .rotulo strong {
+      font-size: 0.8125rem;
+    }
+
+    .rotulo span {
+      font-size: 0.75rem;
+    }
+
+    .pista,
+    .tanda {
+      gap: 0.6rem;
+    }
+
+    .paso {
+      width: 2.25rem;
+      height: 2.25rem;
+    }
+
+    .paso-anterior {
+      left: 0.5rem;
+    }
+
+    .paso-siguiente {
+      right: 0.5rem;
     }
   }
 </style>

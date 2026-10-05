@@ -197,12 +197,10 @@ content:
               - { name: antes, label: Antes de la palabra en naranja, type: string }
               - { name: destacado, label: Palabra en naranja, type: string }
               - { name: despues, label: Después de la palabra en naranja, type: string }
-          - { name: filtro, label: Descripción del filtro, type: string }
-          - { name: todos, label: Botón Todos, type: string }
+          - { name: filtro, label: Descripción del filtro por empresa, type: string }
           - { name: posts, label: Título Posts, type: string }
           - { name: portadas, label: Título Portadas, type: string }
           - { name: ver, label: Texto Ver en grande, type: string }
-          - { name: carrusel, label: Texto Carrusel de, type: string }
           - { name: anterior, label: Botón Anterior, type: string }
           - { name: siguiente, label: Botón Siguiente, type: string }
           - { name: cerrar, label: Botón Cerrar, type: string }
