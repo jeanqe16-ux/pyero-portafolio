@@ -4,8 +4,8 @@ import { proyectos } from '../data/proyectos.json';
 import { creadores } from '../data/creadores.json';
 
 const nombres = [
-  ...proyectos.map((p) => ({ nombre: p.nombre, logo: p.logo })),
-  ...creadores.map((c) => ({ nombre: c.handle, logo: '' })),
+  ...proyectos.map((p) => ({ nombre: p.nombre, logo: p.logo, enlace: `/proyectos/${p.slug}/`, externo: false })),
+  ...creadores.map((c) => ({ nombre: c.handle, logo: '', enlace: c.enlace, externo: true })),
 ];
 
 // La lista se repite para que el loop no deje huecos en pantallas anchas
@@ -17,9 +17,25 @@ const franja = Array.from({ length: 4 }, () => nombres).flat();
     {
       [0, 1].map((mitad) => (
         <ul aria-hidden={mitad === 1 ? 'true' : undefined}>
-          {franja.map((n) => (
-            <li>{n.logo ? <img src={n.logo} alt={n.nombre} loading="lazy" /> : <span>{n.nombre}</span>}</li>
-          ))}
+          {franja.map((n) => {
+            const contenido = n.logo ? <img src={n.logo} alt={n.nombre} loading="lazy" /> : <span>{n.nombre}</span>;
+            return (
+              <li>
+                {n.enlace ? (
+                  <a
+                    href={n.enlace}
+                    tabindex={mitad === 1 ? -1 : undefined}
+                    target={n.externo ? '_blank' : undefined}
+                    rel={n.externo ? 'noopener noreferrer' : undefined}
+                  >
+                    {contenido}
+                  </a>
+                ) : (
+                  contenido
+                )}
+              </li>
+            );
+          })}
         </ul>
       ))
     }

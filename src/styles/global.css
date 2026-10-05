@@ -1,6 +1,8 @@
 :root {
   --acento: #fb8e1f;
   --acento-suave: #fdaf50;
+  /* Naranja oscuro para texto pequeño sobre fondos claros (cumple WCAG AA) */
+  --acento-texto: #b45309;
   --negro: #0a0a0a;
   --gris: #6b6b6b;
   --linea: #ececec;
@@ -89,7 +91,7 @@ h2 em {
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--acento-suave);
+  color: var(--acento-texto);
   margin-bottom: 1rem;
 }
 
