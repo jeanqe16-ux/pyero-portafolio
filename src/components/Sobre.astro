@@ -1,0 +1,80 @@
+---
+import textos from '../data/textos.json';
+import { herramientas } from '../data/herramientas.json';
+
+const t = textos.sobre;
+---
+
+<section class="seccion sobre" id="sobre-mi">
+  <div class="foto">
+    <span>{t.fotoPendiente}</span>
+  </div>
+  <div>
+    <p class="etiqueta">{t.etiqueta}</p>
+    <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
+    {t.parrafos.map((p) => <p class="texto">{p}</p>)}
+    <p class="etiqueta herramientas-titulo">{t.herramientas}</p>
+    <ul class="herramientas">
+      {herramientas.map((h) => <li>{h.nombre}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .sobre {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: center;
+    border-top: 1px solid var(--linea);
+  }
+
+  .foto {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 5;
+    border-radius: 28px;
+    overflow: hidden;
+    background: var(--superficie);
+    color: var(--gris);
+    font-size: 0.875rem;
+    transform: rotate(-2deg);
+  }
+
+  h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  .texto + .texto {
+    margin-top: 1rem;
+  }
+
+  .herramientas-titulo {
+    margin: 2.25rem 0 0.75rem;
+  }
+
+  .herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .herramientas li {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 820px) {
+    .sobre {
+      grid-template-columns: 1fr;
+    }
+
+    .foto {
+      width: 100%;
+      max-width: 360px;
+    }
+  }
+</style>

@@ -1,0 +1,16 @@
+{
+  "servicios": [
+    {
+      "titulo": "Edición de video",
+      "texto": "Reels, TikToks y videos para redes con ritmo, subtítulos, color y sonido pensados para retener desde el primer segundo."
+    },
+    {
+      "titulo": "Motion graphics",
+      "texto": "Animación de textos, logos y gráficos que explican tu mensaje y le dan a tu contenido una identidad propia."
+    },
+    {
+      "titulo": "Diseño gráfico para redes",
+      "texto": "Posts y carruseles con una línea visual coherente, para que tu marca se reconozca en cada publicación."
+    }
+  ]
+}

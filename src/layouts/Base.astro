@@ -1,0 +1,77 @@
+---
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import site from '../data/site.json';
+import textos from '../data/textos.json';
+import Redes from '../components/Redes.astro';
+import { enlaceWhatsapp, iconoWhatsapp } from '../lib/enlaces';
+
+interface Props {
+  titulo?: string;
+  descripcion?: string;
+}
+
+const { titulo = site.seo.titulo, descripcion = site.seo.descripcion } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <svg class="definiciones-svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="gradiente-instagram" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="#FEDA75"></stop>
+          <stop offset=".3" stop-color="#FA7E1E"></stop>
+          <stop offset=".6" stop-color="#D62976"></stop>
+          <stop offset=".85" stop-color="#962FBF"></stop>
+          <stop offset="1" stop-color="#4F5BD5"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <header class="nav">
+      <div class="nav-interior">
+        <a class="marca" href="/">{site.marca}<span>{site.marcaSufijo}</span></a>
+        <nav class="nav-links" aria-label="Principal">
+          <a href="/#servicios">{textos.nav.servicios}</a>
+          <a href="/#sobre-mi">{textos.nav.sobre}</a>
+          <a href="/#contacto">{textos.nav.contacto}</a>
+        </nav>
+        <div class="nav-acciones">
+          <Redes />
+          <a class="boton boton-oscuro boton-chico" href="/#contacto">{textos.nav.cta}</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="pie">
+      <span>© {new Date().getFullYear()} {site.marca}{site.marcaSufijo}. {textos.pie}</span>
+      <Redes />
+    </footer>
+
+    <a
+      class="flotante"
+      href={enlaceWhatsapp}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={textos.whatsapp}
+      title={textos.whatsapp}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={iconoWhatsapp} fill="currentColor"></path></svg>
+    </a>
+  </body>
+</html>

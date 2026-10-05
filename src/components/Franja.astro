@@ -1,0 +1,85 @@
+---
+import textos from '../data/textos.json';
+import { proyectos } from '../data/proyectos.json';
+import { creadores } from '../data/creadores.json';
+
+const nombres = [
+  ...proyectos.map((p) => ({ nombre: p.nombre, logo: p.logo })),
+  ...creadores.map((c) => ({ nombre: c.handle, logo: '' })),
+];
+
+// La lista se repite para que el loop no deje huecos en pantallas anchas
+const franja = Array.from({ length: 4 }, () => nombres).flat();
+---
+
+<section class="franja" aria-label={textos.franja.etiqueta}>
+  <div class="franja-pista">
+    {
+      [0, 1].map((mitad) => (
+        <ul aria-hidden={mitad === 1 ? 'true' : undefined}>
+          {franja.map((n) => (
+            <li>{n.logo ? <img src={n.logo} alt={n.nombre} loading="lazy" /> : <span>{n.nombre}</span>}</li>
+          ))}
+        </ul>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .franja {
+    background: var(--negro);
+    color: #fff;
+    padding: 1.6rem 0;
+    overflow: hidden;
+    /* Disolución en los bordes: los logos se desvanecen al salir */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 22%, #000 88%, transparent);
+  }
+
+  .franja-pista {
+    display: flex;
+    width: max-content;
+    animation: franja 40s linear infinite;
+  }
+
+  .franja ul {
+    display: flex;
+    align-items: center;
+  }
+
+  .franja li {
+    display: flex;
+    align-items: center;
+    padding: 0 2.25rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+
+  .franja img {
+    height: 2rem;
+    width: auto;
+    /* Fuerza cualquier logo a blanco */
+    filter: brightness(0) invert(1);
+  }
+
+  @keyframes franja {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .franja:hover .franja-pista {
+      animation-play-state: paused;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .franja-pista {
+      animation: none;
+    }
+  }
+</style>

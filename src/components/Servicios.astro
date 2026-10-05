@@ -1,0 +1,66 @@
+---
+import textos from '../data/textos.json';
+import { servicios } from '../data/servicios.json';
+
+const t = textos.servicios;
+---
+
+<section class="seccion" id="servicios">
+  <p class="etiqueta">{t.etiqueta}</p>
+  <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{' '}{t.titulo.despues}</h2>
+  <ol class="servicios">
+    {
+      servicios.map((s, i) => (
+        <li>
+          <span class="numero">0{i + 1}</span>
+          <h3>{s.titulo}</h3>
+          <p>{s.texto}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .servicios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .servicios li {
+    padding: 2rem;
+    border-radius: 24px;
+    background: var(--superficie);
+  }
+
+  .numero {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--acento-suave);
+  }
+
+  h3 {
+    margin: 3.5rem 0 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  .servicios p {
+    color: var(--gris);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 820px) {
+    .servicios {
+      grid-template-columns: 1fr;
+    }
+
+    h3 {
+      margin-top: 2rem;
+    }
+  }
+</style>

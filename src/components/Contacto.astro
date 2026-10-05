@@ -1,0 +1,54 @@
+---
+import textos from '../data/textos.json';
+import Redes from './Redes.astro';
+import { enlaceWhatsapp, iconoWhatsapp } from '../lib/enlaces';
+
+const t = textos.contacto;
+---
+
+<section class="contacto" id="contacto">
+  <p class="etiqueta">{t.etiqueta}</p>
+  <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
+  <p class="texto">{t.texto}</p>
+  <a class="boton boton-whatsapp" href={enlaceWhatsapp} target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d={iconoWhatsapp} fill="currentColor"></path></svg>
+    {t.cta}
+  </a>
+  <div class="seguir">
+    <span>{t.redes}</span>
+    <Redes oscuro />
+  </div>
+</section>
+
+<style>
+  .contacto {
+    max-width: calc(var(--ancho) - 3rem);
+    margin: 0 1.5rem;
+    padding: clamp(3rem, 8vw, 6rem) 1.5rem;
+    border-radius: 32px;
+    background: var(--negro);
+    color: #fff;
+    text-align: center;
+  }
+
+  @media (min-width: 1228px) {
+    .contacto {
+      margin-inline: auto;
+    }
+  }
+
+  .texto {
+    margin: 1.25rem auto 2rem;
+    color: rgb(255 255 255 / 0.7);
+  }
+
+  .seguir {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    font-size: 0.875rem;
+    color: rgb(255 255 255 / 0.7);
+  }
+</style>

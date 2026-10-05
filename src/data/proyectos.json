@@ -1,0 +1,31 @@
+{
+  "proyectos": [
+    {
+      "slug": "clinica-dental-imagen",
+      "nombre": "Clínica Dental Imagen",
+      "categoria": "Posts, edición de video y motion",
+      "descripcion": "Contenido para redes sociales, edición de video y motion graphics para la clínica.",
+      "video": "",
+      "poster": "",
+      "logo": ""
+    },
+    {
+      "slug": "cero",
+      "nombre": "CERO",
+      "categoria": "Posts, edición de video y motion",
+      "descripcion": "Contenido para redes sociales, edición de video y motion graphics para el centro especializado de radiología odontológica.",
+      "video": "",
+      "poster": "",
+      "logo": ""
+    },
+    {
+      "slug": "alpacart",
+      "nombre": "Alpacart",
+      "categoria": "Contenido para marca de moda",
+      "descripcion": "Contenido audiovisual para una marca de ropa de lana de alpaca.",
+      "video": "",
+      "poster": "",
+      "logo": ""
+    }
+  ]
+}

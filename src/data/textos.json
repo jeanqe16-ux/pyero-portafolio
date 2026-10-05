@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "servicios": "Servicios",
+    "sobre": "Sobre mí",
+    "contacto": "Contacto",
+    "cta": "Hablemos"
+  },
+  "hero": {
+    "estado": "Disponible para nuevos proyectos",
+    "titulo": {
+      "a": "Eleva tu",
+      "b": "contenido",
+      "c": "entendiendo tu",
+      "d": "marca"
+    },
+    "bajada": "Soy diseñador gráfico especializado en edición de video y motion graphics. Convierto la esencia de tu marca en piezas que se quedan en la cabeza.",
+    "cta": "Escríbeme por WhatsApp",
+    "secundario": "Ver servicios",
+    "proximamente": "Próximamente"
+  },
+  "franja": {
+    "etiqueta": "Marcas y creadores con los que he trabajado"
+  },
+  "servicios": {
+    "etiqueta": "Servicios",
+    "titulo": {
+      "antes": "Tres formas de",
+      "destacado": "mover",
+      "despues": "tu marca"
+    }
+  },
+  "sobre": {
+    "etiqueta": "Sobre mí",
+    "titulo": {
+      "antes": "Diseño con mirada de",
+      "destacado": "marketing",
+      "despues": ""
+    },
+    "parrafos": [
+      "Soy Pyero, diseñador gráfico especializado en edición de video y motion graphics. Actualmente curso el 5.º ciclo de Marketing en la Universidad Continental, y eso me permite pensar cada pieza desde la estrategia y no solo desde lo visual.",
+      "He trabajado con clínicas, marcas de moda y creadores de contenido. Antes de abrir un programa, me ocupo de entender qué hace única a tu marca; después lo traduzco en contenido."
+    ],
+    "herramientas": "Herramientas que uso",
+    "fotoAlt": "Retrato de Pyero, diseñador gráfico y editor de video",
+    "fotoPendiente": "Tu foto aquí"
+  },
+  "contacto": {
+    "etiqueta": "Contacto",
+    "titulo": {
+      "antes": "¿Hacemos que tu",
+      "destacado": "marca",
+      "despues": "se mueva?"
+    },
+    "texto": "Cuéntame qué necesitas y te respondo por WhatsApp.",
+    "cta": "Escríbeme por WhatsApp",
+    "redes": "Sígueme"
+  },
+  "pie": "Todos los derechos reservados.",
+  "whatsapp": "Chatear por WhatsApp"
+}

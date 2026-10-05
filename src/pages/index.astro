@@ -1,5 +1,16 @@
 ---
-import Pagina from '../components/Pagina.astro';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Franja from '../components/Franja.astro';
+import Servicios from '../components/Servicios.astro';
+import Sobre from '../components/Sobre.astro';
+import Contacto from '../components/Contacto.astro';
 ---
 
-<Pagina lang="es" />
+<Base>
+  <Hero />
+  <Franja />
+  <Servicios />
+  <Sobre />
+  <Contacto />
+</Base>
