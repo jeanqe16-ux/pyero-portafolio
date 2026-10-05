@@ -1,0 +1,48 @@
+media:
+  input: public/media
+  output: /media
+
+content:
+  - name: proyectos
+    label: Proyectos
+    type: collection
+    path: src/content/proyectos
+    filename: '{primary}.md'
+    view:
+      fields: [titulo, cliente, orden]
+      primary: titulo
+      sort: [orden]
+      default:
+        sort: orden
+        order: asc
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: titulo_en, label: Título (inglés), type: string }
+      - { name: cliente, label: Cliente o marca, type: string, required: true, description: Aparece en la franja negra de clientes }
+      - { name: usuario, label: Usuario del creador, type: string, description: 'Opcional, por ejemplo @usuario. Si lo llenas, se muestra en la franja en vez del nombre.' }
+      - { name: categoria, label: Categoría, type: string, required: true }
+      - { name: categoria_en, label: Categoría (inglés), type: string }
+      - { name: descripcion, label: Descripción, type: text }
+      - { name: descripcion_en, label: Descripción (inglés), type: text }
+      - name: video
+        label: Video vertical (1080x1920)
+        type: file
+        description: MP4 comprimido y corto; se reproduce sin sonido al pasar el mouse.
+        options:
+          extensions: [mp4, webm]
+      - { name: poster, label: Portada del video, type: image, description: Imagen vertical que se ve antes de reproducir }
+      - { name: logo, label: Logo del cliente, type: image, description: 'Opcional. PNG o SVG con fondo transparente; se muestra en blanco.' }
+      - { name: orden, label: Orden, type: number, description: Los números menores aparecen primero }
+
+  - name: sitio
+    label: Datos del sitio
+    type: file
+    path: src/data/sitio.json
+    fields:
+      - { name: whatsapp, label: WhatsApp (con código de país, sin +), type: string }
+      - { name: mensaje_whatsapp, label: Mensaje de WhatsApp, type: text }
+      - { name: mensaje_whatsapp_en, label: Mensaje de WhatsApp (inglés), type: text }
+      - { name: instagram, label: Enlace de Instagram, type: string }
+      - { name: tiktok, label: Enlace de TikTok, type: string }
+      - { name: foto, label: Foto de Sobre mí, type: image }
+      - { name: herramientas, label: Herramientas, type: string, list: true }
