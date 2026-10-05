@@ -5,13 +5,20 @@
       "nombre": "Clínica Dental Imagen",
       "categoria": "Posts, edición de video y motion",
       "descripcion": "Contenido para redes sociales, edición de video y motion graphics para la clínica.",
-      "video": "",
-      "poster": "",
+      "video": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.mp4",
+      "poster": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.jpg",
       "logo": "",
       "videos": [
-        { "titulo": "Video 01", "video": "", "poster": "" },
-        { "titulo": "Video 02", "video": "", "poster": "" },
-        { "titulo": "Video 03", "video": "", "poster": "" }
+        {
+          "titulo": "Aplicaciones clínicas",
+          "video": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.mp4",
+          "poster": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion.jpg"
+        },
+        {
+          "titulo": "Caso clínico",
+          "video": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion-2.mp4",
+          "poster": "/media/proyectos/clinica-dental-imagen/clinica-dental-motion-2.jpg"
+        }
       ]
     },
     {
@@ -19,13 +26,25 @@
       "nombre": "CERO",
       "categoria": "Posts, edición de video y motion",
       "descripcion": "Contenido para redes sociales, edición de video y motion graphics para el centro especializado de radiología odontológica.",
-      "video": "",
-      "poster": "",
+      "video": "/media/proyectos/cero/cero-regreso-a-clases.mp4",
+      "poster": "/media/proyectos/cero/cero-regreso-a-clases.jpg",
       "logo": "",
       "videos": [
-        { "titulo": "Video 01", "video": "", "poster": "" },
-        { "titulo": "Video 02", "video": "", "poster": "" },
-        { "titulo": "Video 03", "video": "", "poster": "" }
+        {
+          "titulo": "Motion graphics",
+          "video": "/media/proyectos/cero/cero-motion.mp4",
+          "poster": "/media/proyectos/cero/cero-motion.jpg"
+        },
+        {
+          "titulo": "Regreso a clases",
+          "video": "/media/proyectos/cero/cero-regreso-a-clases.mp4",
+          "poster": "/media/proyectos/cero/cero-regreso-a-clases.jpg"
+        },
+        {
+          "titulo": "Ubicación",
+          "video": "/media/proyectos/cero/cero-ubicacion.mp4",
+          "poster": "/media/proyectos/cero/cero-ubicacion.jpg"
+        }
       ]
     }
   ]
