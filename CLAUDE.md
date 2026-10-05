@@ -27,6 +27,7 @@ src/
   pages/proyectos/[slug].astro   Plantilla única por marca
   styles/global.css  Variables, base, botones, navegación
   lib/enlaces.ts     Enlace de WhatsApp e iconos SVG compartidos
+  scripts/pixeles.ts Animaciones de pixeles con GSAP ScrollTrigger (nombre del hero y fondo)
   assets/            Foto de "Sobre mí" (foto-pyero.jpg|png|webp|avif)
 public/media/<cliente>/   logo.png, videos/, posts/, portadas/ (ruta pública /media/...)
 public/media/creadores/videos/   Reels de creadores
@@ -43,7 +44,7 @@ Orden de secciones en la portada: Hero (reels en abanico) → franja negra de ma
 - **Ningún texto visible va escrito en los componentes**: sale de `src/data/`.
 - **Marca**: Pyero.workz (no Pyero.visualz). Redes: instagram.com/pyero.workz y tiktok.com/@pyero.workz.
 - **Solo español**: se eliminó la versión en inglés y el selector de idioma.
-- **Sin librerías nuevas**: la única dependencia añadida es `@fontsource-variable/inter`. Animaciones e interacciones en CSS y JS propio.
+- **Librerías**: solo `@fontsource-variable/inter` y `gsap` (con ScrollTrigger, pedido expresamente para las animaciones de pixeles). El resto de animaciones e interacciones va en CSS y JS propio; no agregar más sin que se pida.
 - **Colores**: `--acento` (#FB8E1F) solo para palabras de titulares y elementos grandes o decorativos; `--acento-texto` (#B45309) para todo texto pequeño en naranja sobre fondo claro (cumple WCAG AA); `--acento-suave` (#FDAF50) solo sobre fondo negro.
 - **Hover**: siempre dentro de `@media (hover: hover) and (pointer: fine)`.
 - **Movimiento**: toda animación respeta `prefers-reduced-motion`.
@@ -57,6 +58,7 @@ Orden de secciones en la portada: Hero (reels en abanico) → franja negra de ma
 - **Sin sección "Videos por marca"**: se eliminó; las páginas `/proyectos/[slug]` siguen existiendo y se llega a ellas desde los logos de la franja. Los enlaces "Ver proyectos" y "Volver" apuntan a `#reels` (los reels del hero).
 - **Franja**: el loop nunca se pausa. Los logos se pintan con `mask` para poder teñirlos de naranja al pasar el mouse.
 - **Tarjetas de Servicios**: `media: "video"` reproduce un loop pregenerado (720x720, sin audio) que solo se descarga cuando la tarjeta entra en pantalla; `media: "posts"` muestra un pase con disolución de los posts de `diseno.json`. Si cambian los videos fuente, volver a correr `bash scripts/generar-loops.sh`.
+- **Pixeles**: dos lienzos `canvas` movidos por el scroll con `scrub` (solo se repintan al hacer scroll, tope de 60 fps). El nombre del hero se rellena con celdas de colores que una capa en `mix-blend-mode: screen` recorta a la forma de las letras. El fondo es un lienzo fijo con `z-index: -1`, opacidad máxima 0.25, que forma las palabras de `textos.json > pixeles` (letras A-Z de 5x7, sin tildes) repartidas a lo largo de la página. 240 pixeles en escritorio, 120 en celular, y la mitad si pintar sale caro. Con `prefers-reduced-motion` no se activa nada.
 - **Posts**: tarjetas verticales 4:5 (la imagen cuadrada se recorta a los lados; completa se ve en el visor). Sin botón "Todos": se muestra por defecto la primera empresa de `clientes.json` que tenga posts. Un post con varias rutas en `imagenes` lleva un contador y el visor recorre todas.
 - **Portadas**: un solo carrusel sin filtros que avanza solo de izquierda a derecha (18 px/s, 5 px/s con el mouse encima, nunca se detiene), con flechas y deslizado táctil. Se anima con `requestAnimationFrame` sobre `scrollLeft` y tres tandas idénticas.
 - **Nombres de clase**: `.pie` es el footer global; no reutilizarlo dentro de componentes.

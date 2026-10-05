@@ -45,6 +45,8 @@ const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <canvas class="fondo-pixeles" data-palabras={JSON.stringify(textos.pixeles)} aria-hidden="true"></canvas>
+
     <svg class="definiciones-svg" aria-hidden="true">
       <defs>
         <linearGradient id="gradiente-instagram" x1="0" y1="1" x2="1" y2="0">
@@ -105,6 +107,9 @@ const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
         );
         document.querySelectorAll('main > :not(.hero)').forEach((seccion) => observador.observe(seccion));
       }
+    </script>
+    <script>
+      import '../scripts/pixeles';
     </script>
   </body>
 </html>

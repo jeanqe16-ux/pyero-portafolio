@@ -36,7 +36,11 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
   </div>
 
   <div class="escenario" id="reels">
-    <p class="bit" aria-hidden="true">{site.marca}{site.marcaSufijo}</p>
+    <div class="bit" aria-hidden="true">
+      <canvas class="bit-lienzo"></canvas>
+      <p class="bit-mascara">{site.marca}{site.marcaSufijo}</p>
+      <p class="bit-contorno">{site.marca}{site.marcaSufijo}</p>
+    </div>
     <ul class="reels">
       {
         reels.map((r, i) => (
@@ -162,21 +166,59 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
     padding: clamp(3rem, 8vw, 7rem) 0 clamp(4rem, 7vw, 6rem);
   }
 
+  /* Nombre en fuente bit: un lienzo de pixeles, una máscara que solo lo deja ver dentro de las letras y el contorno encima */
   .bit {
+    --lleno: 0;
     position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
+    /* El interletrado negativo deja la última letra fuera de la caja; el relleno la vuelve a incluir */
+    padding-inline: 0.08em;
+    isolation: isolate;
+    /* Recorta 2 px a los lados para que no asomen pixeles por el borde de la máscara; arriba y abajo deja pasar el resplandor */
+    clip-path: inset(-3rem 2px);
     font-family: Silkscreen, monospace;
     font-size: clamp(2rem, 11vw, 10.5rem);
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.06em;
     white-space: nowrap;
-    color: transparent;
-    -webkit-text-stroke: 1px #d4d4d4;
     user-select: none;
     pointer-events: none;
+  }
+
+  .bit-contorno {
+    position: relative;
+    color: transparent;
+    -webkit-text-stroke: 1px #d4d4d4;
+    /* Resplandor leve que crece con el relleno */
+    text-shadow: 0 0 22px rgb(251 142 31 / calc(var(--lleno) * 0.28));
+  }
+
+  /* Solo se activan cuando el script de pixeles está en marcha */
+  .bit-lienzo,
+  .bit-mascara {
+    display: none;
+    position: absolute;
+    inset: 0;
+  }
+
+  .bit.activo .bit-lienzo,
+  .bit.activo .bit-mascara {
+    display: block;
+  }
+
+  .bit-lienzo {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Texto negro sobre blanco en modo screen: el blanco tapa y el negro deja ver el lienzo */
+  .bit-mascara {
+    background: #fff;
+    color: #000;
+    mix-blend-mode: screen;
   }
 
   .reels {
