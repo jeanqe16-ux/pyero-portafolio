@@ -50,12 +50,28 @@
       "despues": ""
     },
     "parrafos": [
-      "Soy Pyero, diseñador gráfico especializado en edición de video y motion graphics. Actualmente curso el 5.º ciclo de Marketing en la Universidad Continental, y eso me permite pensar cada pieza desde la estrategia y no solo desde lo visual.",
-      "He trabajado con clínicas, marcas de moda y creadores de contenido. Antes de abrir un programa, me ocupo de entender qué hace única a tu marca; después lo traduzco en contenido."
+      "Soy Pyero, diseñador gráfico especializado en edición de video y motion graphics. Estudio Marketing en la Universidad Continental (5.º ciclo), y eso me permite pensar cada pieza desde la estrategia, no solo desde lo visual.",
+      "He trabajado con clínicas, marcas de moda y creadores de contenido. Antes de abrir un programa, entiendo qué hace única a tu marca. Después lo traduzco en contenido que conecta."
     ],
     "herramientas": "Herramientas que uso",
     "fotoAlt": "Retrato de Pyero, diseñador gráfico y editor de video",
-    "fotoPendiente": "Tu foto aquí"
+    "fotoPendiente": "Tu foto aquí",
+    "datos": [
+      {
+        "titulo": "Enfoque",
+        "valor": "Marketing + diseño"
+      },
+      {
+        "titulo": "Experiencia",
+        "valor": "Clínicas, moda y creadores"
+      },
+      {
+        "titulo": "Respuesta",
+        "valor": "En menos de 24 horas"
+      }
+    ],
+    "cta": "Hablemos",
+    "ctaSecundario": "Ver proyectos"
   },
   "contacto": {
     "etiqueta": "Contacto",
