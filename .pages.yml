@@ -2,6 +2,7 @@ media:
   input: public/media
   output: /media
 
+# Los campos que terminan en _en son la versión en inglés; si se dejan vacíos se usa el español.
 content:
   - name: site
     label: Datos del sitio
@@ -12,6 +13,7 @@ content:
       - { name: marcaSufijo, label: Parte del nombre en naranja, type: string }
       - { name: whatsapp, label: 'WhatsApp (con código de país, sin +)', type: string }
       - { name: mensajeWhatsapp, label: Mensaje prellenado de WhatsApp, type: text }
+      - { name: mensajeWhatsapp_en, label: Mensaje prellenado de WhatsApp (inglés), type: text }
       - { name: instagram, label: Enlace de Instagram, type: string }
       - { name: tiktok, label: Enlace de TikTok, type: string }
       - name: seo
@@ -19,27 +21,52 @@ content:
         type: object
         fields:
           - { name: titulo, label: Título de la página, type: string }
+          - { name: titulo_en, label: Título de la página (inglés), type: string }
           - { name: descripcion, label: Descripción, type: text }
+          - { name: descripcion_en, label: Descripción (inglés), type: text }
           - { name: imagen, label: Imagen al compartir (1200x630), type: image }
 
-  - name: proyectos
-    label: Proyectos por marca
+  - name: cifras
+    label: Cifras de trabajo
     type: file
-    path: src/data/proyectos.json
+    path: src/data/cifras.json
     fields:
-      - name: proyectos
-        label: Proyectos
+      - name: cifras
+        label: Cifras
         type: object
         list: true
         fields:
-          - { name: slug, label: 'Dirección de la página (sin espacios ni tildes)', type: string, required: true }
-          - { name: nombre, label: Nombre de la marca, type: string, required: true }
-          - { name: categoria, label: Categoría, type: string }
-          - { name: descripcion, label: Descripción corta, type: text }
-          - { name: video, label: 'Reel del inicio (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm] } }
-          - { name: poster, label: Portada del reel del inicio, type: image }
+          - { name: valor, label: 'Número (vacío muestra [X])', type: string }
+          - { name: sufijo, label: 'Sufijo opcional, por ejemplo +', type: string }
+          - { name: etiqueta, label: Texto, type: string }
+          - { name: etiqueta_en, label: Texto (inglés), type: string }
+
+  - name: casos
+    label: Casos de estudio
+    type: file
+    path: src/data/casos.json
+    fields:
+      - name: casos
+        label: Casos
+        type: object
+        list: true
+        fields:
+          - { name: cliente, label: 'Identificador del cliente (el de Clientes)', type: string, required: true }
+          - { name: categoria, label: Categoría (rótulo del reel), type: string }
+          - { name: categoria_en, label: Categoría (inglés), type: string }
+          - { name: reto, label: Reto, type: text }
+          - { name: reto_en, label: Reto (inglés), type: text }
+          - { name: hice, label: Lo que hice, type: text }
+          - { name: hice_en, label: Lo que hice (inglés), type: text }
+          - { name: resultado, label: 'Resultado (cualitativo, sin cifras inventadas)', type: text }
+          - { name: resultado_en, label: Resultado (inglés), type: text }
+          - name: prueba
+            label: Qué se muestra como prueba
+            type: select
+            options:
+              values: [videos, posts]
           - name: videos
-            label: Videos de la página del proyecto
+            label: 'Videos (el primero es también el reel del inicio)'
             type: object
             list: true
             fields:
@@ -57,9 +84,55 @@ content:
         type: object
         list: true
         fields:
-          - { name: id, label: 'Identificador (igual al de su carpeta y al slug de su proyecto)', type: string, required: true }
+          - { name: id, label: 'Identificador (igual al de su carpeta en media)', type: string, required: true }
           - { name: nombre, label: Nombre, type: string, required: true }
           - { name: logo, label: 'Logo (PNG transparente, se muestra en blanco)', type: image }
+
+  - name: creadores
+    label: Creadores
+    type: file
+    path: src/data/creadores.json
+    fields:
+      - name: creadores
+        label: Creadores
+        type: object
+        list: true
+        fields:
+          - { name: handle, label: Handle, type: string, required: true }
+          - { name: enlace, label: Enlace a su perfil, type: string }
+          - { name: categoria, label: Categoría, type: string }
+          - { name: categoria_en, label: Categoría (inglés), type: string }
+          - { name: video, label: 'Reel (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm] } }
+          - { name: poster, label: Portada del reel, type: image }
+
+  - name: servicios
+    label: Servicios
+    type: file
+    path: src/data/servicios.json
+    fields:
+      - name: servicios
+        label: Servicios
+        type: object
+        list: true
+        fields:
+          - { name: titulo, label: Título, type: string, required: true }
+          - { name: titulo_en, label: Título (inglés), type: string }
+          - { name: texto, label: Texto, type: text }
+          - { name: texto_en, label: Texto (inglés), type: text }
+          - { name: ideal, label: Ideal para, type: string }
+          - { name: ideal_en, label: Ideal para (inglés), type: string }
+          - name: icono
+            label: Icono
+            type: select
+            options:
+              values: [video, animacion, diseno]
+          - name: media
+            label: Qué muestra la tarjeta
+            type: select
+            options:
+              values: [video, posts]
+          - { name: video, label: 'Video en loop (cuadrado, sin audio)', type: file, options: { extensions: [mp4, webm] } }
+          - { name: poster, label: Portada del video, type: image }
 
   - name: diseno
     label: Diseño gráfico
@@ -85,47 +158,20 @@ content:
           - { name: ancho, label: Ancho en px, type: number }
           - { name: alto, label: Alto en px, type: number }
 
-  - name: creadores
-    label: Creadores
+  - name: proceso
+    label: Proceso
     type: file
-    path: src/data/creadores.json
+    path: src/data/proceso.json
     fields:
-      - name: creadores
-        label: Creadores
-        type: object
-        list: true
-        fields:
-          - { name: handle, label: Handle, type: string, required: true }
-          - { name: enlace, label: Enlace a su perfil, type: string }
-          - { name: categoria, label: Categoría, type: string }
-          - { name: video, label: 'Reel (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm] } }
-          - { name: poster, label: Portada del reel, type: image }
-
-  - name: servicios
-    label: Servicios
-    type: file
-    path: src/data/servicios.json
-    fields:
-      - name: servicios
-        label: Servicios
+      - name: pasos
+        label: Pasos
         type: object
         list: true
         fields:
           - { name: titulo, label: Título, type: string, required: true }
+          - { name: titulo_en, label: Título (inglés), type: string }
           - { name: texto, label: Texto, type: text }
-          - { name: ideal, label: Ideal para, type: string }
-          - name: icono
-            label: Icono
-            type: select
-            options:
-              values: [video, animacion, diseno]
-          - name: media
-            label: Qué muestra la tarjeta
-            type: select
-            options:
-              values: [video, posts]
-          - { name: video, label: 'Video en loop (cuadrado, sin audio)', type: file, options: { extensions: [mp4, webm] } }
-          - { name: poster, label: Portada del video, type: image }
+          - { name: texto_en, label: Texto (inglés), type: text }
 
   - name: herramientas
     label: Herramientas
@@ -147,122 +193,135 @@ content:
     type: file
     path: src/data/textos.json
     fields:
-      - name: nav
-        label: Menú
+      - name: es
+        label: Español
         type: object
-        fields:
-          - { name: servicios, label: Servicios, type: string }
-          - { name: sobre, label: Sobre mí, type: string }
-          - { name: contacto, label: Contacto, type: string }
-          - { name: cta, label: Botón, type: string }
-      - name: hero
-        label: Inicio
-        type: object
-        fields:
-          - { name: estado, label: Etiqueta de disponibilidad, type: string }
-          - name: titulo
-            label: Titular
+        fields: &textos
+          - name: nav
+            label: Menú
             type: object
             fields:
-              - { name: a, label: Primera línea, type: string }
-              - { name: b, label: Palabra en naranja de la primera línea, type: string }
-              - { name: c, label: Segunda línea, type: string }
-              - { name: d, label: Palabra en naranja de la segunda línea, type: string }
-          - { name: bajada, label: Texto bajo el titular, type: text }
-          - { name: cta, label: Botón principal, type: string }
-          - { name: secundario, label: Botón secundario, type: string }
-          - { name: proximamente, label: Texto de reel sin video, type: string }
-      - name: franja
-        label: Franja de marcas
-        type: object
-        fields:
-          - { name: etiqueta, label: Descripción para lectores de pantalla, type: string }
-      - name: proyectos
-        label: Páginas de proyecto
-        type: object
-        fields:
-          - { name: etiquetaPagina, label: Etiqueta en la página de proyecto, type: string }
-          - { name: volver, label: Enlace Volver, type: string }
-          - { name: cotizar, label: Botón Cotizar, type: string }
-          - { name: proximamente, label: Texto de video pendiente, type: string }
-      - name: diseno
-        label: Diseño gráfico
-        type: object
-        fields:
-          - { name: etiqueta, label: Etiqueta, type: string }
-          - name: titulo
-            label: Titular
+              - { name: casos, label: Casos, type: string }
+              - { name: servicios, label: Servicios, type: string }
+              - { name: sobre, label: Sobre mí, type: string }
+              - { name: contacto, label: Contacto, type: string }
+              - { name: cta, label: Botón, type: string }
+              - { name: idioma, label: Descripción del selector de idioma, type: string }
+          - name: hero
+            label: Inicio
             type: object
             fields:
-              - { name: antes, label: Antes de la palabra en naranja, type: string }
-              - { name: destacado, label: Palabra en naranja, type: string }
-              - { name: despues, label: Después de la palabra en naranja, type: string }
-          - { name: filtro, label: Descripción del filtro por empresa, type: string }
-          - { name: posts, label: Título Posts, type: string }
-          - { name: portadas, label: Título Portadas, type: string }
-          - { name: ver, label: Texto Ver en grande, type: string }
-          - { name: anterior, label: Botón Anterior, type: string }
-          - { name: siguiente, label: Botón Siguiente, type: string }
-          - { name: cerrar, label: Botón Cerrar, type: string }
-          - { name: visor, label: Nombre del visor, type: string }
-      - name: servicios
-        label: Servicios
+              - { name: estado, label: Etiqueta de disponibilidad, type: string }
+              - name: titulo
+                label: Titular
+                type: object
+                fields:
+                  - { name: a, label: Primera parte, type: string }
+                  - { name: b, label: Primera palabra en naranja, type: string }
+                  - { name: c, label: Segunda parte, type: string }
+                  - { name: d, label: Segunda palabra en naranja, type: string }
+              - { name: bajada, label: Subtítulo, type: text }
+              - { name: cta, label: Botón de WhatsApp, type: string }
+              - { name: secundario, label: Botón secundario, type: string }
+              - { name: proximamente, label: Texto de reel sin video, type: string }
+          - name: prueba
+            label: Cifras
+            type: object
+            fields:
+              - { name: etiqueta, label: Descripción para lectores de pantalla, type: string }
+              - { name: pendiente, label: Marcador cuando falta la cifra, type: string }
+          - name: franja
+            label: Franja de marcas
+            type: object
+            fields:
+              - { name: etiqueta, label: Descripción para lectores de pantalla, type: string }
+          - name: filosofia
+            label: Filosofía
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - name: titulo
+                label: Titular
+                type: object
+                fields: &titular
+                  - { name: antes, label: Antes de la palabra en naranja, type: string }
+                  - { name: destacado, label: Palabra en naranja, type: string }
+                  - { name: despues, label: Después de la palabra en naranja, type: string }
+              - { name: frase, label: Frase, type: text }
+          - name: casos
+            label: Casos de estudio
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: object, fields: *titular }
+              - { name: caso, label: Palabra Caso, type: string }
+              - { name: reto, label: Título Reto, type: string }
+              - { name: hice, label: Título Lo que hice, type: string }
+              - { name: resultado, label: Título Resultado, type: string }
+              - { name: verVideo, label: Texto Ver video, type: string }
+              - { name: posts, label: Texto Posts diseñados para, type: string }
+          - name: servicios
+            label: Servicios
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: object, fields: *titular }
+              - { name: subtitulo, label: Subtítulo, type: text }
+              - { name: idealPara, label: Texto Ideal para, type: string }
+              - { name: proximamente, label: Texto de video pendiente, type: string }
+              - { name: ctaProyectos, label: Botón Ver casos, type: string }
+              - { name: ctaCotizar, label: Botón Cotizar, type: string }
+              - { name: pase, label: Descripción del pase de posts, type: string }
+          - name: diseno
+            label: Diseño gráfico
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: object, fields: *titular }
+              - { name: filtro, label: Descripción del filtro por empresa, type: string }
+              - { name: posts, label: Título Posts, type: string }
+              - { name: portadas, label: Título Portadas, type: string }
+              - { name: ver, label: Texto Ver en grande, type: string }
+              - { name: anterior, label: Botón Anterior, type: string }
+              - { name: siguiente, label: Botón Siguiente, type: string }
+              - { name: cerrar, label: Botón Cerrar, type: string }
+              - { name: visor, label: Nombre del visor, type: string }
+          - name: proceso
+            label: Proceso
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: object, fields: *titular }
+          - name: sobre
+            label: Sobre mí
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: object, fields: *titular }
+              - { name: parrafos, label: Párrafos, type: text, list: true }
+              - { name: herramientas, label: Título de herramientas, type: string }
+              - { name: fotoAlt, label: Descripción de la foto, type: string }
+              - { name: cta, label: Botón, type: string }
+              - { name: ctaSecundario, label: Enlace secundario, type: string }
+          - name: contacto
+            label: Cierre
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - name: titulo
+                label: Pregunta
+                type: object
+                fields:
+                  - { name: antes, label: Antes de la palabra en naranja, type: string }
+                  - { name: destacado, label: Palabra en naranja, type: string }
+                  - { name: cierre, label: Signo de cierre, type: string }
+              - { name: texto, label: Texto, type: text }
+              - { name: cta, label: Botón de WhatsApp, type: string }
+              - { name: redes, label: Texto junto a las redes, type: string }
+          - { name: pie, label: Texto del pie, type: string }
+          - { name: whatsapp, label: Descripción del botón flotante, type: string }
+          - { name: pixeles, label: 'Palabras que forman los pixeles (mayúsculas, sin tildes)', type: string, list: true }
+      - name: en
+        label: Inglés
         type: object
-        fields:
-          - { name: etiqueta, label: Etiqueta, type: string }
-          - name: titulo
-            label: Titular
-            type: object
-            fields:
-              - { name: antes, label: Antes de la palabra en naranja, type: string }
-              - { name: destacado, label: Palabra en naranja, type: string }
-              - { name: despues, label: Después de la palabra en naranja, type: string }
-          - { name: subtitulo, label: Subtítulo, type: text }
-          - { name: idealPara, label: Texto Ideal para, type: string }
-          - { name: proximamente, label: Texto de video pendiente, type: string }
-          - { name: pase, label: Descripción del pase de posts, type: string }
-          - { name: ctaProyectos, label: Botón Ver proyectos, type: string }
-          - { name: ctaCotizar, label: Botón Cotizar, type: string }
-      - name: sobre
-        label: Sobre mí
-        type: object
-        fields:
-          - { name: etiqueta, label: Etiqueta, type: string }
-          - name: titulo
-            label: Titular
-            type: object
-            fields:
-              - { name: antes, label: Antes de la palabra en naranja, type: string }
-              - { name: destacado, label: Palabra en naranja, type: string }
-              - { name: despues, label: Después de la palabra en naranja, type: string }
-          - { name: parrafos, label: Párrafos, type: text, list: true }
-          - name: datos
-            label: Datos de confianza
-            type: object
-            list: true
-            fields:
-              - { name: titulo, label: Título, type: string }
-              - { name: valor, label: Valor, type: string }
-          - { name: herramientas, label: Título de herramientas, type: string }
-          - { name: fotoAlt, label: Descripción de la foto, type: string }
-          - { name: fotoPendiente, label: Texto si no hay foto, type: string }
-          - { name: cta, label: Botón, type: string }
-          - { name: ctaSecundario, label: Enlace secundario, type: string }
-      - name: contacto
-        label: Contacto
-        type: object
-        fields:
-          - { name: etiqueta, label: Etiqueta, type: string }
-          - name: titulo
-            label: Titular
-            type: object
-            fields:
-              - { name: antes, label: Antes de la palabra en naranja, type: string }
-              - { name: destacado, label: Palabra en naranja, type: string }
-              - { name: despues, label: Después de la palabra en naranja, type: string }
-          - { name: texto, label: Texto, type: text }
-          - { name: cta, label: Botón de WhatsApp, type: string }
-          - { name: redes, label: Texto junto a las redes, type: string }
-      - { name: pixeles, label: 'Palabras que forman los pixeles de fondo (mayúsculas, sin tildes)', type: string, list: true }
-      - { name: pie, label: Texto del pie, type: string }
-      - { name: whatsapp, label: Descripción del botón flotante, type: string }
+        fields: *textos
