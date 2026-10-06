@@ -124,12 +124,48 @@ const datosEstructurados = {
       // Activa la animación de entrada solo si el usuario no pidió menos movimiento
       if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches)
         document.documentElement.classList.add('animar');
+
+      // Tema claro u oscuro. Corre antes del primer pintado para que la página no parpadee en blanco:
+      // usa la elección guardada y, si no hay, la preferencia del sistema.
+      (() => {
+        const raiz = document.documentElement;
+        const sistema = matchMedia('(prefers-color-scheme: dark)');
+        let eleccion = null;
+        try {
+          eleccion = localStorage.getItem('tema');
+        } catch {}
+
+        const aplicar = (suave) => {
+          const tema = eleccion === 'oscuro' || eleccion === 'claro' ? eleccion : sistema.matches ? 'oscuro' : 'claro';
+          if (suave && raiz.dataset.tema !== tema) {
+            raiz.classList.add('cambiando-tema');
+            setTimeout(() => raiz.classList.remove('cambiando-tema'), 350);
+          }
+          raiz.dataset.tema = tema;
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', tema === 'oscuro' ? '#0e0e0e' : '#ffffff');
+          document.querySelectorAll('.tema').forEach((boton) => boton.setAttribute('aria-pressed', String(tema === 'oscuro')));
+          // Avisa a los lienzos de pixeles para que se repinten con los colores del tema
+          document.dispatchEvent(new Event('tema'));
+        };
+
+        aplicar(false);
+        // Al cambiar de página se pierden los atributos de <html>: se reponen antes de pintar
+        document.addEventListener('astro:after-swap', () => aplicar(false));
+        document.addEventListener('astro:page-load', () => aplicar(false));
+        sistema.addEventListener('change', () => eleccion || aplicar(true));
+        document.addEventListener('click', (evento) => {
+          if (!evento.target.closest?.('.tema')) return;
+          eleccion = raiz.dataset.tema === 'oscuro' ? 'claro' : 'oscuro';
+          try {
+            localStorage.setItem('tema', eleccion);
+          } catch {}
+          aplicar(true);
+        });
+      })();
     </script>
   </head>
   <body>
     <canvas class="fondo-pixeles" data-palabras={JSON.stringify(textos.pixeles)} aria-hidden="true"></canvas>
-
-    <div class="cursor" data-play={textos.cursor.play} data-ver={textos.cursor.ver} aria-hidden="true"><span></span></div>
 
     <svg class="definiciones-svg" aria-hidden="true">
       <defs>
@@ -154,6 +190,13 @@ const datosEstructurados = {
         </nav>
         <div class="nav-acciones">
           <Redes />
+          <button type="button" class="tema" aria-label={textos.nav.tema} aria-pressed="false">
+            <svg class="luna" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"></path></svg>
+            <svg class="sol" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"></path>
+            </svg>
+          </button>
           <a class="idioma" href={ruta(otroIdioma)} hreflang={otroIdioma} aria-label={textos.nav.idioma}>
             <span class:list={{ activo: lang === 'es' }}>ES</span>
             <span class:list={{ activo: lang === 'en' }}>EN</span>

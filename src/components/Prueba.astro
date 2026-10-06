@@ -66,12 +66,12 @@ const t = textosDe(lang).prueba;
 
   /* Sin animación el número es texto negro normal; con ella queda en contorno y se rellena */
   .cifra :global(.pixel-contorno) {
-    color: var(--negro);
+    color: var(--texto);
   }
 
   .cifra:global(.activo) :global(.pixel-contorno) {
     color: transparent;
-    -webkit-text-stroke: 1px #d4d4d4;
+    -webkit-text-stroke: 1px var(--contorno);
   }
 
   .rotulo {

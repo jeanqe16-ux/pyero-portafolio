@@ -205,7 +205,7 @@ const pase = await Promise.all(posts.map((p) => optimizar(p.imagenes[0], 640)));
     aspect-ratio: 1 / 1;
     border-radius: 16px;
     overflow: hidden;
-    background: #fff;
+    background: var(--fondo);
     color: var(--gris);
     font-size: 0.875rem;
   }
@@ -255,7 +255,7 @@ const pase = await Promise.all(posts.map((p) => optimizar(p.imagenes[0], 640)));
   }
 
   .ideal strong {
-    color: var(--negro);
+    color: var(--texto);
     font-weight: 600;
   }
 

@@ -1,30 +1,7 @@
-// Detalles de interacción: cursor de pixel, botones magnéticos, títulos que se decodifican y el easter egg.
+// Detalles de interacción: botones magnéticos, títulos que se decodifican y el easter egg.
 // Se carga de forma diferida desde Base.astro y nunca con "reducir movimiento".
 const PALETA = ['#fb8e1f', '#fb8e1f', '#fdaf50', '#ffd166', '#ff7a59', '#0a0a0a'];
 const conMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-/* Cursor: un cuadro naranja que sigue al mouse con suavidad y cambia según lo que hay debajo */
-let cursor: HTMLElement | null = null;
-let rotulo: HTMLElement | null = null;
-const destino = { x: 0, y: 0 };
-const actual = { x: 0, y: 0 };
-let cuadro = 0;
-
-const seguir = () => {
-  actual.x += (destino.x - actual.x) * 0.22;
-  actual.y += (destino.y - actual.y) * 0.22;
-  if (cursor) cursor.style.transform = `translate3d(${actual.x.toFixed(1)}px, ${actual.y.toFixed(1)}px, 0)`;
-  // El bucle se detiene solo cuando el cuadro alcanza al mouse
-  cuadro = Math.abs(destino.x - actual.x) + Math.abs(destino.y - actual.y) > 0.3 ? requestAnimationFrame(seguir) : 0;
-};
-
-const estadoDe = (el: Element | null) => {
-  if (!el) return '';
-  if (el.closest('.reel, .escena video, .media video')) return 'play';
-  if (el.closest('.caso .visor')) return 'ver';
-  if (el.closest('a, button')) return 'boton';
-  return '';
-};
 
 /* Botones magnéticos: se acercan hasta 8 px al cursor cuando pasa cerca */
 let imanes: { el: HTMLElement; x: number; y: number; radio: number; activo: boolean }[] = [];
@@ -57,25 +34,10 @@ if (conMouse) {
   window.addEventListener(
     'pointermove',
     (e) => {
-      if (e.pointerType !== 'mouse') return;
-      atraer(e.clientX, e.clientY);
-      if (!cursor) return;
-      destino.x = e.clientX;
-      destino.y = e.clientY;
-      if (!cursor.classList.contains('visible')) {
-        Object.assign(actual, destino);
-        cursor.classList.add('visible');
-      }
-      const estado = estadoDe(e.target as Element);
-      if (cursor.dataset.estado !== estado) {
-        cursor.dataset.estado = estado;
-        if (rotulo) rotulo.textContent = cursor.dataset[estado] ?? '';
-      }
-      if (!cuadro) cuadro = requestAnimationFrame(seguir);
+      if (e.pointerType === 'mouse') atraer(e.clientX, e.clientY);
     },
     { passive: true },
   );
-  document.documentElement.addEventListener('pointerleave', () => cursor?.classList.remove('visible'));
 
   // Las posiciones de los botones cambian al hacer scroll o redimensionar: se vuelven a medir al terminar
   let espera = 0;
@@ -131,6 +93,8 @@ function explosion() {
   lienzo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:95;pointer-events:none';
   document.documentElement.append(lienzo);
   const ctx = lienzo.getContext('2d')!;
+  // En modo oscuro los pixeles negros no se verían: pasan a blanco
+  const colores = document.documentElement.dataset.tema === 'oscuro' ? PALETA.map((c) => (c === '#0a0a0a' ? '#ffffff' : c)) : PALETA;
 
   const pixeles = Array.from({ length: 160 }, () => {
     const angulo = Math.random() * Math.PI * 2;
@@ -141,7 +105,7 @@ function explosion() {
       vx: Math.cos(angulo) * fuerza,
       vy: Math.sin(angulo) * fuerza - 220,
       lado: 6 + Math.floor(Math.random() * 4) * 5,
-      color: PALETA[Math.floor(Math.random() * PALETA.length)],
+      color: colores[Math.floor(Math.random() * colores.length)],
     };
   });
 
@@ -180,9 +144,6 @@ window.addEventListener('keydown', (e) => {
 /* Se llama al cargar el módulo y de nuevo después de cada cambio de página */
 let observador: IntersectionObserver | null = null;
 export function iniciar() {
-  cursor = conMouse ? document.querySelector<HTMLElement>('.cursor') : null;
-  rotulo = cursor?.querySelector('span') ?? null;
-
   imanes = conMouse ? [...document.querySelectorAll<HTMLElement>('.boton')].map((el) => ({ el, x: 0, y: 0, radio: 0, activo: false })) : [];
   medirImanes();
 

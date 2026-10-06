@@ -1,13 +1,53 @@
 :root {
+  color-scheme: light;
   --acento: #fb8e1f;
   --acento-suave: #fdaf50;
   /* Naranja oscuro para texto pequeño sobre fondos claros (cumple WCAG AA) */
   --acento-texto: #b45309;
+  /* Negro fijo: no cambia con el tema (texto sobre naranja, fondo de videos, franja de logos) */
   --negro: #0a0a0a;
+  /* Colores que cambian con el tema */
+  --fondo: #fff;
+  --texto: #0a0a0a;
   --gris: #6b6b6b;
   --linea: #ececec;
   --superficie: #f5f5f4;
+  /* Bloques invertidos, como el cierre: negros en claro, gris oscuro en oscuro */
+  --inverso: #0a0a0a;
+  /* Textos .pixel: contorno de las letras vacías y cómo se funde la máscara con el fondo */
+  --contorno: #d4d4d4;
+  --mascara: #000;
+  --mezcla: screen;
   --ancho: 1180px;
+}
+
+:root[data-tema='oscuro'] {
+  color-scheme: dark;
+  /* Sobre fondo oscuro el naranja claro ya tiene contraste de sobra */
+  --acento-texto: #fdaf50;
+  --fondo: #0e0e0e;
+  --texto: #fff;
+  --gris: #a8a8a8;
+  --linea: #2c2c2c;
+  --superficie: #1a1a1a;
+  --inverso: #1a1a1a;
+  --contorno: #3d3d3d;
+  --mascara: #fff;
+  --mezcla: darken;
+}
+
+/* Al cambiar de tema los colores pasan suavemente durante 0.3 s (la clase la pone y la quita el script del <head>) */
+@media (prefers-reduced-motion: no-preference) {
+  .cambiando-tema *,
+  .cambiando-tema *::before,
+  .cambiando-tema *::after {
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease,
+      border-color 0.3s ease,
+      fill 0.3s ease,
+      stroke 0.3s ease !important;
+  }
 }
 
 /* Fuente bit del nombre, autoalojada (solo latín, negrita) */
@@ -32,8 +72,8 @@ html {
 
 body {
   margin: 0;
-  background: #fff;
-  color: var(--negro);
+  background: var(--fondo);
+  color: var(--texto);
   font-family: 'Inter Variable', Inter, system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.5;
@@ -151,14 +191,14 @@ h2 em {
 }
 
 .boton-oscuro {
-  background: var(--negro);
-  color: #fff;
+  background: var(--texto);
+  color: var(--fondo);
   box-shadow: 0 8px 20px -10px rgb(0 0 0 / 0.6);
 }
 
 .boton-claro {
   border-color: var(--linea);
-  background: #fff;
+  background: var(--fondo);
 }
 
 .boton-whatsapp {
@@ -171,7 +211,7 @@ h2 em {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgb(255 255 255 / 0.82);
+  background: color-mix(in srgb, var(--fondo) 82%, transparent);
   backdrop-filter: blur(14px);
 }
 
@@ -224,8 +264,42 @@ h2 em {
 }
 
 .idioma .activo {
-  background: var(--negro);
-  color: #fff;
+  background: var(--texto);
+  color: var(--fondo);
+}
+
+/* Botón de modo claro u oscuro: muestra la luna en claro y el sol en oscuro */
+.tema {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  background: none;
+  color: var(--texto);
+  cursor: pointer;
+}
+
+.tema svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tema .sol,
+[data-tema='oscuro'] .tema .luna {
+  display: none;
+}
+
+[data-tema='oscuro'] .tema .sol {
+  display: block;
 }
 
 .pie {
@@ -285,8 +359,8 @@ h2 em {
   /* El interletrado negativo deja la última letra fuera de la caja; el relleno la vuelve a incluir */
   padding-inline: 0.08em;
   isolation: isolate;
-  /* Fondo blanco: sin el lienzo, la máscara en modo screen se funde con él y no se ve */
-  background: #fff;
+  /* Mismo color que la página: sin el lienzo, la máscara se funde con él y no se ve */
+  background: var(--fondo);
   /* Recorta 2 px a los lados para que no asomen pixeles por el borde de la máscara; arriba y abajo deja pasar el resplandor */
   clip-path: inset(-3rem 2px);
   white-space: nowrap;
@@ -321,12 +395,13 @@ h2 em {
   height: 100%;
 }
 
-/* Texto negro sobre blanco en modo screen: el blanco tapa y el negro deja ver el lienzo */
+/* La máscara tapa con el color de la página y sus letras dejan ver el lienzo.
+   En claro: letras negras sobre blanco en modo screen. En oscuro: letras blancas sobre el fondo oscuro en modo darken */
 .pixel-mascara {
   padding-inline: inherit;
-  background: #fff;
-  color: #000;
-  mix-blend-mode: screen;
+  background: var(--fondo);
+  color: var(--mascara);
+  mix-blend-mode: var(--mezcla);
 }
 
 /* Pixeles de fondo: lienzo fijo detrás de todo el contenido */
@@ -337,58 +412,6 @@ h2 em {
   width: 100%;
   height: 100%;
   pointer-events: none;
-}
-
-/* Cursor: cuadro naranja que sigue al mouse (solo se muestra con mouse; lo mueve scripts/interacciones.ts) */
-.cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 90;
-  display: grid;
-  place-items: center;
-  width: 12px;
-  height: 12px;
-  margin: 10px 0 0 10px;
-  background: var(--acento);
-  opacity: 0;
-  pointer-events: none;
-  will-change: transform;
-  transition:
-    width 0.2s ease,
-    height 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.cursor.visible {
-  opacity: 1;
-}
-
-.cursor span {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--negro);
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-/* Sobre botones y enlaces crece un poco; sobre videos y casos crece más y muestra su rótulo */
-.cursor[data-estado='boton'] {
-  width: 22px;
-  height: 22px;
-}
-
-.cursor[data-estado='play'],
-.cursor[data-estado='ver'] {
-  width: 58px;
-  height: 58px;
-}
-
-.cursor[data-estado='play'] span,
-.cursor[data-estado='ver'] span {
-  opacity: 1;
 }
 
 /* Gradiente de Instagram compartido por todos los iconos de redes */
@@ -410,7 +433,7 @@ h2 em {
   }
 
   .boton-claro:hover {
-    border-color: var(--negro);
+    border-color: var(--texto);
   }
 
   .boton-whatsapp:hover {
@@ -418,7 +441,11 @@ h2 em {
   }
 
   .nav-links a:hover {
-    color: var(--negro);
+    color: var(--texto);
+  }
+
+  .tema:hover {
+    border-color: var(--texto);
   }
 
   .flotante:hover {

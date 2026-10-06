@@ -106,7 +106,8 @@ const en = textos.en.perdida;
       }
       ctx.globalAlpha = 1;
       // El "atrapador": un marco negro que sigue al puntero
-      ctx.strokeStyle = '#0a0a0a';
+      // Negro en claro y blanco en oscuro: toma el color de texto del lienzo
+      ctx.strokeStyle = getComputedStyle(lienzo).color;
       ctx.lineWidth = 2;
       ctx.strokeRect(Math.round(puntero.x) - 18, Math.round(puntero.y) - 18, 36, 36);
     }
@@ -177,6 +178,7 @@ const en = textos.en.perdida;
     aspect-ratio: 16 / 9;
     border-radius: 24px;
     background: var(--superficie);
+    color: var(--texto);
     /* Dentro del juego el dedo mueve el atrapador en vez de desplazar la página */
     touch-action: none;
     cursor: crosshair;
@@ -199,7 +201,7 @@ const en = textos.en.perdida;
     font-weight: 600;
     letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums;
-    color: var(--negro);
+    color: var(--texto);
   }
 
   @media (max-width: 600px) {

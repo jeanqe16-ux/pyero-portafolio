@@ -228,6 +228,7 @@ content:
               - { name: contacto, label: Contacto, type: string }
               - { name: cta, label: Botón, type: string }
               - { name: idioma, label: Descripción del selector de idioma, type: string }
+              - { name: tema, label: Descripción del botón de modo claro u oscuro, type: string }
           - name: hero
             label: Inicio
             type: object
@@ -320,12 +321,6 @@ content:
               - { name: texto, label: Texto, type: text }
               - { name: cta, label: Botón de WhatsApp, type: string }
               - { name: redes, label: Texto junto a las redes, type: string }
-          - name: cursor
-            label: Rótulos del cursor
-            type: object
-            fields:
-              - { name: play, label: Sobre videos, type: string }
-              - { name: ver, label: Sobre casos, type: string }
           - name: perdida
             label: Página 404
             type: object

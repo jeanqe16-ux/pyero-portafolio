@@ -72,6 +72,11 @@ const franja = Array.from({ length: 3 }, () => nombres).flat();
     mask-image: linear-gradient(90deg, transparent, #000 22%, #000 88%, transparent);
   }
 
+  /* En oscuro la franja negra casi se confunde con la página: se separa con dos líneas finas */
+  :global([data-tema='oscuro']) .franja {
+    border-block: 1px solid var(--linea);
+  }
+
   .franja-pista {
     display: flex;
     width: max-content;

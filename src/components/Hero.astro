@@ -38,8 +38,11 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
       ></span
     >{' '}<em>{t.titulo.b}</em></span>{t.titulo.b2 && ` ${t.titulo.b2}`}{' '}
     {t.titulo.c}{' '}<span class="junto"><span class="chip chip-claro" aria-hidden="true"
-      ><svg viewBox="0 0 24 24"
-        ><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor"></path></svg
+      ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"
+        ><path class="estrella" d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor" stroke="none"></path
+        ><g class="flecha"
+          ><path d="M12 20V5M6 11l6-6 6 6"></path><path class="estela" d="M6.5 17v4M17.5 17v4"></path></g
+        ></svg
       ></span
     >{' '}<em>{t.titulo.d}</em></span>
   </h1>
@@ -175,6 +178,94 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
     height: 0.5em;
   }
 
+  /* La estrella se vuelve una flecha que sube con una pequeña estela, se queda un momento y vuelve a ser estrella (ciclo de 3 s) */
+  .chip-claro {
+    overflow: hidden;
+  }
+
+  .estrella,
+  .flecha {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .estrella {
+    animation: estrella 3s ease-in-out infinite;
+  }
+
+  .flecha {
+    opacity: 0;
+    animation: flecha 3s ease-in-out infinite;
+  }
+
+  .estela {
+    animation: estela 3s ease-out infinite;
+  }
+
+  @keyframes estrella {
+    0%,
+    22% {
+      opacity: 1;
+      transform: none;
+    }
+    34%,
+    86% {
+      opacity: 0;
+      transform: scale(0.2) rotate(90deg);
+    }
+    97%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes flecha {
+    0%,
+    26% {
+      opacity: 0;
+      transform: translateY(75%);
+    }
+    42%,
+    72% {
+      opacity: 1;
+      transform: none;
+    }
+    86%,
+    100% {
+      opacity: 0;
+      transform: translateY(-95%);
+    }
+  }
+
+  @keyframes estela {
+    0%,
+    26% {
+      opacity: 0;
+    }
+    34% {
+      opacity: 0.9;
+    }
+    52%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Sin movimiento queda la estrella fija */
+  @media (prefers-reduced-motion: reduce) {
+    .estrella,
+    .flecha,
+    .estela {
+      animation: none;
+    }
+  }
+
+  /* En oscuro el chip negro de TikTok se perdería contra el fondo: lleva un borde fino */
+  :global([data-tema='oscuro']) .chip-redes {
+    outline: 1px solid rgb(255 255 255 / 0.2);
+  }
+
   /* Icono que recorre las redes: cada 2 s cambian el color, la forma del chip y el símbolo */
   .chip-redes {
     background: #ff0000;
@@ -308,7 +399,7 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
 
   .bit :global(.pixel-contorno) {
     color: transparent;
-    -webkit-text-stroke: 1px #d4d4d4;
+    -webkit-text-stroke: 1px var(--contorno);
   }
 
   .reels {

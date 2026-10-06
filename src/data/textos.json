@@ -6,7 +6,8 @@
       "sobre": "Sobre mí",
       "contacto": "Contacto",
       "cta": "Hablemos",
-      "idioma": "Cambiar idioma"
+      "idioma": "Cambiar idioma",
+      "tema": "Cambiar entre modo claro y oscuro"
     },
     "hero": {
       "estado": "Disponible para nuevos proyectos",
@@ -101,10 +102,6 @@
       "EDIT",
       "VISUAL"
     ],
-    "cursor": {
-      "play": "Play",
-      "ver": "Ver"
-    },
     "perdida": {
       "codigo": "Error 404",
       "titulo": "Este frame se perdió en el render",
@@ -121,7 +118,8 @@
       "sobre": "About",
       "contacto": "Contact",
       "cta": "Let's talk",
-      "idioma": "Switch language"
+      "idioma": "Switch language",
+      "tema": "Switch between light and dark mode"
     },
     "hero": {
       "estado": "Available for new projects",
@@ -216,10 +214,6 @@
       "EDIT",
       "VISUAL"
     ],
-    "cursor": {
-      "play": "Play",
-      "ver": "View"
-    },
     "perdida": {
       "codigo": "Error 404",
       "titulo": "This frame got lost in the render",

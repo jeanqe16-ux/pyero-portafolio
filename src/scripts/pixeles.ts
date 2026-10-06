@@ -4,6 +4,9 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 const PALETA = ['#fb8e1f', '#fb8e1f', '#fdaf50', '#ffd166', '#ff7a59', '#0a0a0a'];
+// En modo oscuro el negro no se vería (y rompería la máscara en modo darken): pasa a blanco. El fondo coincide con --fondo
+const PALETA_OSCURA = PALETA.map((color) => (color === '#0a0a0a' ? '#ffffff' : color));
+const oscuro = () => document.documentElement.dataset.tema === 'oscuro';
 const movil = window.matchMedia('(max-width: 820px)').matches;
 const escala = Math.min(window.devicePixelRatio || 1, movil ? 1.5 : 2);
 
@@ -39,6 +42,8 @@ const LETRAS: Record<string, number[]> = {
 
 // Lo que hay que deshacer al cambiar de página, y lo que se repinta al redimensionar
 let limpiezas: (() => void)[] = [];
+let repintados: (() => void)[] = [];
+document.addEventListener('tema', () => repintados.forEach((repintar) => repintar()));
 let alRedimensionar = () => {};
 window.addEventListener('resize', () => alRedimensionar());
 
@@ -63,16 +68,17 @@ function rellenar(caja: HTMLElement, disparador: ScrollTrigger.Vars) {
   const estado = { lleno: 0 };
   let lado = 0;
   let columnas = 0;
-  let celdas: { orden: number; color: string }[] = [];
+  let celdas: { orden: number; color: number }[] = [];
 
   const pintar = () => {
-    // El blanco es lo que la máscara deja ver dentro de las letras vacías
-    ctx.fillStyle = '#fff';
+    // El color de la página es lo que la máscara deja ver dentro de las letras vacías
+    const paleta = oscuro() ? PALETA_OSCURA : PALETA;
+    ctx.fillStyle = oscuro() ? '#0e0e0e' : '#fff';
     ctx.fillRect(0, 0, lienzo.width, lienzo.height);
     const hasta = estado.lleno * celdas.length;
     for (let i = 0; i < celdas.length; i++) {
       if (celdas[i].orden >= hasta) continue;
-      ctx.fillStyle = celdas[i].color;
+      ctx.fillStyle = paleta[celdas[i].color];
       ctx.fillRect((i % columnas) * lado, Math.floor(i / columnas) * lado, lado, lado);
     }
     caja.style.setProperty('--lleno', estado.lleno.toFixed(3));
@@ -88,7 +94,7 @@ function rellenar(caja: HTMLElement, disparador: ScrollTrigger.Vars) {
     columnas = Math.ceil(lienzo.width / lado);
     const total = columnas * Math.ceil(lienzo.height / lado);
     const orden = mezclar(Array.from({ length: total }, (_, i) => i));
-    celdas = orden.map((o) => ({ orden: o, color: PALETA[Math.floor(Math.random() * PALETA.length)] }));
+    celdas = orden.map((o) => ({ orden: o, color: Math.floor(Math.random() * PALETA.length) }));
     pintar();
   };
 
@@ -97,6 +103,7 @@ function rellenar(caja: HTMLElement, disparador: ScrollTrigger.Vars) {
   const tamano = new ResizeObserver(armar);
   tamano.observe(caja);
   limpiezas.push(() => tamano.disconnect());
+  repintados.push(pintar);
 
   gsap.to(estado, { lleno: 1, ease: 'none', onUpdate: pintar, scrollTrigger: { scrub: 0.4, ...disparador } });
 }
@@ -228,6 +235,7 @@ gsap.ticker.fps(60);
 export function iniciar() {
   limpiezas.forEach((limpiar) => limpiar());
   limpiezas = [];
+  repintados = [];
   ScrollTrigger.getAll().forEach((disparador) => disparador.kill());
   gsap.globalTimeline.getChildren().forEach((animacion) => animacion.kill());
 

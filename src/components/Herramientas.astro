@@ -5,7 +5,7 @@ import { herramientas } from '../data/herramientas.json';
 <ul class="herramientas">
   {
     herramientas.map((h) => (
-      <li class="herramienta" style={`--marca:${h.color};--brillo:${h.brillo}`}>
+      <li class:list={['herramienta', { negra: h.color.toLowerCase() === '#000000' }]} style={`--marca:${h.color};--brillo:${h.brillo}`}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <rect x="2" y="2" width="20" height="20" rx="5" />
           {h.sigla ? (
@@ -57,6 +57,11 @@ import { herramientas } from '../data/herramientas.json';
     font-size: 0.875rem;
     font-weight: 500;
     transition: border-color 0.2s ease;
+  }
+
+  /* Una marca de color negro (CapCut) no se vería en oscuro: ahí pasa a blanco */
+  :global([data-tema='oscuro']) .herramienta.negra {
+    --marca: #fff;
   }
 
   .herramienta::before {
