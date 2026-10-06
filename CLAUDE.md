@@ -36,6 +36,7 @@ public/media/creadores/videos/   Reels de creadores
 public/media/servicios/   Loops cuadrados de las tarjetas de Servicios
 scripts/generar-loops.sh   Regenera esos loops con ffmpeg desde el material fuente
 .pages.yml           Configuración de Pages CMS sobre los JSON de src/data
+wrangler.jsonc       Despliegue en Cloudflare Workers: sirve ./dist como assets estáticos
 ```
 
 Orden de secciones (cuenta una historia orientada a resultados): Hero → Prueba (cifras) → franja negra de marcas → Casos de estudio → Servicios → Proceso → Sobre mí → Cierre. No hay sección de Filosofía ni de Diseño gráfico: se eliminaron a pedido.
@@ -75,6 +76,6 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero → Prueba
 - Los tres videos de CERO están sin audio; confirmar cuál era el que no tenía sound design y restaurar el audio de los otros.
 - Confirmar los handles de redes y agregar los enlaces de @Loreimp y @Basee44 en `creadores.json`.
 - Definir `site` en `astro.config.mjs` cuando haya dominio, para que las URL de Open Graph salgan absolutas.
-- Conectar el repositorio (github.com/jeanqe16-ux/pyero-portafolio, público) a Pages CMS y desplegarlo en Cloudflare Pages (límite de 25 MB por archivo).
+- Conectar el repositorio (github.com/jeanqe16-ux/pyero-portafolio, público) a Pages CMS y desplegarlo en Cloudflare Workers con `wrangler.jsonc` (comando de build `npm run build`; límite de 25 MB por archivo).
 - Silkscreen (fuente bit del nombre) aún se carga desde Google Fonts; autoalojarla si se quiere evitar la dependencia externa.
 - Los efectos hover y la reproducción de videos no se han probado con contenido real.

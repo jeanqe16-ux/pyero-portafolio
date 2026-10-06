@@ -1,0 +1,8 @@
+{
+  // Sitio estático de Astro servido como assets de Cloudflare Workers
+  "name": "pyero-portafolio",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
