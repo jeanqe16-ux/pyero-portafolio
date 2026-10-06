@@ -3,6 +3,7 @@ import { casos } from '../data/casos.json';
 import { clientes } from '../data/clientes.json';
 import { posts, portadas } from '../data/diseno.json';
 import { textosDe, tr, type Idioma } from '../lib/i18n';
+import { optimizar } from '../lib/imagenes';
 
 interface Props {
   lang: Idioma;
@@ -12,19 +13,30 @@ const { lang } = Astro.props;
 const t = textosDe(lang).casos;
 const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
 
-// Versión pequeña de una imagen para su miniatura (la crea scripts/generar-miniaturas.mjs)
-const mini = (src: string) => src.replace(/\.webp$/, '.min.webp');
 
-// Piezas de cada caso, en orden: sus videos, luego sus posts (todas las láminas) y sus portadas
-const piezasDe = (caso: (typeof casos)[number]) => [
-  ...caso.videos.map((v) => ({ tipo: 'video', src: v.video, miniatura: v.poster, titulo: v.titulo })),
-  ...posts
-    .filter((p) => p.cliente === caso.cliente)
-    .flatMap((p) => p.imagenes.map((src) => ({ tipo: 'imagen', src, miniatura: src, titulo: p.titulo }))),
-  ...portadas
-    .filter((p) => p.cliente === caso.cliente)
-    .map((p) => ({ tipo: 'imagen', src: p.imagen, miniatura: p.imagen, titulo: p.titulo })),
-];
+// Piezas de cada caso, en orden: sus videos, luego sus posts (todas las láminas) y sus portadas.
+// Cada una lleva su miniatura (160 px) y lo que se muestra en grande: el video con su portada, o la imagen a 900 px.
+const piezasDe = (caso: (typeof casos)[number]) =>
+  Promise.all([
+    ...caso.videos.map(async (v) => ({
+      tipo: 'video',
+      titulo: v.titulo,
+      src: v.video,
+      portada: await optimizar(v.poster, 640),
+      mini: await optimizar(v.poster, 160),
+    })),
+    ...[
+      ...posts.filter((p) => p.cliente === caso.cliente).flatMap((p) => p.imagenes.map((imagen) => ({ imagen, titulo: p.titulo }))),
+      ...portadas.filter((p) => p.cliente === caso.cliente).map((p) => ({ imagen: p.imagen, titulo: p.titulo })),
+    ].map(async ({ imagen, titulo }) => ({
+      tipo: 'imagen',
+      titulo,
+      src: await optimizar(imagen, 900),
+      portada: '',
+      mini: await optimizar(imagen, 160),
+    })),
+  ]);
+const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await piezasDe(caso) })));
 ---
 
 <section class="seccion" id="casos">
@@ -32,9 +44,8 @@ const piezasDe = (caso: (typeof casos)[number]) => [
   <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
 
   {
-    casos.map((caso, i) => {
+    lista.map(({ caso, piezas }, i) => {
       const nombre = nombreDe(caso.cliente);
-      const piezas = piezasDe(caso);
       const primera = piezas[0];
       return (
         <article class="caso" id={`caso-${caso.cliente}`}>
@@ -42,7 +53,7 @@ const piezasDe = (caso: (typeof casos)[number]) => [
             <div class="escena">
               <video
                 src={primera?.tipo === 'video' ? primera.src : undefined}
-                data-poster={primera?.tipo === 'video' ? primera.miniatura : undefined}
+                data-poster={primera?.tipo === 'video' ? primera.portada : undefined}
                 aria-label={primera?.tipo === 'video' ? `${nombre}: ${primera.titulo}` : undefined}
                 hidden={primera?.tipo !== 'video'}
                 controls
@@ -65,19 +76,12 @@ const piezasDe = (caso: (typeof casos)[number]) => [
                       type="button"
                       data-tipo={p.tipo}
                       data-src={p.src}
-                      data-miniatura={p.miniatura}
+                      data-poster={p.portada}
                       data-titulo={`${nombre}: ${p.titulo}`}
                       aria-label={`${p.tipo === 'video' ? t.verVideo : t.verImagen} ${p.titulo}`}
                       aria-pressed={n === 0 ? 'true' : 'false'}
                     >
-                      {/* Si falta la versión pequeña, cae a la imagen completa */}
-                      <img
-                        src={mini(p.miniatura)}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        onerror={`this.onerror=null;this.src='${p.miniatura}'`}
-                      />
+                      <img src={p.mini} alt="" width="160" height="160" loading="lazy" decoding="async" />
                       {p.tipo === 'video' && (
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                           <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
@@ -138,13 +142,13 @@ const piezasDe = (caso: (typeof casos)[number]) => [
 
     botones.forEach((boton) =>
       boton.addEventListener('click', () => {
-        const { tipo, src, miniatura, titulo } = boton.dataset;
+        const { tipo, src, poster, titulo } = boton.dataset;
         botones.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
         video.pause();
         video.hidden = tipo !== 'video';
         imagen.hidden = tipo === 'video';
         if (tipo === 'video') {
-          video.poster = miniatura!;
+          video.poster = poster!;
           video.src = src!;
           video.setAttribute('aria-label', titulo!);
           video.play().catch(() => {});

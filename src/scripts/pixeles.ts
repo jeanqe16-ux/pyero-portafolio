@@ -1,4 +1,5 @@
-// Animaciones de pixeles ligadas al scroll: textos que se rellenan (nombre del hero y cifras) y pixeles de fondo que forman palabras
+// Animaciones ligadas al scroll: textos que se rellenan con pixeles, pixeles de fondo que forman palabras y la línea del proceso.
+// Este módulo trae GSAP y se carga de forma diferida desde Base.astro, para no competir con el primer pintado.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -202,11 +203,23 @@ function fondo() {
   });
 }
 
+/* Proceso: la línea que une los pasos se dibuja con el scroll; sin este módulo queda completa */
+function proceso() {
+  const pasos = document.querySelector<HTMLElement>('.pasos');
+  if (!pasos) return;
+  gsap.fromTo(
+    pasos,
+    { '--trazo': 0 },
+    { '--trazo': 1, ease: 'none', scrollTrigger: { trigger: pasos, start: 'top 82%', end: 'bottom 60%', scrub: 0.4 } },
+  );
+}
+
 // Con "reducir movimiento" no se activa nada: los textos quedan como están y el fondo vacío
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   gsap.registerPlugin(ScrollTrigger);
   gsap.ticker.fps(60);
   fondo();
+  proceso();
   document.fonts.ready.then(() => {
     const nombre = document.querySelector<HTMLElement>('.bit');
     if (nombre) rellenar(nombre, { trigger: nombre, start: 'clamp(top 62%)', end: 'top 12%' });

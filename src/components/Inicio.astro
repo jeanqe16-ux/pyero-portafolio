@@ -9,15 +9,21 @@ import Proceso from './Proceso.astro';
 import Sobre from './Sobre.astro';
 import Contacto from './Contacto.astro';
 import type { Idioma } from '../lib/i18n';
+import { conjunto } from '../lib/imagenes';
+import { ANCHOS_REEL, SIZES_REEL, reelsDe } from '../lib/reels';
 
 interface Props {
   lang: Idioma;
 }
 
 const { lang } = Astro.props;
+
+// La portada del primer reel se precarga desde el <head>, con el mismo srcset que usa el hero
+const primera = reelsDe(lang)[0]?.poster;
+const precarga = primera ? { srcset: await conjunto(primera, ANCHOS_REEL, 'avif'), sizes: SIZES_REEL } : undefined;
 ---
 
-<Base lang={lang}>
+<Base lang={lang} precarga={precarga}>
   <Hero lang={lang} />
   <Prueba lang={lang} />
   <Franja lang={lang} />

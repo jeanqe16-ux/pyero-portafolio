@@ -3,6 +3,7 @@ import { servicios } from '../data/servicios.json';
 import { posts } from '../data/diseno.json';
 
 import { textosDe, tr, type Idioma } from '../lib/i18n';
+import { optimizar } from '../lib/imagenes';
 
 interface Props {
   lang: Idioma;
@@ -10,6 +11,9 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = textosDe(lang).servicios;
+
+// El pase muestra los posts a unos 320 px de lado: 640 px alcanza para pantallas de alta densidad
+const pase = await Promise.all(posts.map((p) => optimizar(p.imagenes[0], 640)));
 ---
 
 <section class="seccion" id="servicios">
@@ -57,8 +61,8 @@ const t = textosDe(lang).servicios;
           </div>
           {s.media === 'posts' ? (
             <div class="media pase" role="img" aria-label={t.pase}>
-              {posts.map((p, n) => (
-                <img data-src={p.imagenes[0]} alt="" width="1080" height="1080" decoding="async" class:list={{ activa: n === 0 }} />
+              {pase.map((src, n) => (
+                <img data-src={src} alt="" width="640" height="640" decoding="async" class:list={{ activa: n === 0 }} />
               ))}
             </div>
           ) : (

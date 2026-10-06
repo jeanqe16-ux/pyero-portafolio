@@ -68,6 +68,11 @@ video {
   max-width: 100%;
 }
 
+/* El <picture> de las imágenes optimizadas no ocupa caja propia: su <img> se comporta como hijo directo */
+picture {
+  display: contents;
+}
+
 :focus-visible {
   outline: 2px solid var(--acento);
   outline-offset: 3px;
@@ -279,6 +284,8 @@ h2 em {
   /* El interletrado negativo deja la última letra fuera de la caja; el relleno la vuelve a incluir */
   padding-inline: 0.08em;
   isolation: isolate;
+  /* Fondo blanco: sin el lienzo, la máscara en modo screen se funde con él y no se ve */
+  background: #fff;
   /* Recorta 2 px a los lados para que no asomen pixeles por el borde de la máscara; arriba y abajo deja pasar el resplandor */
   clip-path: inset(-3rem 2px);
   white-space: nowrap;
@@ -291,17 +298,20 @@ h2 em {
   text-shadow: 0 0 22px rgb(251 142 31 / calc(var(--lleno) * 0.28));
 }
 
-/* Solo se activan cuando el script de pixeles está en marcha */
 .pixel-lienzo,
 .pixel-mascara {
-  display: none;
   position: absolute;
   inset: 0;
   margin: 0;
 }
 
-.pixel.activo .pixel-lienzo,
-.pixel.activo .pixel-mascara {
+/* El lienzo solo aparece cuando el script de pixeles está en marcha. La máscara se pinta desde el inicio:
+   si apareciera recién al cargar el script, el navegador la contaría como el elemento más grande y retrasaría el LCP */
+.pixel-lienzo {
+  display: none;
+}
+
+.pixel.activo .pixel-lienzo {
   display: block;
 }
 

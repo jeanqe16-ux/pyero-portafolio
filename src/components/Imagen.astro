@@ -1,0 +1,37 @@
+---
+import { conjunto, local, optimizar } from '../lib/imagenes';
+
+interface Props {
+  src: string;
+  alt: string;
+  /** Anchos en px que se generan; el navegador elige según `sizes` */
+  anchos: number[];
+  /** Ancho en que se muestra la imagen, en la sintaxis del atributo sizes */
+  sizes: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const { src, alt, anchos, sizes, loading = 'lazy', fetchpriority } = Astro.props;
+const imagen = local(src);
+---
+
+{
+  imagen ? (
+    <picture>
+      <source type="image/avif" srcset={await conjunto(src, anchos, 'avif')} sizes={sizes} />
+      <source type="image/webp" srcset={await conjunto(src, anchos, 'webp')} sizes={sizes} />
+      <img
+        src={await optimizar(src, Math.max(...anchos))}
+        alt={alt}
+        width={imagen.width}
+        height={imagen.height}
+        loading={loading}
+        fetchpriority={fetchpriority}
+        decoding="async"
+      />
+    </picture>
+  ) : (
+    <img src={src} alt={alt} loading={loading} fetchpriority={fetchpriority} decoding="async" />
+  )
+}

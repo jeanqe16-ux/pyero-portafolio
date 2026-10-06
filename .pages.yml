@@ -1,6 +1,14 @@
+# Dos destinos de subida. Las imágenes van a src/media para que Astro las optimice (AVIF y WebP por tamaño);
+# los videos y los logos van a public/media y se sirven tal cual. En ambos casos la ruta guardada es /media/...
 media:
-  input: public/media
-  output: /media
+  - name: imagenes
+    label: Imágenes (se optimizan)
+    input: src/media
+    output: /media
+  - name: publico
+    label: Videos y logos (sin optimizar)
+    input: public/media
+    output: /media
 
 # Los campos que terminan en _en son la versión en inglés; si se dejan vacíos se usa el español.
 content:
@@ -39,8 +47,8 @@ content:
           - { name: titulo_en, label: Título de la página (inglés), type: string }
           - { name: descripcion, label: Descripción, type: text }
           - { name: descripcion_en, label: Descripción (inglés), type: text }
-          - { name: imagen, label: Imagen al compartir (1200x630), type: image }
-          - { name: imagen_en, label: Imagen al compartir en inglés (1200x630), type: image }
+          - { name: imagen, label: Imagen al compartir (1200x630), type: image, options: { media: publico } }
+          - { name: imagen_en, label: Imagen al compartir en inglés (1200x630), type: image, options: { media: publico } }
           - { name: imagenAlt, label: Descripción de la imagen al compartir, type: string }
           - { name: imagenAlt_en, label: Descripción de la imagen al compartir (inglés), type: string }
 
@@ -84,7 +92,7 @@ content:
             list: true
             fields:
               - { name: titulo, label: Título, type: string }
-              - { name: video, label: 'Video (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm] } }
+              - { name: video, label: 'Video (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm], media: publico } }
               - { name: poster, label: Portada, type: image }
 
   - name: clientes
@@ -99,7 +107,7 @@ content:
         fields:
           - { name: id, label: 'Identificador (igual al de su carpeta en media)', type: string, required: true }
           - { name: nombre, label: Nombre, type: string, required: true }
-          - { name: logo, label: 'Logo (PNG transparente, se muestra en blanco)', type: image }
+          - { name: logo, label: 'Logo (PNG transparente, se muestra en blanco)', type: image, options: { media: publico } }
 
   - name: creadores
     label: Creadores
@@ -115,7 +123,7 @@ content:
           - { name: enlace, label: Enlace a su perfil, type: string }
           - { name: categoria, label: Categoría, type: string }
           - { name: categoria_en, label: Categoría (inglés), type: string }
-          - { name: video, label: 'Reel (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm] } }
+          - { name: video, label: 'Reel (vertical 1080x1920)', type: file, options: { extensions: [mp4, webm], media: publico } }
           - { name: poster, label: Portada del reel, type: image }
 
   - name: servicios
@@ -144,8 +152,8 @@ content:
             type: select
             options:
               values: [video, posts]
-          - { name: video, label: 'Video en loop (cuadrado, sin audio)', type: file, options: { extensions: [mp4, webm] } }
-          - { name: poster, label: Portada del video, type: image }
+          - { name: video, label: 'Video en loop (cuadrado, sin audio)', type: file, options: { extensions: [mp4, webm], media: publico } }
+          - { name: poster, label: Portada del video, type: image, options: { media: publico } }
 
   - name: diseno
     label: Posts y portadas por cliente

@@ -29,22 +29,6 @@ const t = textosDe(lang).proceso;
   </ol>
 </section>
 
-<script>
-  import { gsap } from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-  // La línea que une los pasos se dibuja con el scroll; sin animaciones queda completa
-  const pasos = document.querySelector<HTMLElement>('.pasos');
-  if (pasos && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    gsap.registerPlugin(ScrollTrigger);
-    gsap.fromTo(
-      pasos,
-      { '--trazo': 0 },
-      { '--trazo': 1, ease: 'none', scrollTrigger: { trigger: pasos, start: 'top 82%', end: 'bottom 60%', scrub: 0.4 } },
-    );
-  }
-</script>
-
 <style>
   .pasos {
     --trazo: 1;
