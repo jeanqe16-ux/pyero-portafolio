@@ -13,7 +13,7 @@ Portafolio de una sola página para Pyero.workz (Jean, editor y motion designer 
 ```
 src/
   data/            Todo el contenido editable (JSON)
-    site.json        Marca, dirección pública (url), persona, ubicación, WhatsApp, redes, SEO
+    site.json        Marca, dirección pública (url), persona, ubicación, fondo del hero, WhatsApp, redes, SEO
     textos.json      Textos de todas las secciones, en `es` y `en`
     cifras.json      Las tres cifras de trabajo (prefijo, valor y texto)
     casos.json       Casos de estudio: reto, lo que hice, resultado y videos
@@ -24,7 +24,7 @@ src/
     servicios.json   Copy, icono y video de cada servicio
     herramientas.json  Nombre, sigla y colores de cada herramienta
   layouts/Base.astro   <head>, SEO, header, footer, WhatsApp flotante, animación de entrada
-  components/        Inicio (arma la página), Imagen (picture con srcset), Hero, Prueba, Franja, Casos, Servicios, Proceso, Sobre, Herramientas, Contacto, Redes
+  components/        Inicio (arma la página), Imagen (picture con srcset), Hero, Reels, Prueba, Franja, Casos, Servicios, Proceso, Sobre, Herramientas, Contacto, Redes
   pages/index.astro, pages/en/index.astro   Solo llaman a Inicio con su idioma
   pages/sitemap.xml.ts, pages/robots.txt.ts   Generados en el build a partir de la url del sitio
   pages/404.astro    Página 404 con mini juego de pixeles; una sola para ambos idiomas (pasa a inglés si la dirección empieza con /en/)
@@ -32,13 +32,17 @@ src/
   lib/enlaces.ts     Enlace de WhatsApp e iconos SVG compartidos
   lib/i18n.ts        textosDe(lang), tr(objeto, campo, lang) y ruta(lang)
   lib/imagenes.ts    optimizar(ruta, ancho) y conjunto(ruta, anchos, formato) sobre las imágenes de src/media
-  lib/reels.ts       Reels del hero y sus tamaños, compartidos con la precarga del <head>
+  lib/reels.ts       Reels (primer video de cada caso y creadores) y sus tamaños
+  lib/hero.ts        Anchos y sizes de la foto del hero, compartidos con la precarga del <head>
   media/<cliente>/   posts/, portadas/ y portadas de video (videos/*.webp), más yo.jpg: imágenes que Astro optimiza
+  media/hero/hero.jpg   Foto de fondo del hero (fuente; Astro genera AVIF y WebP)
+  scripts/hero.ts    Revelado WebGL del hero con mapa de profundidad, parallax y arranque del video
   scripts/pixeles.ts Animaciones con GSAP ScrollTrigger (textos .pixel, fondo y línea del proceso); se carga diferido
   scripts/interacciones.ts   Botones magnéticos, decodificación de títulos y easter egg; se carga diferido
   scripts/barrido.ts Barrido de pixeles al cambiar de página, sobre las View Transitions de Astro
 public/media/<cliente>/   logo.png y videos/*.mp4 (se sirven tal cual; ruta pública /media/...)
 public/media/creadores/videos/   Reels de creadores
+public/media/hero/        hero-loop.mp4 (1600x900), hero-loop-movil.mp4 (854x480) y depth.png (mapa de profundidad)
 public/media/servicios/   Loops cuadrados de las tarjetas de Servicios
 public/fonts/             Silkscreen autoalojada
 public/og.png, og-en.png  Imágenes al compartir (1200x630), una por idioma
@@ -49,7 +53,7 @@ scripts/generar-og.mjs     Regenera og.png y og-en.png con el titular del hero (
 wrangler.jsonc       Despliegue en Cloudflare Workers: sirve ./dist como assets estáticos
 ```
 
-Orden de secciones (cuenta una historia orientada a resultados): Hero (titular con iconos dentro del texto) → Prueba (cifras) → franja negra de marcas → Casos de estudio → Servicios → Proceso → Sobre mí → Cierre. No hay sección de Filosofía ni de Diseño gráfico: se eliminaron a pedido.
+Orden de secciones (cuenta una historia orientada a resultados): Hero (foto a pantalla completa con video en loop y titular con iconos dentro del texto) → Reels en abanico con el nombre en fuente bit → Prueba (cifras) → franja negra de marcas → Casos de estudio → Servicios → Proceso → Sobre mí → Cierre. No hay sección de Filosofía ni de Diseño gráfico: se eliminaron a pedido.
 
 ## Decisiones tomadas
 
@@ -77,7 +81,9 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero (titular c
 - **Espaciado**: las secciones usan `clamp(4rem, 7.5vw, 6rem)` de relleno vertical (64 px en celular, 96 px en escritorio) y unos 2rem entre titular y contenido. Mantenerlo compacto.
 - **SEO y compartir**: la dirección pública vive en `site.json > url` (hoy `https://pyero-portafolio.jeanqe16.workers.dev`); de ahí salen canonical, hreflang, Open Graph, Twitter, sitemap y robots. Si cambia el dominio, basta con editar ese campo. `Base.astro` incluye los datos estructurados (`ProfessionalService` con su `Person`, en Huancayo, Perú). Las imágenes og llevan el titular del hero: si cambia el titular, hay que regenerarlas con `node scripts/generar-og.mjs`.
 - **Imágenes**: las de `src/media` se nombran en los JSON por su ruta pública (`/media/...`) y `lib/imagenes.ts` las resuelve y optimiza en el build. `Imagen.astro` genera `<picture>` con AVIF y WebP en varios anchos; para una sola URL (miniaturas de 160 px, portadas de video de 640 px, imágenes grandes de 900 px) se usa `optimizar()`. Una ruta que no exista en `src/media` se usa tal cual, sin optimizar. Los estilos de un `<img>` que sale de `Imagen.astro` necesitan `:global(img)` en el componente padre.
-- **Rendimiento (LCP)**: el elemento LCP en celular es la portada del primer reel: va con `loading="eager"`, `fetchpriority="high"` y precarga en el `<head>` (mismo srcset AVIF, calculado en `Inicio.astro`). El segundo reel también es `eager`; todo lo demás es `lazy`. En los reels la portada es una imagen y el video va encima, sin atributo `poster`. Todo el CSS va dentro del HTML (`build.inlineStylesheets: 'always'`). Sin fuentes externas: Inter por fontsource y Silkscreen en `public/fonts`, ambas precargadas y con `font-display: swap`. GSAP no está en la carga inicial: `Base.astro` importa `scripts/pixeles.ts` al primer scroll, toque o tecla, o cuando el navegador queda libre. Todo video usa `preload="none"`. La máscara de los textos `.pixel` se pinta desde el inicio a propósito: si apareciera al cargar el script, pasaría a ser el LCP en escritorio.
+- **Hero**: foto a pantalla completa (`src/media/hero/hero.jpg`) con el titular centrado sobre el cielo. Capas del fondo, de abajo hacia arriba: foto, video en loop, lienzo WebGL, cubierta de entrada y velo de contraste (claro en modo claro; en oscuro oscurece toda la foto para que el texto blanco contraste). Las palabras en naranja del titular usan `--acento-hero`, más oscuro en claro. `scripts/hero.ts` hace el revelado de entrada de 1.5 s según `depth.png` (de lejos a cerca, con barrido crema, naranja y coral), solo la primera vez (`window.__heroVisto`); en escritorio sigue dibujando la foto o el cuadro del video con parallax del mouse, y en táctil retira el lienzo y deja el `<video>`. El video se pide después del evento `load`. Con `prefers-reduced-motion` queda la foto fija, sin revelado, parallax ni video. El encuadre (`object-position: 50% 55%`) está repetido en el CSS y en `hero.ts`: cambiar ambos. El video fuente no es un loop: la versión web va de ida y vuelta (20 s) para que no salte. El mapa de profundidad se generó con Depth Anything V2 small (ONNX); si cambia la foto hay que regenerarlo.
+- **Menú**: barra flotante de vidrio (`.nav` no ocupa alto; `.nav-interior` va en posición absoluta). Una página que no empiece con el hero debe dejarle sitio con `--alto-nav`, como hace la 404.
+- **Rendimiento (LCP)**: el LCP es el titular del hero (Chrome no cuenta como LCP una imagen que cubre toda la pantalla), así que depende de que el texto se pinte pronto: todo el CSS va dentro del HTML (`build.inlineStylesheets: 'always'`) y no hay fuentes externas (Inter por fontsource y Silkscreen en `public/fonts`, ambas precargadas y con `font-display: swap`). La foto del hero va con `loading="eager"`, `fetchpriority="high"` y precarga en el `<head>` (mismo srcset AVIF, calculado en `Inicio.astro`); todo lo demás es `lazy`. En los reels la portada es una imagen y el video va encima, sin atributo `poster`. GSAP no está en la carga inicial: `Base.astro` importa `scripts/pixeles.ts` al primer scroll, toque o tecla, o cuando el navegador queda libre. Todo video usa `preload="none"`. La máscara de los textos `.pixel` se pinta desde el inicio a propósito: si apareciera al cargar el script, pasaría a ser el LCP en escritorio.
 - **Favicon**: no hay un logo propio de Pyero.workz; los iconos salen de la marca provisional (cuadro negro con triángulo naranja de `favicon.svg`).
 - **View Transitions**: `Base.astro` usa `<ClientRouter />`, así que al cambiar de idioma la página no se recarga. Por eso todo script de componente va dentro de `document.addEventListener('astro:page-load', ...)`, y los módulos diferidos exportan `iniciar()`, que `Base.astro` vuelve a llamar tras cada cambio de página (limpian lo anterior antes de empezar). La animación por defecto está desactivada (`transition:animate="none"`); el barrido lo pinta `scripts/barrido.ts` en un lienzo colgado de `<html>` para que sobreviva al reemplazo del `<body>`.
 - **Interacciones** (todas se desactivan con `prefers-reduced-motion`; los botones magnéticos solo con mouse): la decodificación se aplica a los `h2` de `main`, una vez, con el texto real en el HTML y en `aria-label` mientras dura. El easter egg se dispara al teclear "pyero". No hay cursor personalizado: se probó y se quitó a pedido. No tocar la selección de texto ni el comportamiento al hacer clic en los textos.

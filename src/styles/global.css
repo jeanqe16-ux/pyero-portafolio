@@ -19,6 +19,8 @@
   --mascara: #000;
   --mezcla: screen;
   --ancho: 1180px;
+  /* Alto del menú flotante más su separación del borde superior */
+  --alto-nav: 5rem;
 }
 
 :root[data-tema='oscuro'] {
@@ -201,28 +203,42 @@ h2 em {
   background: var(--fondo);
 }
 
+/* Botón principal sobre la foto del hero */
+.boton-acento {
+  background: var(--acento);
+  color: var(--negro);
+  box-shadow: 0 10px 24px -12px rgb(251 142 31 / 0.9);
+}
+
 .boton-whatsapp {
   background: #25d366;
   color: #0a0a0a;
 }
 
-/* Navegación */
+/* Navegación: barra flotante de vidrio. El contenedor no ocupa alto, así el hero empieza desde el borde superior */
 .nav {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--fondo) 82%, transparent);
-  backdrop-filter: blur(14px);
+  height: 0;
 }
 
 .nav-interior {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  max-width: var(--ancho);
-  margin: 0 auto;
-  padding: 0.9rem 1.5rem;
+  width: min(var(--ancho), calc(100% - 1.5rem));
+  padding: 0.6rem 0.75rem 0.6rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--texto) 9%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fondo) 58%, transparent);
+  backdrop-filter: blur(18px) saturate(1.6);
+  box-shadow: 0 12px 30px -20px rgb(0 0 0 / 0.4);
+  transform: translateX(-50%);
 }
 
 .marca {
@@ -432,6 +448,11 @@ h2 em {
     color: var(--negro);
   }
 
+  .boton-acento:hover {
+    background: var(--texto);
+    color: var(--fondo);
+  }
+
   .boton-claro:hover {
     border-color: var(--texto);
   }
@@ -477,8 +498,8 @@ h2 em {
 
   /* Con el selector de idioma el encabezado va más justo en pantallas chicas */
   .nav-interior {
-    gap: 0.5rem;
-    padding-inline: 1rem;
+    gap: 0.4rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.9rem;
   }
 
   .nav-acciones {

@@ -152,7 +152,8 @@ const en = textos.en.perdida;
 
 <style>
   .perdida {
-    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    /* Deja sitio al menú flotante */
+    padding-top: calc(var(--alto-nav) + clamp(3rem, 7vw, 5rem));
     text-align: center;
   }
 

@@ -74,5 +74,7 @@ document.addEventListener('astro:before-preparation', (evento) => {
 document.addEventListener('astro:after-swap', () => {
   // Al cambiar de página se pierden las clases de <html>: se repone la que activa la entrada de las secciones
   if (!reducir.matches && 'IntersectionObserver' in window) document.documentElement.classList.add('animar');
+  // El revelado del hero solo corre la primera vez: en los cambios de página la foto se ve de inmediato
+  if (window.__heroVisto) document.documentElement.classList.add('hero-listo');
   descubrir();
 });

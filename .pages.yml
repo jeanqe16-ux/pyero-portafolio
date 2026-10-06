@@ -34,6 +34,14 @@ content:
           - { name: ciudad, label: Ciudad, type: string }
           - { name: region, label: Región, type: string }
           - { name: pais, label: 'País (código de dos letras)', type: string }
+      - name: hero
+        label: Fondo del hero
+        type: object
+        fields:
+          - { name: imagen, label: 'Foto de fondo (apaisada; se optimiza)', type: image }
+          - { name: video, label: 'Video en loop (sin audio)', type: file, options: { extensions: [mp4, webm], media: publico } }
+          - { name: videoMovil, label: 'Video en loop para celular (más liviano)', type: file, options: { extensions: [mp4, webm], media: publico } }
+          - { name: profundidad, label: 'Mapa de profundidad de la foto (blanco cerca, negro lejos)', type: image, options: { media: publico } }
       - { name: whatsapp, label: 'WhatsApp (con código de país, sin +)', type: string }
       - { name: mensajeWhatsapp, label: Mensaje prellenado de WhatsApp, type: text }
       - { name: mensajeWhatsapp_en, label: Mensaje prellenado de WhatsApp (inglés), type: text }
@@ -247,6 +255,7 @@ content:
               - { name: cta, label: Botón de WhatsApp, type: string }
               - { name: secundario, label: Botón secundario, type: string }
               - { name: proximamente, label: Texto de reel sin video, type: string }
+              - { name: reels, label: Descripción de la sección de reels, type: string }
           - name: prueba
             label: Cifras
             type: object

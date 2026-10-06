@@ -2,8 +2,9 @@
 import site from '../data/site.json';
 import Imagen from './Imagen.astro';
 import { enlaceWhatsapp, iconoTiktok } from '../lib/enlaces';
+import { ANCHOS_HERO, SIZES_HERO } from '../lib/hero';
 import { textosDe, type Idioma } from '../lib/i18n';
-import { ANCHOS_REEL, SIZES_REEL, reelsDe } from '../lib/reels';
+import { optimizar } from '../lib/imagenes';
 
 interface Props {
   lang: Idioma;
@@ -11,120 +12,163 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = textosDe(lang).hero;
-
-const reels = reelsDe(lang);
-
-// Abanico: cada reel rota y baja según su distancia al centro
-const centro = (reels.length - 1) / 2;
-const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - centro) * 14}px`;
+const { hero } = site;
 ---
 
 <section class="hero">
-  <p class="estado"><i></i>{t.estado}</p>
-  <h1>
-    {t.titulo.a}{' '}<span class="junto"><span class="chip chip-redes" aria-hidden="true"
-      ><svg viewBox="0 0 24 24"><path d="M9.2 7.4v9.2l7.6-4.6z" fill="currentColor"></path></svg
-      ><svg viewBox="0 0 24 24"><path d={iconoTiktok} fill="currentColor"></path></svg
-      ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-        ><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="3.9"></circle><path d="M16.9 7.1h.01"></path></svg
-      ><svg viewBox="0 0 24 24"
-        ><path
-          d="M13.6 21.5v-8h2.7l.4-3.2h-3.1V8.4c0-.9.3-1.6 1.6-1.6h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.5v3.2h2.8v8z"
-          fill="currentColor"></path></svg
-      ><svg viewBox="0 0 24 24"
-        ><path
-          d="M4.4 9.3h3.3V20H4.4zM6 4a1.9 1.9 0 1 1 0 3.8A1.9 1.9 0 0 1 6 4zm3.7 5.3h3.1v1.5c.5-.9 1.6-1.8 3.3-1.8 3.3 0 3.9 2.1 3.9 4.9V20h-3.3v-5.3c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V20H9.7z"
-          fill="currentColor"></path></svg
-      ></span
-    >{' '}<em>{t.titulo.b}</em></span>{t.titulo.b2 && ` ${t.titulo.b2}`}{' '}
-    {t.titulo.c}{' '}<span class="junto"><span class="chip chip-claro" aria-hidden="true"
-      ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"
-        ><path class="estrella" d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor" stroke="none"></path
-        ><g class="flecha"
-          ><path d="M12 20V5M6 11l6-6 6 6"></path><path class="estela" d="M6.5 17v4M17.5 17v4"></path></g
-        ></svg
-      ></span
-    >{' '}<em>{t.titulo.d}</em></span>
-  </h1>
-  <p class="bajada">{t.bajada}</p>
-  <div class="acciones">
-    <a class="boton boton-oscuro" href={enlaceWhatsapp(lang)} target="_blank" rel="noopener noreferrer">{t.cta}</a>
-    <a class="boton boton-claro" href="#casos">{t.secundario}</a>
+  {/* Capas del fondo, de abajo hacia arriba: foto (LCP), video en loop, lienzo WebGL, cubierta de entrada y velo de contraste */}
+  <div
+    class="hero-media"
+    data-video={hero.video}
+    data-video-movil={hero.videoMovil}
+    data-poster={await optimizar(hero.imagen, 1920)}
+    data-profundidad={hero.profundidad}
+  >
+    <Imagen src={hero.imagen} alt="" anchos={ANCHOS_HERO} sizes={SIZES_HERO} loading="eager" fetchpriority="high" />
+    <video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+    <canvas aria-hidden="true"></canvas>
+    <div class="cubierta"></div>
+    <div class="velo"></div>
   </div>
 
-  <div class="escenario" id="reels">
-    <div class="bit pixel" aria-hidden="true">
-      <canvas class="pixel-lienzo"></canvas>
-      <p class="pixel-mascara">{site.marca}{site.marcaSufijo}</p>
-      <p class="pixel-contorno">{site.marca}{site.marcaSufijo}</p>
+  <div class="hero-texto">
+    <p class="estado"><i></i>{t.estado}</p>
+    <h1>
+      {t.titulo.a}{' '}<span class="junto"><span class="chip chip-redes" aria-hidden="true"
+        ><svg viewBox="0 0 24 24"><path d="M9.2 7.4v9.2l7.6-4.6z" fill="currentColor"></path></svg
+        ><svg viewBox="0 0 24 24"><path d={iconoTiktok} fill="currentColor"></path></svg
+        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          ><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="3.9"></circle><path d="M16.9 7.1h.01"></path></svg
+        ><svg viewBox="0 0 24 24"
+          ><path
+            d="M13.6 21.5v-8h2.7l.4-3.2h-3.1V8.4c0-.9.3-1.6 1.6-1.6h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.5v3.2h2.8v8z"
+            fill="currentColor"></path></svg
+        ><svg viewBox="0 0 24 24"
+          ><path
+            d="M4.4 9.3h3.3V20H4.4zM6 4a1.9 1.9 0 1 1 0 3.8A1.9 1.9 0 0 1 6 4zm3.7 5.3h3.1v1.5c.5-.9 1.6-1.8 3.3-1.8 3.3 0 3.9 2.1 3.9 4.9V20h-3.3v-5.3c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V20H9.7z"
+            fill="currentColor"></path></svg
+        ></span
+      >{' '}<em>{t.titulo.b}</em></span>{t.titulo.b2 && ` ${t.titulo.b2}`}{' '}
+      {t.titulo.c}{' '}<span class="junto"><span class="chip chip-claro" aria-hidden="true"
+        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"
+          ><path class="estrella" d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor" stroke="none"></path
+          ><g class="flecha"
+            ><path d="M12 20V5M6 11l6-6 6 6"></path><path class="estela" d="M6.5 17v4M17.5 17v4"></path></g
+          ></svg
+        ></span
+      >{' '}<em>{t.titulo.d}</em></span>
+    </h1>
+    <p class="bajada">{t.bajada}</p>
+    <div class="acciones">
+      <a class="boton boton-acento" href={enlaceWhatsapp(lang)} target="_blank" rel="noopener noreferrer">{t.cta}</a>
+      <a class="boton boton-vidrio" href="#casos">{t.secundario}</a>
     </div>
-    <ul class="reels">
-      {
-        reels.map((r, i) => (
-          <li class="reel" style={abanico(i)} tabindex="0">
-            {/* La portada es una imagen con srcset; el video va encima y solo se descarga al reproducirse */}
-            {r.poster && (
-              <Imagen
-                src={r.poster}
-                alt=""
-                anchos={ANCHOS_REEL}
-                sizes={SIZES_REEL}
-                loading={i < 2 ? 'eager' : 'lazy'}
-                fetchpriority={i === 0 ? 'high' : undefined}
-              />
-            )}
-            {r.video && <video src={r.video} aria-label={r.nombre} muted loop playsinline preload="none" />}
-            {!r.video && !r.poster && (
-              <div class="reel-vacio">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
-                </svg>
-                <span>{t.proximamente}</span>
-              </div>
-            )}
-            <div class="reel-pie">
-              <strong>{r.nombre}</strong>
-              <span>{r.categoria}</span>
-            </div>
-          </li>
-        ))
-      }
-    </ul>
   </div>
 </section>
 
 <script>
-  // Con mouse los reels se reproducen al pasar por encima; en táctil, al tocarlos
-  document.addEventListener('astro:page-load', () => {
-    const conMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const reels = [...document.querySelectorAll<HTMLElement>('.reel')];
-
-    reels.forEach((reel) => {
-      const video = reel.querySelector('video');
-      if (!video) return;
-      const reproducir = () => video.play().catch(() => {});
-      const detener = () => video.pause();
-
-      if (conMouse) {
-        reel.addEventListener('pointerenter', reproducir);
-        reel.addEventListener('pointerleave', detener);
-      } else {
-        reel.addEventListener('click', () => {
-          const estabaPausado = video.paused;
-          reels.forEach((otro) => otro.querySelector('video')?.pause());
-          if (estabaPausado) reproducir();
-        });
-      }
-      reel.addEventListener('focus', reproducir);
-      reel.addEventListener('blur', detener);
-    });
-  });
+  import '../scripts/hero';
 </script>
 
 <style>
   .hero {
-    padding: clamp(2rem, 5vw, 4rem) 1.5rem 0;
+    /* Color que tapa la foto antes del revelado; el lienzo WebGL usa el mismo */
+    --cubierta: #fff3e0;
+    /* Naranja algo más oscuro para las palabras del titular sobre el cielo claro */
+    --acento-hero: #c2530a;
+    position: relative;
+    display: grid;
+    min-height: max(100svh, 38rem);
+    overflow: hidden;
+    isolation: isolate;
     text-align: center;
+  }
+
+  :global([data-tema='oscuro']) .hero {
+    --cubierta: #0e0e0e;
+    --acento-hero: var(--acento);
+  }
+
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--cubierta);
+  }
+
+  .hero-media :global(img),
+  .hero-media video,
+  .hero-media canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    /* El horizonte queda un poco por debajo del centro; scripts/hero.ts usa el mismo encuadre */
+    object-position: 50% 55%;
+  }
+
+  /* El video aparece con un fundido cuando empieza a reproducirse */
+  .hero-media video {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .hero-media:global(.con-video) video {
+    opacity: 1;
+  }
+
+  .hero-media canvas {
+    opacity: 0;
+  }
+
+  .hero-media canvas:global(.visible) {
+    opacity: 1;
+  }
+
+  /* Cubierta: solo existe mientras el revelado está por empezar (hay JS y no se pidió menos movimiento).
+     Si el script no llega a quitarla, se va sola a los 3 s */
+  .cubierta,
+  .velo {
+    position: absolute;
+    inset: 0;
+  }
+
+  .cubierta {
+    background: var(--cubierta);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(html.animar:not(.hero-listo)) .cubierta {
+    opacity: 1;
+    animation: cubierta-fuera 0.5s ease 3s forwards;
+  }
+
+  @keyframes cubierta-fuera {
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* Velo: aclara el cielo detrás del texto y funde el borde inferior con la página */
+  .velo {
+    background:
+      linear-gradient(to top, var(--fondo), transparent 16%),
+      linear-gradient(to bottom, rgb(255 250 242 / 0.6), rgb(255 250 242 / 0.28) 45%, transparent 68%);
+  }
+
+  /* En oscuro la foto se oscurece entera para que el texto blanco contraste */
+  :global([data-tema='oscuro']) .velo {
+    background:
+      linear-gradient(to top, var(--fondo), transparent 18%),
+      linear-gradient(to bottom, rgb(14 14 14 / 0.78), rgb(14 14 14 / 0.56) 55%, rgb(14 14 14 / 0.42));
+  }
+
+  .hero-texto {
+    /* El menú flota encima del hero: el texto empieza por debajo de él, sobre el cielo */
+    padding: calc(var(--alto-nav) + clamp(1.5rem, 4.5svh, 3.5rem)) 1.5rem 4rem;
   }
 
   h1 {
@@ -133,14 +177,29 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
     font-size: clamp(2rem, 4.8vw, 4rem);
   }
 
+  h1 em {
+    color: var(--acento-hero);
+  }
+
+  /* Etiqueta de disponibilidad en una píldora de vidrio */
   .estado {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid rgb(255 255 255 / 0.6);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.45);
+    backdrop-filter: blur(10px);
     font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--acento-texto);
+    color: var(--texto);
+  }
+
+  :global([data-tema='oscuro']) .estado {
+    border-color: rgb(255 255 255 / 0.2);
+    background: rgb(255 255 255 / 0.1);
   }
 
   .estado i {
@@ -363,7 +422,8 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
   .bajada {
     max-width: 58ch;
     margin: 1.5rem auto 0;
-    color: var(--gris);
+    /* Más oscuro que el gris habitual: va sobre la foto, no sobre el fondo de la página */
+    color: color-mix(in srgb, var(--texto) 80%, transparent);
     font-size: 1.0625rem;
   }
 
@@ -375,154 +435,26 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
     margin-top: 2rem;
   }
 
-  .escenario {
-    position: relative;
-    margin-top: clamp(2rem, 4vw, 3rem);
-    padding: clamp(3rem, 8vw, 7rem) 0 clamp(3rem, 5vw, 4rem);
+  /* Botón secundario de vidrio */
+  .boton-vidrio {
+    border-color: rgb(255 255 255 / 0.7);
+    background: rgb(255 255 255 / 0.35);
+    backdrop-filter: blur(12px) saturate(1.4);
+    color: var(--texto);
   }
 
-  /* Nombre en fuente bit; las capas .pixel (lienzo, máscara y contorno) están en global.css */
-  .bit {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    display: block;
-    font-family: Silkscreen, monospace;
-    font-size: clamp(2rem, 11vw, 10.5rem);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.06em;
-    user-select: none;
-    pointer-events: none;
+  :global([data-tema='oscuro']) .boton-vidrio {
+    border-color: rgb(255 255 255 / 0.28);
+    background: rgb(255 255 255 / 0.12);
   }
 
-  .bit :global(.pixel-contorno) {
-    color: transparent;
-    -webkit-text-stroke: 1px var(--contorno);
-  }
-
-  .reels {
-    position: relative;
-    display: flex;
-    justify-content: center;
-  }
-
-  .reel {
-    position: relative;
-    flex: none;
-    width: clamp(150px, 17vw, 232px);
-    aspect-ratio: 9 / 16;
-    margin: 0 -0.6vw;
-    border-radius: 22px;
-    overflow: hidden;
-    background: var(--negro);
-    cursor: pointer;
-    transform: translateY(var(--y)) rotate(var(--r));
-    box-shadow: 0 30px 50px -28px rgb(0 0 0 / 0.55);
-    transition:
-      transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
-      opacity 0.45s ease,
-      filter 0.45s ease,
-      box-shadow 0.45s ease;
-  }
-
-  .reel video,
-  .reel :global(img) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .reel:focus-visible {
-    z-index: 5;
-    outline-offset: 4px;
-    border-radius: 22px;
-  }
-
-  .reel-vacio {
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    gap: 0.75rem;
-    height: 100%;
-    color: rgb(255 255 255 / 0.7);
-    font-size: 0.75rem;
-    background: linear-gradient(160deg, #2a2a2a, #0a0a0a 70%);
-  }
-
-  .reel:nth-child(even) .reel-vacio {
-    background: linear-gradient(160deg, var(--acento-suave), var(--acento) 45%, #7a3a00);
-    color: #fff;
-  }
-
-  .reel-vacio svg {
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0.6rem;
-    border-radius: 50%;
-    background: rgb(255 255 255 / 0.14);
-  }
-
-  .reel-pie {
-    position: absolute;
-    inset: auto 0 0;
-    display: grid;
-    gap: 0.1rem;
-    padding: 2.5rem 1rem 1rem;
-    text-align: left;
-    color: #fff;
-    font-size: 0.6875rem;
-    line-height: 1.3;
-    background: linear-gradient(transparent, rgb(0 0 0 / 0.75));
-    pointer-events: none;
-  }
-
-  .reel-pie strong {
-    font-size: 0.8125rem;
-    font-weight: 600;
-  }
-
-  .reel-pie span {
-    opacity: 0.8;
-  }
-
-  /* El reel activo crece y se endereza; los demás se quedan atrás */
   @media (hover: hover) and (pointer: fine) {
-    .reel:hover {
-      z-index: 5;
-      transform: translateY(-12px) rotate(0deg) scale(1.14);
-      box-shadow: 0 40px 70px -30px rgb(0 0 0 / 0.7);
+    .boton-vidrio:hover {
+      background: rgb(255 255 255 / 0.6);
     }
 
-    .reels:has(.reel:hover) .reel:not(:hover) {
-      opacity: 0.5;
-      filter: saturate(0.5) blur(1px);
-      transform: translateY(var(--y)) rotate(var(--r)) scale(0.93);
-    }
-  }
-
-  /* En pantallas angostas los reels pasan a un carrusel deslizable */
-  @media (max-width: 820px) {
-    .reels {
-      justify-content: flex-start;
-      gap: 0.75rem;
-      margin: 0 -1.5rem;
-      padding: 1.5rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-    }
-
-    .reel {
-      width: 58vw;
-      max-width: 260px;
-      margin: 0;
-      scroll-snap-align: center;
-      transform: none;
+    :global([data-tema='oscuro']) .boton-vidrio:hover {
+      background: rgb(255 255 255 / 0.22);
     }
   }
 </style>

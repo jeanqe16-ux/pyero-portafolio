@@ -12,6 +12,12 @@
     "region": "Junín",
     "pais": "PE"
   },
+  "hero": {
+    "imagen": "/media/hero/hero.jpg",
+    "video": "/media/hero/hero-loop.mp4",
+    "videoMovil": "/media/hero/hero-loop-movil.mp4",
+    "profundidad": "/media/hero/depth.png"
+  },
   "whatsapp": "51964544392",
   "mensajeWhatsapp": "Hola Jean, vi tu portafolio y quiero cotizar un proyecto.",
   "instagram": "https://instagram.com/pyero.workz",
