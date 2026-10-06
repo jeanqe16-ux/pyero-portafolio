@@ -37,6 +37,11 @@ const LETRAS: Record<string, number[]> = {
   Z: [31, 1, 2, 4, 8, 16, 31],
 };
 
+// Lo que hay que deshacer al cambiar de página, y lo que se repinta al redimensionar
+let limpiezas: (() => void)[] = [];
+let alRedimensionar = () => {};
+window.addEventListener('resize', () => alRedimensionar());
+
 const mezclar = <T,>(lista: T[]) => {
   for (let i = lista.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -89,7 +94,9 @@ function rellenar(caja: HTMLElement, disparador: ScrollTrigger.Vars) {
 
   caja.classList.add('activo');
   armar();
-  new ResizeObserver(armar).observe(caja);
+  const tamano = new ResizeObserver(armar);
+  tamano.observe(caja);
+  limpiezas.push(() => tamano.disconnect());
 
   gsap.to(estado, { lleno: 1, ease: 'none', onUpdate: pintar, scrollTrigger: { scrub: 0.4, ...disparador } });
 }
@@ -190,10 +197,10 @@ function fondo() {
 
   medir();
   pintar();
-  window.addEventListener('resize', () => {
+  alRedimensionar = () => {
     medir();
     pintar();
-  });
+  };
 
   gsap.to(estado, {
     avance: 1,
@@ -214,10 +221,16 @@ function proceso() {
   );
 }
 
-// Con "reducir movimiento" no se activa nada: los textos quedan como están y el fondo vacío
-if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  gsap.registerPlugin(ScrollTrigger);
-  gsap.ticker.fps(60);
+gsap.registerPlugin(ScrollTrigger);
+gsap.ticker.fps(60);
+
+/* Se llama al cargar el módulo y de nuevo después de cada cambio de página (Base.astro no lo carga con "reducir movimiento") */
+export function iniciar() {
+  limpiezas.forEach((limpiar) => limpiar());
+  limpiezas = [];
+  ScrollTrigger.getAll().forEach((disparador) => disparador.kill());
+  gsap.globalTimeline.getChildren().forEach((animacion) => animacion.kill());
+
   fondo();
   proceso();
   document.fonts.ready.then(() => {

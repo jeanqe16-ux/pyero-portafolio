@@ -239,6 +239,7 @@ content:
                 fields:
                   - { name: a, label: Primera parte, type: string }
                   - { name: b, label: Primera palabra en naranja, type: string }
+                  - { name: b2, label: Texto que sigue a la primera palabra en naranja, type: string }
                   - { name: c, label: Segunda parte, type: string }
                   - { name: d, label: Segunda palabra en naranja, type: string }
               - { name: bajada, label: Subtítulo, type: text }
@@ -319,6 +320,22 @@ content:
               - { name: texto, label: Texto, type: text }
               - { name: cta, label: Botón de WhatsApp, type: string }
               - { name: redes, label: Texto junto a las redes, type: string }
+          - name: cursor
+            label: Rótulos del cursor
+            type: object
+            fields:
+              - { name: play, label: Sobre videos, type: string }
+              - { name: ver, label: Sobre casos, type: string }
+          - name: perdida
+            label: Página 404
+            type: object
+            fields:
+              - { name: codigo, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: string }
+              - { name: texto, label: Texto, type: text }
+              - { name: juego, label: Descripción del mini juego, type: string }
+              - { name: marcador, label: Texto del marcador, type: string }
+              - { name: volver, label: Botón, type: string }
           - { name: pie, label: Texto del pie, type: string }
           - { name: whatsapp, label: Descripción del botón flotante, type: string }
           - { name: pixeles, label: 'Palabras que forman los pixeles (mayúsculas, sin tildes)', type: string, list: true }

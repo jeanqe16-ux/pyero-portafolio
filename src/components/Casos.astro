@@ -121,43 +121,45 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
 </section>
 
 <script>
-  // La portada de cada video se descarga recién cuando su caso se acerca a la pantalla
-  const cercanos = new IntersectionObserver(
-    (entradas) =>
-      entradas.forEach(({ target, isIntersecting }) => {
-        if (!isIntersecting) return;
-        const video = target as HTMLVideoElement;
-        if (!video.poster) video.poster = video.dataset.poster!;
-        cercanos.unobserve(video);
-      }),
-    { rootMargin: '600px' },
-  );
-  document.querySelectorAll<HTMLVideoElement>('.escena video[data-poster]').forEach((video) => cercanos.observe(video));
-
-  // Cada miniatura pone su video o su imagen en el espacio principal del caso
-  document.querySelectorAll<HTMLElement>('.visor').forEach((visor) => {
-    const video = visor.querySelector('video')!;
-    const imagen = visor.querySelector<HTMLImageElement>('.escena img')!;
-    const botones = [...visor.querySelectorAll<HTMLElement>('.miniaturas button')];
-
-    botones.forEach((boton) =>
-      boton.addEventListener('click', () => {
-        const { tipo, src, poster, titulo } = boton.dataset;
-        botones.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
-        video.pause();
-        video.hidden = tipo !== 'video';
-        imagen.hidden = tipo === 'video';
-        if (tipo === 'video') {
-          video.poster = poster!;
-          video.src = src!;
-          video.setAttribute('aria-label', titulo!);
-          video.play().catch(() => {});
-        } else {
-          imagen.src = src!;
-          imagen.alt = titulo!;
-        }
-      }),
+  document.addEventListener('astro:page-load', () => {
+    // La portada de cada video se descarga recién cuando su caso se acerca a la pantalla
+    const cercanos = new IntersectionObserver(
+      (entradas) =>
+        entradas.forEach(({ target, isIntersecting }) => {
+          if (!isIntersecting) return;
+          const video = target as HTMLVideoElement;
+          if (!video.poster) video.poster = video.dataset.poster!;
+          cercanos.unobserve(video);
+        }),
+      { rootMargin: '600px' },
     );
+    document.querySelectorAll<HTMLVideoElement>('.escena video[data-poster]').forEach((video) => cercanos.observe(video));
+
+    // Cada miniatura pone su video o su imagen en el espacio principal del caso
+    document.querySelectorAll<HTMLElement>('.visor').forEach((visor) => {
+      const video = visor.querySelector('video')!;
+      const imagen = visor.querySelector<HTMLImageElement>('.escena img')!;
+      const botones = [...visor.querySelectorAll<HTMLElement>('.miniaturas button')];
+
+      botones.forEach((boton) =>
+        boton.addEventListener('click', () => {
+          const { tipo, src, poster, titulo } = boton.dataset;
+          botones.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
+          video.pause();
+          video.hidden = tipo !== 'video';
+          imagen.hidden = tipo === 'video';
+          if (tipo === 'video') {
+            video.poster = poster!;
+            video.src = src!;
+            video.setAttribute('aria-label', titulo!);
+            video.play().catch(() => {});
+          } else {
+            imagen.src = src!;
+            imagen.alt = titulo!;
+          }
+        }),
+      );
+    });
   });
 </script>
 

@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '@fontsource-variable/inter';
 import '../styles/global.css';
 import site from '../data/site.json';
@@ -14,9 +15,11 @@ interface Props {
   descripcion?: string;
   /** Imagen principal del primer pantallazo, para precargarla */
   precarga?: { srcset: string; sizes: string };
+  /** Para páginas que no deben aparecer en buscadores, como la 404 */
+  noindex?: boolean;
 }
 
-const { lang, precarga } = Astro.props;
+const { lang, precarga, noindex = false } = Astro.props;
 const { titulo = tr(site.seo, 'titulo', lang), descripcion = tr(site.seo, 'descripcion', lang) } = Astro.props;
 const textos = textosDe(lang);
 const inicio = ruta(lang);
@@ -72,12 +75,13 @@ const datosEstructurados = {
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>
     <meta name="description" content={descripcion} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={urlPagina} />
     <link rel="alternate" hreflang="es" href={urlDe('es')} />
     <link rel="alternate" hreflang="en" href={urlDe('en')} />
@@ -114,6 +118,7 @@ const datosEstructurados = {
         <link rel="preload" as="image" type="image/avif" imagesrcset={precarga.srcset} imagesizes={precarga.sizes} fetchpriority="high" />
       )
     }
+    <ClientRouter />
     <script type="application/ld+json" set:html={JSON.stringify(datosEstructurados)} />
     <script is:inline>
       // Activa la animación de entrada solo si el usuario no pidió menos movimiento
@@ -123,6 +128,8 @@ const datosEstructurados = {
   </head>
   <body>
     <canvas class="fondo-pixeles" data-palabras={JSON.stringify(textos.pixeles)} aria-hidden="true"></canvas>
+
+    <div class="cursor" data-play={textos.cursor.play} data-ver={textos.cursor.ver} aria-hidden="true"><span></span></div>
 
     <svg class="definiciones-svg" aria-hidden="true">
       <defs>
@@ -176,37 +183,48 @@ const datosEstructurados = {
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d={iconoWhatsapp} fill="currentColor"></path></svg>
     </a>
     <script>
-      // Entrada sutil de cada sección al hacer scroll
-      if (document.documentElement.classList.contains('animar')) {
-        const observador = new IntersectionObserver(
-          (entradas) =>
-            entradas.forEach((entrada) => {
-              if (!entrada.isIntersecting) return;
-              entrada.target.classList.add('visible');
-              observador.unobserve(entrada.target);
-            }),
-          { rootMargin: '0px 0px -8% 0px' },
-        );
-        document.querySelectorAll('main > :not(.hero)').forEach((seccion) => observador.observe(seccion));
-      }
-    </script>
-    <script>
-      // GSAP y las animaciones de scroll se cargan cuando el usuario empieza a interactuar o cuando el navegador queda libre
+      import '../scripts/barrido';
+
+      type Modulo = { iniciar: () => void };
+      const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // GSAP y los detalles de interacción se cargan cuando el usuario empieza a interactuar o cuando el navegador queda libre
       const eventos = ['scroll', 'pointerdown', 'touchstart', 'keydown'];
-      let pedido = false;
+      let modulos: Promise<Modulo[]> | null = null;
       const cargar = () => {
-        if (pedido) return;
-        pedido = true;
+        if (modulos) return;
         eventos.forEach((evento) => window.removeEventListener(evento, cargar));
-        import('../scripts/pixeles');
+        modulos = Promise.all([import('../scripts/pixeles'), import('../scripts/interacciones')]);
+        modulos.then((lista) => lista.forEach((modulo) => modulo.iniciar()));
       };
 
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!reducir) {
         eventos.forEach((evento) => window.addEventListener(evento, cargar, { passive: true }));
         const libre = () => ('requestIdleCallback' in window ? window.requestIdleCallback(cargar, { timeout: 4000 }) : window.setTimeout(cargar, 2500));
         if (document.readyState === 'complete') libre();
         else window.addEventListener('load', libre, { once: true });
       }
+
+      // Corre en la primera carga y después de cada cambio de página
+      let primera = true;
+      document.addEventListener('astro:page-load', () => {
+        // Entrada sutil de cada sección al hacer scroll
+        if (document.documentElement.classList.contains('animar')) {
+          const observador = new IntersectionObserver(
+            (entradas) =>
+              entradas.forEach((entrada) => {
+                if (!entrada.isIntersecting) return;
+                entrada.target.classList.add('visible');
+                observador.unobserve(entrada.target);
+              }),
+            { rootMargin: '0px 0px -8% 0px' },
+          );
+          document.querySelectorAll('main > :not(.hero)').forEach((seccion) => observador.observe(seccion));
+        }
+        // Si los módulos diferidos ya estaban cargados, se reinician sobre la página nueva
+        if (!primera) modulos?.then((lista) => lista.forEach((modulo) => modulo.iniciar()));
+        primera = false;
+      });
     </script>
   </body>
 </html>

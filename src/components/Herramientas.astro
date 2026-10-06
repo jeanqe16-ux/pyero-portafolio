@@ -24,7 +24,8 @@ import { herramientas } from '../data/herramientas.json';
 
 <script>
   // El resplandor sigue al mouse dentro de cada chip
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  document.addEventListener('astro:page-load', () => {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     document.querySelectorAll<HTMLElement>('.herramienta').forEach((chip) => {
       chip.addEventListener('pointermove', (e) => {
         const caja = chip.getBoundingClientRect();
@@ -32,7 +33,7 @@ import { herramientas } from '../data/herramientas.json';
         chip.style.setProperty('--y', `${e.clientY - caja.top}px`);
       });
     });
-  }
+  });
 </script>
 
 <style>

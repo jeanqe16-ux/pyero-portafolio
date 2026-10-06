@@ -1,0 +1,210 @@
+---
+import Base from '../layouts/Base.astro';
+import textos from '../data/textos.json';
+
+// Una sola página 404 para los dos idiomas: sale en español y, si la dirección empieza con /en/, el script la pasa a inglés
+const es = textos.es.perdida;
+const en = textos.en.perdida;
+---
+
+<Base lang="es" titulo={`404 | ${es.titulo}`} descripcion={es.texto} noindex>
+  <section class="seccion perdida">
+    <p class="etiqueta">{es.codigo}</p>
+    <h1 data-en={en.titulo}>{es.titulo}</h1>
+    <p class="texto" data-en={en.texto}>{es.texto}</p>
+
+    <div class="juego">
+      <canvas aria-label={es.juego} data-en-aria={en.juego} role="img"></canvas>
+      <p class="marcador">
+        <span data-en={en.marcador}>{es.marcador}</span>
+        <strong>0</strong>
+      </p>
+    </div>
+
+    <a class="boton boton-oscuro" href="/" data-en={en.volver} data-en-href="/en/">{es.volver}</a>
+  </section>
+</Base>
+
+<script>
+  const NARANJAS = ['#fb8e1f', '#fb8e1f', '#fdaf50', '#ff7a59', '#ffd166'];
+
+  document.addEventListener('astro:page-load', () => {
+    const lienzo = document.querySelector<HTMLCanvasElement>('.perdida canvas');
+    if (!lienzo) return;
+
+    if (location.pathname.startsWith('/en')) {
+      document.documentElement.lang = 'en';
+      document.querySelectorAll<HTMLElement>('.perdida [data-en]').forEach((el) => (el.textContent = el.dataset.en!));
+      document.querySelectorAll<HTMLAnchorElement>('.perdida [data-en-href]').forEach((el) => (el.href = el.dataset.enHref!));
+      lienzo.setAttribute('aria-label', lienzo.dataset.enAria!);
+    }
+
+    // Mini juego: atrapar los pixeles naranjas que caen pasando el mouse o el dedo por encima
+    const ctx = lienzo.getContext('2d')!;
+    const marcador = document.querySelector('.perdida .marcador strong')!;
+    const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const escala = Math.min(window.devicePixelRatio || 1, 2);
+    let ancho = 0;
+    let alto = 0;
+    let puntos = 0;
+    let anterior = 0;
+    let proximo = 0;
+    const puntero = { x: -99, y: -99 };
+    type Pixel = { x: number; y: number; lado: number; v: number; color: string };
+    let pixeles: Pixel[] = [];
+    let chispas: (Pixel & { vx: number; vida: number })[] = [];
+
+    const nuevo = (): Pixel => {
+      const lado = 16 + Math.floor(Math.random() * 3) * 6;
+      return {
+        x: Math.random() * (ancho - lado),
+        // Sin movimiento los pixeles aparecen quietos en cualquier parte; con movimiento caen desde arriba
+        y: quieto ? Math.random() * (alto - lado) : -lado,
+        lado,
+        v: 60 + Math.random() * 110,
+        color: NARANJAS[Math.floor(Math.random() * NARANJAS.length)],
+      };
+    };
+
+    const medir = () => {
+      ancho = lienzo.clientWidth;
+      alto = lienzo.clientHeight;
+      lienzo.width = Math.round(ancho * escala);
+      lienzo.height = Math.round(alto * escala);
+      if (quieto) {
+        pixeles = Array.from({ length: 7 }, nuevo);
+        pintar();
+      }
+    };
+
+    const atrapar = () => {
+      pixeles = pixeles.filter((p) => {
+        const margen = 16;
+        const dentro = puntero.x > p.x - margen && puntero.x < p.x + p.lado + margen && puntero.y > p.y - margen && puntero.y < p.y + p.lado + margen;
+        if (!dentro) return true;
+        marcador.textContent = String(++puntos);
+        if (!quieto) for (let i = 0; i < 5; i++) chispas.push({ ...p, lado: 6, vx: (Math.random() - 0.5) * 260, v: -80 - Math.random() * 160, vida: 0.5 });
+        return false;
+      });
+      if (quieto) {
+        while (pixeles.length < 7) pixeles.push(nuevo());
+        pintar();
+      }
+    };
+
+    function pintar() {
+      ctx.setTransform(escala, 0, 0, escala, 0, 0);
+      ctx.clearRect(0, 0, ancho, alto);
+      for (const p of pixeles) {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), p.lado, p.lado);
+      }
+      for (const c of chispas) {
+        ctx.globalAlpha = Math.max(0, c.vida * 2);
+        ctx.fillStyle = c.color;
+        ctx.fillRect(Math.round(c.x), Math.round(c.y), c.lado, c.lado);
+      }
+      ctx.globalAlpha = 1;
+      // El "atrapador": un marco negro que sigue al puntero
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(Math.round(puntero.x) - 18, Math.round(puntero.y) - 18, 36, 36);
+    }
+
+    const cuadro = (ahora: number) => {
+      // El juego se apaga solo al salir de la página
+      if (!lienzo.isConnected) return;
+      const dt = Math.min((ahora - anterior) / 1000, 0.05);
+      anterior = ahora;
+      if (ahora > proximo && pixeles.length < 14) {
+        pixeles.push(nuevo());
+        proximo = ahora + 450 + Math.random() * 500;
+      }
+      pixeles.forEach((p) => (p.y += p.v * dt));
+      pixeles = pixeles.filter((p) => p.y < alto);
+      chispas.forEach((c) => {
+        c.x += c.vx * dt;
+        c.y += c.v * dt;
+        c.v += 500 * dt;
+        c.vida -= dt;
+      });
+      chispas = chispas.filter((c) => c.vida > 0);
+      atrapar();
+      pintar();
+      requestAnimationFrame(cuadro);
+    };
+
+    const mover = (e: PointerEvent) => {
+      const caja = lienzo.getBoundingClientRect();
+      puntero.x = e.clientX - caja.left;
+      puntero.y = e.clientY - caja.top;
+      if (quieto) atrapar();
+    };
+    lienzo.addEventListener('pointermove', mover);
+    lienzo.addEventListener('pointerdown', mover);
+
+    medir();
+    new ResizeObserver(medir).observe(lienzo);
+    if (!quieto) requestAnimationFrame(cuadro);
+  });
+</script>
+
+<style>
+  .perdida {
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    text-align: center;
+  }
+
+  h1 {
+    max-width: 16ch;
+    margin: 0 auto 1rem;
+    font-size: clamp(2.1rem, 5.6vw, 4.25rem);
+  }
+
+  .texto {
+    margin-inline: auto;
+  }
+
+  .juego {
+    position: relative;
+    max-width: 760px;
+    margin: 2rem auto;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 24px;
+    background: var(--superficie);
+    /* Dentro del juego el dedo mueve el atrapador en vez de desplazar la página */
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .marcador {
+    position: absolute;
+    top: 0.9rem;
+    left: 1.1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--gris);
+    pointer-events: none;
+  }
+
+  .marcador strong {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--negro);
+  }
+
+  @media (max-width: 600px) {
+    canvas {
+      aspect-ratio: 4 / 5;
+    }
+  }
+</style>

@@ -1,7 +1,7 @@
 ---
 import site from '../data/site.json';
 import Imagen from './Imagen.astro';
-import { enlaceWhatsapp } from '../lib/enlaces';
+import { enlaceWhatsapp, iconoTiktok } from '../lib/enlaces';
 import { textosDe, type Idioma } from '../lib/i18n';
 import { ANCHOS_REEL, SIZES_REEL, reelsDe } from '../lib/reels';
 
@@ -22,9 +22,21 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
 <section class="hero">
   <p class="estado"><i></i>{t.estado}</p>
   <h1>
-    {t.titulo.a}{' '}<span class="junto"><span class="chip" aria-hidden="true"
-      ><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"></path></svg></span
-    >{' '}<em>{t.titulo.b}</em></span>{' '}
+    {t.titulo.a}{' '}<span class="junto"><span class="chip chip-redes" aria-hidden="true"
+      ><svg viewBox="0 0 24 24"><path d="M9.2 7.4v9.2l7.6-4.6z" fill="currentColor"></path></svg
+      ><svg viewBox="0 0 24 24"><path d={iconoTiktok} fill="currentColor"></path></svg
+      ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+        ><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="3.9"></circle><path d="M16.9 7.1h.01"></path></svg
+      ><svg viewBox="0 0 24 24"
+        ><path
+          d="M13.6 21.5v-8h2.7l.4-3.2h-3.1V8.4c0-.9.3-1.6 1.6-1.6h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.5v3.2h2.8v8z"
+          fill="currentColor"></path></svg
+      ><svg viewBox="0 0 24 24"
+        ><path
+          d="M4.4 9.3h3.3V20H4.4zM6 4a1.9 1.9 0 1 1 0 3.8A1.9 1.9 0 0 1 6 4zm3.7 5.3h3.1v1.5c.5-.9 1.6-1.8 3.3-1.8 3.3 0 3.9 2.1 3.9 4.9V20h-3.3v-5.3c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V20H9.7z"
+          fill="currentColor"></path></svg
+      ></span
+    >{' '}<em>{t.titulo.b}</em></span>{t.titulo.b2 && ` ${t.titulo.b2}`}{' '}
     {t.titulo.c}{' '}<span class="junto"><span class="chip chip-claro" aria-hidden="true"
       ><svg viewBox="0 0 24 24"
         ><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor"></path></svg
@@ -80,27 +92,29 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
 
 <script>
   // Con mouse los reels se reproducen al pasar por encima; en táctil, al tocarlos
-  const conMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  const reels = [...document.querySelectorAll<HTMLElement>('.reel')];
+  document.addEventListener('astro:page-load', () => {
+    const conMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reels = [...document.querySelectorAll<HTMLElement>('.reel')];
 
-  reels.forEach((reel) => {
-    const video = reel.querySelector('video');
-    if (!video) return;
-    const reproducir = () => video.play().catch(() => {});
-    const detener = () => video.pause();
+    reels.forEach((reel) => {
+      const video = reel.querySelector('video');
+      if (!video) return;
+      const reproducir = () => video.play().catch(() => {});
+      const detener = () => video.pause();
 
-    if (conMouse) {
-      reel.addEventListener('pointerenter', reproducir);
-      reel.addEventListener('pointerleave', detener);
-    } else {
-      reel.addEventListener('click', () => {
-        const estabaPausado = video.paused;
-        reels.forEach((otro) => otro.querySelector('video')?.pause());
-        if (estabaPausado) reproducir();
-      });
-    }
-    reel.addEventListener('focus', reproducir);
-    reel.addEventListener('blur', detener);
+      if (conMouse) {
+        reel.addEventListener('pointerenter', reproducir);
+        reel.addEventListener('pointerleave', detener);
+      } else {
+        reel.addEventListener('click', () => {
+          const estabaPausado = video.paused;
+          reels.forEach((otro) => otro.querySelector('video')?.pause());
+          if (estabaPausado) reproducir();
+        });
+      }
+      reel.addEventListener('focus', reproducir);
+      reel.addEventListener('blur', detener);
+    });
   });
 </script>
 
@@ -111,7 +125,7 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
   }
 
   h1 {
-    max-width: 21ch;
+    max-width: 20ch;
     margin-inline: auto;
     font-size: clamp(2rem, 4.8vw, 4rem);
   }
@@ -159,6 +173,100 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
   .chip svg {
     width: 0.5em;
     height: 0.5em;
+  }
+
+  /* Icono que recorre las redes: cada 2 s cambian el color, la forma del chip y el símbolo */
+  .chip-redes {
+    background: #ff0000;
+    animation: redes-fondo 10s infinite;
+  }
+
+  .chip-redes svg {
+    grid-area: 1 / 1;
+    width: 0.56em;
+    height: 0.56em;
+    opacity: 0;
+    transform: scale(0.4) rotate(-45deg);
+    animation: redes-simbolo 10s infinite;
+  }
+
+  .chip-redes svg:nth-child(2) {
+    animation-delay: 2s;
+  }
+
+  .chip-redes svg:nth-child(3) {
+    animation-delay: 4s;
+  }
+
+  .chip-redes svg:nth-child(4) {
+    animation-delay: 6s;
+  }
+
+  .chip-redes svg:nth-child(5) {
+    animation-delay: 8s;
+  }
+
+  /* YouTube, TikTok, Instagram, Facebook y LinkedIn */
+  @keyframes redes-fondo {
+    0%,
+    15% {
+      background: #ff0000;
+      border-radius: 0.24em;
+    }
+    20%,
+    35% {
+      background: #0a0a0a;
+      border-radius: 0.32em;
+    }
+    40%,
+    55% {
+      background: #e1306c;
+      border-radius: 0.28em;
+    }
+    60%,
+    75% {
+      background: #1877f2;
+      border-radius: 0.41em;
+    }
+    80%,
+    95% {
+      background: #0a66c2;
+      border-radius: 0.14em;
+    }
+    100% {
+      background: #ff0000;
+      border-radius: 0.24em;
+    }
+  }
+
+  @keyframes redes-simbolo {
+    0% {
+      opacity: 0;
+      transform: scale(0.4) rotate(-45deg);
+    }
+    5%,
+    15% {
+      opacity: 1;
+      transform: none;
+    }
+    20%,
+    100% {
+      opacity: 0;
+      transform: scale(1.6) rotate(35deg);
+    }
+  }
+
+  /* Sin movimiento queda fijo el primero */
+  @media (prefers-reduced-motion: reduce) {
+    .chip-redes,
+    .chip-redes svg {
+      animation: none;
+    }
+
+    .chip-redes svg:first-child {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .bajada {

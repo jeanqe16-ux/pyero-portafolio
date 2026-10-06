@@ -11,12 +11,13 @@
     "hero": {
       "estado": "Disponible para nuevos proyectos",
       "titulo": {
-        "a": "Tu",
-        "b": "marca",
-        "c": "tiene algo que decir. Yo hago que se vea y se",
-        "d": "escuche."
+        "a": "¿Publicas y",
+        "b": "nadie",
+        "b2": "se detiene?",
+        "c": "Hagamos que tu marca",
+        "d": "destaque."
       },
-      "bajada": "Edición de video, motion graphics y diseño para marcas que quieren comunicar con claridad y verse profesionales.",
+      "bajada": "Edición de video, motion graphics y diseño que detienen el scroll y hacen que tu marca se recuerde.",
       "cta": "Quiero resultados así",
       "secundario": "Ver casos",
       "proximamente": "Próximamente"
@@ -99,7 +100,19 @@
       "MOTION",
       "EDIT",
       "VISUAL"
-    ]
+    ],
+    "cursor": {
+      "play": "Play",
+      "ver": "Ver"
+    },
+    "perdida": {
+      "codigo": "Error 404",
+      "titulo": "Este frame se perdió en el render",
+      "texto": "La página que buscas no existe o cambió de lugar. Mientras tanto, atrapa los pixeles naranjas.",
+      "juego": "Mini juego: mueve el mouse o el dedo para atrapar los pixeles naranjas que caen",
+      "marcador": "Atrapados",
+      "volver": "Volver al inicio"
+    }
   },
   "en": {
     "nav": {
@@ -113,12 +126,13 @@
     "hero": {
       "estado": "Available for new projects",
       "titulo": {
-        "a": "Your",
-        "b": "brand",
-        "c": "has something to say. I make it seen and",
-        "d": "heard."
+        "a": "You post and",
+        "b": "nobody",
+        "b2": "stops?",
+        "c": "Let's make your brand",
+        "d": "stand out."
       },
-      "bajada": "Video editing, motion graphics and design for brands that want to communicate clearly and look professional.",
+      "bajada": "Video editing, motion graphics and design that stop the scroll and make your brand memorable.",
       "cta": "I want results like these",
       "secundario": "See cases",
       "proximamente": "Coming soon"
@@ -201,6 +215,18 @@
       "MOTION",
       "EDIT",
       "VISUAL"
-    ]
+    ],
+    "cursor": {
+      "play": "Play",
+      "ver": "View"
+    },
+    "perdida": {
+      "codigo": "Error 404",
+      "titulo": "This frame got lost in the render",
+      "texto": "The page you're looking for doesn't exist or has moved. In the meantime, catch the orange pixels.",
+      "juego": "Mini game: move your mouse or finger to catch the falling orange pixels",
+      "marcador": "Caught",
+      "volver": "Back to home"
+    }
   }
 }

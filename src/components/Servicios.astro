@@ -92,49 +92,57 @@ const pase = await Promise.all(posts.map((p) => optimizar(p.imagenes[0], 640)));
 
 <script>
   const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Relojes de los pases de posts de la página actual; se apagan al cambiar de página
+  let relojes: number[] = [];
 
-  // Los videos se descargan y reproducen solo mientras su tarjeta está a la vista
-  const observador = new IntersectionObserver(
-    (entradas) =>
-      entradas.forEach(({ target, isIntersecting }) => {
-        const video = target as HTMLVideoElement;
-        if (!isIntersecting) return video.pause();
-        if (!video.src) video.src = video.dataset.src!;
-        if (!reducir) video.play().catch(() => {});
-      }),
-    { rootMargin: '150px' },
-  );
-  document.querySelectorAll<HTMLVideoElement>('#servicios video[data-src]').forEach((video) => observador.observe(video));
+  document.addEventListener('astro:page-load', () => {
+    relojes.forEach((reloj) => window.clearInterval(reloj));
+    relojes = [];
 
-  // Pase de posts con disolución; cada imagen se descarga justo antes de mostrarse
-  document.querySelectorAll<HTMLElement>('#servicios .pase').forEach((pase) => {
-    const imagenes = [...pase.querySelectorAll('img')];
-    let actual = 0;
-    let reloj = 0;
-    const cargar = (n: number) => {
-      const imagen = imagenes[n % imagenes.length];
-      if (!imagen.getAttribute('src')) imagen.src = imagen.dataset.src!;
-      return imagen;
-    };
-    const avanzar = () => {
-      const siguiente = cargar(actual + 1);
-      if (!siguiente.complete) return;
-      imagenes[actual].classList.remove('activa');
-      siguiente.classList.add('activa');
-      actual = (actual + 1) % imagenes.length;
-      cargar(actual + 1);
-    };
-    new IntersectionObserver(
-      ([entrada]) => {
-        window.clearInterval(reloj);
-        if (!entrada.isIntersecting) return;
-        cargar(actual);
-        if (reducir) return;
-        cargar(actual + 1);
-        reloj = window.setInterval(avanzar, 2500);
-      },
+    // Los videos se descargan y reproducen solo mientras su tarjeta está a la vista
+    const observador = new IntersectionObserver(
+      (entradas) =>
+        entradas.forEach(({ target, isIntersecting }) => {
+          const video = target as HTMLVideoElement;
+          if (!isIntersecting) return video.pause();
+          if (!video.src) video.src = video.dataset.src!;
+          if (!reducir) video.play().catch(() => {});
+        }),
       { rootMargin: '150px' },
-    ).observe(pase);
+    );
+    document.querySelectorAll<HTMLVideoElement>('#servicios video[data-src]').forEach((video) => observador.observe(video));
+
+    // Pase de posts con disolución; cada imagen se descarga justo antes de mostrarse
+    document.querySelectorAll<HTMLElement>('#servicios .pase').forEach((pase) => {
+      const imagenes = [...pase.querySelectorAll('img')];
+      let actual = 0;
+      let reloj = 0;
+      const cargar = (n: number) => {
+        const imagen = imagenes[n % imagenes.length];
+        if (!imagen.getAttribute('src')) imagen.src = imagen.dataset.src!;
+        return imagen;
+      };
+      const avanzar = () => {
+        const siguiente = cargar(actual + 1);
+        if (!siguiente.complete) return;
+        imagenes[actual].classList.remove('activa');
+        siguiente.classList.add('activa');
+        actual = (actual + 1) % imagenes.length;
+        cargar(actual + 1);
+      };
+      new IntersectionObserver(
+        ([entrada]) => {
+          window.clearInterval(reloj);
+          if (!entrada.isIntersecting) return;
+          cargar(actual);
+          if (reducir) return;
+          cargar(actual + 1);
+          reloj = window.setInterval(avanzar, 2500);
+          relojes.push(reloj);
+        },
+        { rootMargin: '150px' },
+      ).observe(pase);
+    });
   });
 </script>
 

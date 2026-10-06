@@ -3,6 +3,8 @@
   "name": "pyero-portafolio",
   "compatibility_date": "2026-10-01",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    // Las direcciones que no existen responden con dist/404.html
+    "not_found_handling": "404-page"
   }
 }
