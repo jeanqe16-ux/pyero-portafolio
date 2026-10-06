@@ -65,7 +65,7 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero → Prueba
 - **Pixeles**: lienzos `canvas` movidos por el scroll con `scrub` (solo se repintan al hacer scroll, tope de 60 fps). Los textos con clase `.pixel` (nombre del hero y las tres cifras) llevan tres capas definidas en `global.css`: un lienzo de celdas de colores, una máscara en `mix-blend-mode: screen` que lo recorta a la forma de las letras y el texto encima; `rellenar()` en `scripts/pixeles.ts` los llena al bajar y los vacía al subir. El fondo es un lienzo fijo con `z-index: -1`, opacidad máxima 0.25, que forma las palabras de `textos.json > pixeles` (letras A-Z de 5x7, sin tildes) repartidas a lo largo de la página. 240 pixeles en escritorio, 120 en celular, y la mitad si pintar sale caro. Con `prefers-reduced-motion` no se activa nada y las cifras quedan como texto negro normal.
 - **Espaciado**: las secciones usan `clamp(4rem, 7.5vw, 6rem)` de relleno vertical (64 px en celular, 96 px en escritorio) y unos 2rem entre titular y contenido. Mantenerlo compacto.
 - **Nombres de clase**: `.pie` es el footer global; no reutilizarlo dentro de componentes.
-- **Git**: un commit por fase. Identidad configurada solo en este repositorio.
+- **Git**: un commit por fase. Los commits usan el correo privado de GitHub (noreply), configurado solo en este repositorio; no publicar el correo personal. `referencias/` está en `.gitignore` y fuera del historial. La rama `respaldo-local-sin-publicar` conserva el historial anterior y no debe subirse.
 
 ## Pendientes
 
@@ -75,6 +75,6 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero → Prueba
 - Los tres videos de CERO están sin audio; confirmar cuál era el que no tenía sound design y restaurar el audio de los otros.
 - Confirmar los handles de redes y agregar los enlaces de @Loreimp y @Basee44 en `creadores.json`.
 - Definir `site` en `astro.config.mjs` cuando haya dominio, para que las URL de Open Graph salgan absolutas.
-- Subir el repositorio a GitHub y conectarlo a Pages CMS.
+- Conectar el repositorio (github.com/jeanqe16-ux/pyero-portafolio, público) a Pages CMS y desplegarlo en Cloudflare Pages (límite de 25 MB por archivo).
 - Silkscreen (fuente bit del nombre) aún se carga desde Google Fonts; autoalojarla si se quiere evitar la dependencia externa.
 - Los efectos hover y la reproducción de videos no se han probado con contenido real.
