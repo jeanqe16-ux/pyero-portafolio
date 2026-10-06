@@ -7,7 +7,10 @@
       "icono": "video",
       "video": "/media/servicios/edicion-de-video.mp4",
       "poster": "/media/servicios/edicion-de-video.webp",
-      "media": "video"
+      "media": "video",
+      "titulo_en": "Video editing",
+      "texto_en": "Reels, TikToks and Shorts with pacing, captions, color and sound built to hold attention from the first second.",
+      "ideal_en": "AI and tech creators who explain complex ideas."
     },
     {
       "titulo": "Motion graphics",
@@ -16,7 +19,10 @@
       "icono": "animacion",
       "video": "/media/servicios/motion-graphics.mp4",
       "poster": "/media/servicios/motion-graphics.webp",
-      "media": "video"
+      "media": "video",
+      "titulo_en": "Motion graphics",
+      "texto_en": "Animated text, logos and graphics that explain your message and give your content an identity people recognize.",
+      "ideal_en": "brands that want to look consistent in every video."
     },
     {
       "titulo": "Diseño gráfico para redes",
@@ -25,7 +31,10 @@
       "icono": "diseno",
       "video": "",
       "poster": "",
-      "media": "posts"
+      "media": "posts",
+      "titulo_en": "Graphic design for social media",
+      "texto_en": "Posts and carousels with a consistent visual line, so your brand is recognized without seeing the logo.",
+      "ideal_en": "profiles that want a professional, tidy image."
     }
   ]
 }

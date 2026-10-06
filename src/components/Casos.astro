@@ -1,0 +1,269 @@
+---
+import { casos } from '../data/casos.json';
+import { clientes } from '../data/clientes.json';
+import { posts } from '../data/diseno.json';
+import { textosDe, tr, type Idioma } from '../lib/i18n';
+
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+const t = textosDe(lang).casos;
+const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
+---
+
+<section class="seccion" id="casos">
+  <p class="etiqueta">{t.etiqueta}</p>
+  <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
+
+  {
+    casos.map((caso, i) => {
+      const nombre = nombreDe(caso.cliente);
+      const piezas = posts.filter((p) => p.cliente === caso.cliente).slice(0, 4);
+      return (
+        <article class="caso" id={`caso-${caso.cliente}`}>
+          <div class="prueba">
+            {caso.prueba === 'videos' && caso.videos.length > 0 ? (
+              <div class="reproductor">
+                <video
+                  src={caso.videos[0].video}
+                  poster={caso.videos[0].poster}
+                  aria-label={`${nombre}: ${caso.videos[0].titulo}`}
+                  controls
+                  playsinline
+                  preload="none"
+                />
+                {caso.videos.length > 1 && (
+                  <ul class="miniaturas">
+                    {caso.videos.map((v, n) => (
+                      <li>
+                        <button
+                          type="button"
+                          data-video={v.video}
+                          data-poster={v.poster}
+                          data-titulo={`${nombre}: ${v.titulo}`}
+                          aria-label={`${t.verVideo} ${v.titulo}`}
+                          aria-pressed={n === 0 ? 'true' : 'false'}
+                        >
+                          <img src={v.poster} alt="" loading="lazy" decoding="async" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : (
+              <ul class="piezas" aria-label={`${t.posts} ${nombre}`}>
+                {piezas.map((p) => (
+                  <li>
+                    <img src={p.imagenes[0]} alt={p.titulo} width="1080" height="1080" loading="lazy" decoding="async" />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div class="relato">
+            <p class="numero">
+              {t.caso} 0{i + 1}
+            </p>
+            <h3>{nombre}</h3>
+            <dl>
+              <div>
+                <dt>{t.reto}</dt>
+                <dd>{tr(caso, 'reto', lang)}</dd>
+              </div>
+              <div>
+                <dt>{t.hice}</dt>
+                <dd>{tr(caso, 'hice', lang)}</dd>
+              </div>
+              <div class="resultado">
+                <dt>{t.resultado}</dt>
+                <dd>{tr(caso, 'resultado', lang)}</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+      );
+    })
+  }
+</section>
+
+<script>
+  // Las miniaturas cambian el video del caso sin recargar nada más
+  document.querySelectorAll<HTMLElement>('.reproductor').forEach((reproductor) => {
+    const video = reproductor.querySelector('video')!;
+    const botones = [...reproductor.querySelectorAll<HTMLElement>('.miniaturas button')];
+    botones.forEach((boton) =>
+      boton.addEventListener('click', () => {
+        botones.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
+        video.poster = boton.dataset.poster!;
+        video.src = boton.dataset.video!;
+        video.setAttribute('aria-label', boton.dataset.titulo!);
+        video.play().catch(() => {});
+      }),
+    );
+  });
+</script>
+
+<style>
+  .caso {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1.5rem, 5vw, 4.5rem);
+    align-items: center;
+    margin-top: clamp(3rem, 7vw, 5.5rem);
+    scroll-margin-top: 6rem;
+  }
+
+  /* Diseño alternado: en los casos pares el texto va a la izquierda */
+  .caso:nth-of-type(even) .prueba {
+    order: 2;
+  }
+
+  .prueba {
+    display: grid;
+    place-items: center;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border-radius: 28px;
+    background: var(--superficie);
+  }
+
+  .reproductor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  video {
+    display: block;
+    flex: 0 1 290px;
+    min-width: 0;
+    aspect-ratio: 9 / 16;
+    border-radius: 22px;
+    background: var(--negro);
+    object-fit: cover;
+    box-shadow: 0 30px 50px -30px rgb(0 0 0 / 0.55);
+  }
+
+  .miniaturas {
+    flex: none;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .miniaturas button {
+    display: block;
+    width: clamp(3rem, 6vw, 4rem);
+    aspect-ratio: 9 / 16;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--negro);
+    opacity: 0.6;
+    cursor: pointer;
+    transition:
+      opacity 0.25s ease,
+      border-color 0.25s ease;
+  }
+
+  .miniaturas button[aria-pressed='true'] {
+    border-color: var(--acento);
+    opacity: 1;
+  }
+
+  .miniaturas img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .piezas {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .piezas li {
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .piezas img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .numero {
+    margin-bottom: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--acento-texto);
+  }
+
+  h3 {
+    font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  dl {
+    display: grid;
+    gap: 1.25rem;
+    margin: 1.75rem 0 0;
+  }
+
+  dt {
+    margin-bottom: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--gris);
+  }
+
+  dd {
+    margin: 0;
+    max-width: 44ch;
+    font-size: 1.0625rem;
+  }
+
+  .resultado {
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--acento);
+    border-radius: 0 16px 16px 0;
+    background: var(--superficie);
+  }
+
+  .resultado dd {
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .miniaturas button:hover {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .caso {
+      grid-template-columns: 1fr;
+    }
+
+    /* En celular siempre va primero la prueba y luego el texto */
+    .caso:nth-of-type(even) .prueba {
+      order: 0;
+    }
+  }
+</style>

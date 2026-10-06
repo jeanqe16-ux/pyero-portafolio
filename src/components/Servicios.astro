@@ -1,9 +1,15 @@
 ---
-import textos from '../data/textos.json';
 import { servicios } from '../data/servicios.json';
 import { posts } from '../data/diseno.json';
 
-const t = textos.servicios;
+import { textosDe, tr, type Idioma } from '../lib/i18n';
+
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+const t = textosDe(lang).servicios;
 ---
 
 <section class="seccion" id="servicios">
@@ -64,10 +70,10 @@ const t = textos.servicios;
               )}
             </div>
           )}
-          <h3>{s.titulo}</h3>
-          <p>{s.texto}</p>
+          <h3>{tr(s, 'titulo', lang)}</h3>
+          <p>{tr(s, 'texto', lang)}</p>
           <p class="ideal">
-            <strong>{t.idealPara}</strong> {s.ideal}
+            <strong>{t.idealPara}</strong> {tr(s, 'ideal', lang)}
           </p>
         </li>
       ))
@@ -75,7 +81,7 @@ const t = textos.servicios;
   </ol>
 
   <div class="acciones">
-    <a class="boton boton-oscuro" href="#reels">{t.ctaProyectos}</a>
+    <a class="boton boton-oscuro" href="#casos">{t.ctaProyectos}</a>
     <a class="boton boton-claro" href="#contacto">{t.ctaCotizar}</a>
   </div>
 </section>

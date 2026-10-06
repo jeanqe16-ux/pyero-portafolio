@@ -1,0 +1,94 @@
+---
+import { cifras } from '../data/cifras.json';
+import { textosDe, tr, type Idioma } from '../lib/i18n';
+
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+const t = textosDe(lang).prueba;
+---
+
+<section class="prueba" aria-label={t.etiqueta}>
+  <ul>
+    {
+      cifras.map((c) => {
+        // Sin valor se muestra el marcador para completar; no se inventan cifras
+        const pendiente = c.valor === '' || c.valor == null;
+        return (
+          <li>
+            <strong>
+              <span data-conteo={pendiente ? undefined : c.valor}>{pendiente ? t.pendiente : c.valor}</span>
+              {!pendiente && c.sufijo}
+            </strong>
+            <span>{tr(c, 'etiqueta', lang)}</span>
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
+
+<script>
+  // Conteo ascendente al entrar en pantalla; con "reducir movimiento" queda el número final
+  const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const numeros = document.querySelectorAll<HTMLElement>('.prueba [data-conteo]');
+
+  if (!reducir && numeros.length) {
+    const observador = new IntersectionObserver(
+      (entradas) =>
+        entradas.forEach(({ target, isIntersecting }) => {
+          if (!isIntersecting) return;
+          observador.unobserve(target);
+          const numero = target as HTMLElement;
+          const final = Number(numero.dataset.conteo);
+          if (!Number.isFinite(final)) return;
+          const inicio = performance.now();
+          const paso = (ahora: number) => {
+            const avance = Math.min(1, (ahora - inicio) / 1400);
+            numero.textContent = String(Math.round(final * (1 - Math.pow(1 - avance, 3))));
+            if (avance < 1) requestAnimationFrame(paso);
+          };
+          requestAnimationFrame(paso);
+        }),
+      { threshold: 0.6 },
+    );
+    numeros.forEach((numero) => observador.observe(numero));
+  }
+</script>
+
+<style>
+  .prueba {
+    max-width: var(--ancho);
+    margin: 0 auto;
+    padding: 0 1.5rem clamp(2.5rem, 5vw, 4rem);
+  }
+
+  ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding-top: clamp(1.5rem, 3vw, 2.5rem);
+    border-top: 1px solid var(--linea);
+    text-align: center;
+  }
+
+  li {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  strong {
+    font-size: clamp(2.25rem, 6vw, 4.5rem);
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  li > span {
+    color: var(--gris);
+    font-size: clamp(0.8125rem, 1.4vw, 1rem);
+  }
+</style>

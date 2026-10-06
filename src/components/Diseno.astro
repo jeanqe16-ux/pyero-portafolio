@@ -1,9 +1,14 @@
 ---
-import textos from '../data/textos.json';
 import { clientes } from '../data/clientes.json';
 import { posts, portadas } from '../data/diseno.json';
 
-const t = textos.diseno;
+import { textosDe, type Idioma } from '../lib/i18n';
+
+interface Props {
+  lang: Idioma;
+}
+
+const t = textosDe(Astro.props.lang).diseno;
 const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
 
 // Solo se ofrecen como filtro las empresas que tienen posts; la primera queda seleccionada

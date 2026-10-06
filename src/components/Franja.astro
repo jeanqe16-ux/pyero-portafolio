@@ -1,15 +1,21 @@
 ---
-import textos from '../data/textos.json';
 import { clientes } from '../data/clientes.json';
-import { proyectos } from '../data/proyectos.json';
+import { casos } from '../data/casos.json';
 import { creadores } from '../data/creadores.json';
+import { textosDe, type Idioma } from '../lib/i18n';
 
-// Un cliente enlaza a su página de proyecto solo si existe una con el mismo slug
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+
+// Un cliente enlaza a su caso de estudio si tiene uno
 const nombres = [
   ...clientes.map((c) => ({
     nombre: c.nombre,
     logo: c.logo,
-    enlace: proyectos.some((p) => p.slug === c.id) ? `/proyectos/${c.id}/` : '',
+    enlace: casos.some((caso) => caso.cliente === c.id) ? `#caso-${c.id}` : '',
     externo: false,
   })),
   ...creadores.map((c) => ({ nombre: c.handle, logo: '', enlace: c.enlace, externo: true })),
@@ -19,7 +25,7 @@ const nombres = [
 const franja = Array.from({ length: 3 }, () => nombres).flat();
 ---
 
-<section class="franja" aria-label={textos.franja.etiqueta}>
+<section class="franja" aria-label={textosDe(lang).franja.etiqueta}>
   <div class="franja-pista">
     {
       [0, 1].map((mitad) => (

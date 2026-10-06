@@ -1,0 +1,149 @@
+---
+import { pasos } from '../data/proceso.json';
+import { textosDe, tr, type Idioma } from '../lib/i18n';
+
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+const t = textosDe(lang).proceso;
+---
+
+<section class="seccion proceso" id="proceso">
+  <p class="etiqueta">{t.etiqueta}</p>
+  <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
+
+  <ol class="pasos">
+    <li class="linea" aria-hidden="true"><span></span></li>
+    {
+      pasos.map((p, i) => (
+        <li class="paso">
+          <span class="numero">0{i + 1}</span>
+          <span class="punto" aria-hidden="true" />
+          <h3>{tr(p, 'titulo', lang)}</h3>
+          <p>{tr(p, 'texto', lang)}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  // La línea que une los pasos se dibuja con el scroll; sin animaciones queda completa
+  const pasos = document.querySelector<HTMLElement>('.pasos');
+  if (pasos && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.fromTo(
+      pasos,
+      { '--trazo': 0 },
+      { '--trazo': 1, ease: 'none', scrollTrigger: { trigger: pasos, start: 'top 82%', end: 'bottom 60%', scrub: 0.4 } },
+    );
+  }
+</script>
+
+<style>
+  .pasos {
+    --trazo: 1;
+    --numero: clamp(3.5rem, 8vw, 6.5rem);
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    margin-top: 3rem;
+  }
+
+  .numero {
+    display: block;
+    height: var(--numero);
+    font-size: var(--numero);
+    font-weight: 600;
+    letter-spacing: -0.06em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Riel gris con el trazo naranja encima, a la altura de los puntos */
+  .linea {
+    position: absolute;
+    top: calc(var(--numero) + 1.5rem + 5px);
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--linea);
+  }
+
+  .linea span {
+    display: block;
+    height: 100%;
+    background: var(--acento);
+    transform: scaleX(var(--trazo));
+    transform-origin: left;
+  }
+
+  .punto {
+    position: relative;
+    display: block;
+    width: 12px;
+    height: 12px;
+    margin: 1.5rem 0;
+    border-radius: 50%;
+    background: var(--acento);
+    box-shadow: 0 0 0 5px #fff;
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  .paso p {
+    max-width: 32ch;
+    margin-top: 0.6rem;
+    color: var(--gris);
+    font-size: 0.9375rem;
+  }
+
+  /* En celular los pasos se apilan y la línea baja por la izquierda */
+  @media (max-width: 700px) {
+    .pasos {
+      grid-template-columns: 1fr;
+      gap: 2.25rem;
+      padding-left: 2.25rem;
+    }
+
+    .linea {
+      top: 0.5rem;
+      bottom: 0.5rem;
+      left: 5px;
+      right: auto;
+      width: 2px;
+      height: auto;
+    }
+
+    .linea span {
+      transform: scaleY(var(--trazo));
+      transform-origin: top;
+    }
+
+    .paso {
+      position: relative;
+    }
+
+    .punto {
+      position: absolute;
+      top: 0.5rem;
+      left: -2.25rem;
+      margin: 0;
+    }
+
+    h3 {
+      margin-top: 0.75rem;
+    }
+  }
+</style>

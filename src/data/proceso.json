@@ -1,0 +1,22 @@
+{
+  "pasos": [
+    {
+      "titulo": "Entiendo tu marca",
+      "titulo_en": "I understand your brand",
+      "texto": "Reviso tu contenido, tu audiencia y lo que te hace distinto.",
+      "texto_en": "I review your content, your audience and what sets you apart."
+    },
+    {
+      "titulo": "Creo el sistema visual",
+      "titulo_en": "I build the visual system",
+      "texto": "Defino tipografías, colores, ritmo y animaciones para tus videos y posts.",
+      "texto_en": "I define type, color, pacing and animation for your videos and posts."
+    },
+    {
+      "titulo": "Entrego y optimizamos",
+      "titulo_en": "I deliver and we optimize",
+      "texto": "Recibes las piezas listas para publicar y ajustamos según cómo responden.",
+      "texto_en": "You get pieces ready to publish and we adjust based on how they perform."
+    }
+  ]
+}

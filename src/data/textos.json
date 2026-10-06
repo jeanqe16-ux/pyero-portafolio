@@ -1,111 +1,242 @@
 {
-  "nav": {
-    "servicios": "Servicios",
-    "sobre": "Sobre mí",
-    "contacto": "Contacto",
-    "cta": "Hablemos"
-  },
-  "hero": {
-    "estado": "Disponible para nuevos proyectos",
-    "titulo": {
-      "a": "Eleva tu",
-      "b": "contenido",
-      "c": "entendiendo tu",
-      "d": "marca"
+  "es": {
+    "nav": {
+      "casos": "Casos",
+      "servicios": "Servicios",
+      "sobre": "Sobre mí",
+      "contacto": "Contacto",
+      "cta": "Hablemos",
+      "idioma": "Cambiar idioma"
     },
-    "bajada": "Soy diseñador gráfico especializado en edición de video y motion graphics. Primero entiendo tu marca, luego la convierto en piezas visuales que se quedan en la mente de tu audiencia.",
-    "cta": "Escríbeme por WhatsApp",
-    "secundario": "Ver servicios",
-    "proximamente": "Próximamente"
-  },
-  "franja": {
-    "etiqueta": "Marcas y creadores con los que he trabajado"
-  },
-  "proyectos": {
-    "etiquetaPagina": "Proyecto",
-    "volver": "Volver",
-    "cotizar": "Cotizar mi proyecto",
-    "proximamente": "Próximamente"
-  },
-  "diseno": {
-    "etiqueta": "Diseño gráfico",
-    "titulo": {
-      "antes": "Posts y portadas que se",
-      "destacado": "reconocen",
-      "despues": ""
-    },
-    "filtro": "Filtrar por cliente",
-    "posts": "Posts",
-    "portadas": "Portadas",
-    "ver": "Ver en grande:",
-    "anterior": "Anterior",
-    "siguiente": "Siguiente",
-    "cerrar": "Cerrar",
-    "visor": "Visor de imágenes"
-  },
-  "servicios": {
-    "etiqueta": "Servicios",
-    "titulo": {
-      "antes": "Tres formas de",
-      "destacado": "mover",
-      "despues": "tu marca"
-    },
-    "subtitulo": "Todo parte de entender tu marca. Después, hacemos que se mueva.",
-    "idealPara": "Ideal para:",
-    "proximamente": "Próximamente",
-    "ctaProyectos": "Ver proyectos",
-    "ctaCotizar": "Cotizar mi proyecto",
-    "pase": "Muestra de posts diseñados para redes"
-  },
-  "sobre": {
-    "etiqueta": "Sobre mí",
-    "titulo": {
-      "antes": "Diseño con mirada de",
-      "destacado": "marketing",
-      "despues": ""
-    },
-    "parrafos": [
-      "Soy Pyero, diseñador gráfico especializado en edición de video y motion graphics. Estudio Marketing en la Universidad Continental (5.º ciclo), y eso me permite pensar cada pieza desde la estrategia, no solo desde lo visual.",
-      "He trabajado con clínicas, marcas de moda y creadores de contenido. Antes de abrir un programa, entiendo qué hace única a tu marca. Después lo traduzco en contenido que conecta."
-    ],
-    "herramientas": "Herramientas que uso",
-    "fotoAlt": "Retrato de Pyero, diseñador gráfico y editor de video",
-    "fotoPendiente": "Tu foto aquí",
-    "datos": [
-      {
-        "titulo": "Enfoque",
-        "valor": "Marketing + diseño"
+    "hero": {
+      "estado": "Disponible para nuevos proyectos",
+      "titulo": {
+        "a": "Tus ideas sobre",
+        "b": "IA",
+        "c": "merecen videos que las hagan",
+        "d": "escuchar"
       },
-      {
-        "titulo": "Experiencia",
-        "valor": "Clínicas, moda y creadores"
+      "bajada": "Edición y motion graphics para creadores de IA y tecnología que quieren retener desde el primer segundo.",
+      "cta": "Quiero resultados así",
+      "secundario": "Ver casos",
+      "proximamente": "Próximamente"
+    },
+    "prueba": {
+      "etiqueta": "Mi trabajo en cifras",
+      "pendiente": "[X]"
+    },
+    "franja": {
+      "etiqueta": "Marcas y creadores con los que he trabajado"
+    },
+    "filosofia": {
+      "etiqueta": "Filosofía",
+      "titulo": {
+        "antes": "Cambio de forma, no de",
+        "destacado": "esencia",
+        "despues": ""
       },
-      {
-        "titulo": "Respuesta",
-        "valor": "En menos de 24 horas"
+      "frase": "Primero entiendo tu negocio. La edición es la consecuencia."
+    },
+    "casos": {
+      "etiqueta": "Casos de estudio",
+      "titulo": {
+        "antes": "Lo que cambió para cada",
+        "destacado": "marca",
+        "despues": ""
+      },
+      "caso": "Caso",
+      "reto": "Reto",
+      "hice": "Lo que hice",
+      "resultado": "Resultado",
+      "verVideo": "Ver video:",
+      "posts": "Posts diseñados para"
+    },
+    "servicios": {
+      "etiqueta": "Servicios",
+      "titulo": {
+        "antes": "Tres formas de",
+        "destacado": "mover",
+        "despues": "tu marca"
+      },
+      "subtitulo": "Todo parte de entender tu marca. Después, hacemos que se mueva.",
+      "idealPara": "Ideal para:",
+      "proximamente": "Próximamente",
+      "ctaProyectos": "Ver casos",
+      "ctaCotizar": "Cotizar mi proyecto",
+      "pase": "Muestra de posts diseñados para redes"
+    },
+    "diseno": {
+      "etiqueta": "Diseño gráfico",
+      "titulo": {
+        "antes": "Posts y portadas que se",
+        "destacado": "reconocen",
+        "despues": ""
+      },
+      "filtro": "Filtrar por empresa",
+      "posts": "Posts",
+      "portadas": "Portadas",
+      "ver": "Ver en grande:",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente",
+      "cerrar": "Cerrar",
+      "visor": "Visor de imágenes"
+    },
+    "proceso": {
+      "etiqueta": "Proceso",
+      "titulo": {
+        "antes": "Tres pasos, un solo",
+        "destacado": "sistema",
+        "despues": ""
       }
-    ],
-    "cta": "Hablemos",
-    "ctaSecundario": "Ver proyectos"
-  },
-  "contacto": {
-    "etiqueta": "Contacto",
-    "titulo": {
-      "antes": "¿Hacemos que tu",
-      "destacado": "marca",
-      "despues": "se mueva?"
     },
-    "texto": "Cuéntame qué necesitas y te respondo por WhatsApp.",
-    "cta": "Escríbeme por WhatsApp",
-    "redes": "Sígueme"
+    "sobre": {
+      "etiqueta": "Sobre mí",
+      "titulo": {
+        "antes": "Hola, soy",
+        "destacado": "Jean",
+        "despues": ""
+      },
+      "parrafos": [
+        "Editor y motion designer desde Huancayo. Trabajo con creadores de IA y tecnología que quieren que su contenido se vea tan inteligente como sus ideas."
+      ],
+      "herramientas": "Herramientas que uso",
+      "fotoAlt": "Retrato de Jean, editor y motion designer",
+      "cta": "Hablemos",
+      "ctaSecundario": "Ver casos"
+    },
+    "contacto": {
+      "etiqueta": "Contacto",
+      "titulo": {
+        "antes": "¿Tu contenido está a la altura de tus",
+        "destacado": "ideas",
+        "cierre": "?"
+      },
+      "texto": "Cuéntame qué quieres lograr y te respondo por WhatsApp.",
+      "cta": "Escríbeme por WhatsApp",
+      "redes": "Sígueme"
+    },
+    "pie": "Todos los derechos reservados.",
+    "whatsapp": "Chatear por WhatsApp",
+    "pixeles": ["IA", "TECH", "MOTION", "EDIT", "VISUAL"]
   },
-  "pie": "Todos los derechos reservados.",
-  "whatsapp": "Chatear por WhatsApp",
-  "pixeles": [
-    "IA",
-    "TECH",
-    "MOTION",
-    "EDIT",
-    "VISUAL"
-  ]
+  "en": {
+    "nav": {
+      "casos": "Cases",
+      "servicios": "Services",
+      "sobre": "About",
+      "contacto": "Contact",
+      "cta": "Let's talk",
+      "idioma": "Switch language"
+    },
+    "hero": {
+      "estado": "Available for new projects",
+      "titulo": {
+        "a": "Your ideas on",
+        "b": "AI",
+        "c": "deserve videos that get them",
+        "d": "heard"
+      },
+      "bajada": "Editing and motion graphics for AI and tech creators who want to hold attention from the first second.",
+      "cta": "I want results like these",
+      "secundario": "See cases",
+      "proximamente": "Coming soon"
+    },
+    "prueba": {
+      "etiqueta": "My work in numbers",
+      "pendiente": "[X]"
+    },
+    "franja": {
+      "etiqueta": "Brands and creators I have worked with"
+    },
+    "filosofia": {
+      "etiqueta": "Philosophy",
+      "titulo": {
+        "antes": "I change the form, not the",
+        "destacado": "essence",
+        "despues": ""
+      },
+      "frase": "First I understand your business. The edit is the consequence."
+    },
+    "casos": {
+      "etiqueta": "Case studies",
+      "titulo": {
+        "antes": "What changed for each",
+        "destacado": "brand",
+        "despues": ""
+      },
+      "caso": "Case",
+      "reto": "Challenge",
+      "hice": "What I did",
+      "resultado": "Result",
+      "verVideo": "Watch video:",
+      "posts": "Posts designed for"
+    },
+    "servicios": {
+      "etiqueta": "Services",
+      "titulo": {
+        "antes": "Three ways to",
+        "destacado": "move",
+        "despues": "your brand"
+      },
+      "subtitulo": "It all starts with understanding your brand. Then we make it move.",
+      "idealPara": "Ideal for:",
+      "proximamente": "Coming soon",
+      "ctaProyectos": "See cases",
+      "ctaCotizar": "Get a quote",
+      "pase": "Sample of posts designed for social media"
+    },
+    "diseno": {
+      "etiqueta": "Graphic design",
+      "titulo": {
+        "antes": "Posts and covers you",
+        "destacado": "recognize",
+        "despues": ""
+      },
+      "filtro": "Filter by company",
+      "posts": "Posts",
+      "portadas": "Covers",
+      "ver": "View larger:",
+      "anterior": "Previous",
+      "siguiente": "Next",
+      "cerrar": "Close",
+      "visor": "Image viewer"
+    },
+    "proceso": {
+      "etiqueta": "Process",
+      "titulo": {
+        "antes": "Three steps, one",
+        "destacado": "system",
+        "despues": ""
+      }
+    },
+    "sobre": {
+      "etiqueta": "About me",
+      "titulo": {
+        "antes": "Hi, I'm",
+        "destacado": "Jean",
+        "despues": ""
+      },
+      "parrafos": [
+        "Editor and motion designer based in Huancayo. I work with AI and tech creators who want their content to look as smart as their ideas."
+      ],
+      "herramientas": "Tools I use",
+      "fotoAlt": "Portrait of Jean, editor and motion designer",
+      "cta": "Let's talk",
+      "ctaSecundario": "See cases"
+    },
+    "contacto": {
+      "etiqueta": "Contact",
+      "titulo": {
+        "antes": "Is your content living up to your",
+        "destacado": "ideas",
+        "cierre": "?"
+      },
+      "texto": "Tell me what you want to achieve and I'll reply on WhatsApp.",
+      "cta": "Message me on WhatsApp",
+      "redes": "Follow me"
+    },
+    "pie": "All rights reserved.",
+    "whatsapp": "Chat on WhatsApp",
+    "pixeles": ["AI", "TECH", "MOTION", "EDIT", "VISUAL"]
+  }
 }

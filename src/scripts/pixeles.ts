@@ -132,7 +132,8 @@ function fondo() {
       const columnas = palabra.length * 6 - 1;
       const paso = Math.max(8, Math.min(30, Math.floor((ancho * (movil ? 0.86 : 0.6)) / columnas)));
       const x0 = Math.round((ancho - columnas * paso) / 2);
-      const y0 = Math.round(alto * (n % 2 ? 0.58 : 0.4) - 3.5 * paso);
+      // Alternan arriba y abajo del texto de la sección para no quedar detrás de él
+      const y0 = Math.round(alto * (n % 2 ? 0.82 : 0.2) - 3.5 * paso);
       const puntos: { x: number; y: number; lado: number }[] = [];
       [...palabra].forEach((letra, l) =>
         (LETRAS[letra] ?? []).forEach((fila, f) => {
@@ -144,6 +145,10 @@ function fondo() {
     });
   };
 
+  // Las palabras se forman mientras se recorre la sección de filosofía, que queda fija en pantalla
+  const seccion = document.querySelector<HTMLElement>('.filosofia');
+  const tramo = { t: 0 };
+
   let costo = 0;
   let muestras = 0;
 
@@ -153,11 +158,12 @@ function fondo() {
     ctx.setTransform(escala, 0, 0, escala, 0, 0);
     ctx.clearRect(0, 0, ancho, alto);
 
-    // Cada palabra ocupa un tramo del recorrido: se arma, se sostiene y se deshace
+    // Cada palabra ocupa un tramo de la sección: se arma, se sostiene y se deshace
     let palabra = -1;
     let fuerza = 0;
     for (let n = 0; n < destinos.length; n++) {
-      const f = 1 - suave(0.03, 0.07, Math.abs(p - (n + 1) / (destinos.length + 1)));
+      const centro = 0.08 + (0.84 * (n + 0.5)) / destinos.length;
+      const f = seccion ? 1 - suave(0.045, 0.08, Math.abs(tramo.t - centro)) : 0;
       if (f > fuerza) [palabra, fuerza] = [n, f];
     }
     const puntos = palabra >= 0 ? destinos[palabra] : [];
@@ -206,10 +212,20 @@ function fondo() {
     onUpdate: pintar,
     scrollTrigger: { start: 0, end: 'max', scrub: 0.6 },
   });
+
+  if (seccion)
+    gsap.to(tramo, {
+      t: 1,
+      ease: 'none',
+      onUpdate: pintar,
+      scrollTrigger: { trigger: seccion, start: 'top top', end: 'bottom bottom', scrub: 0.6 },
+    });
 }
 
 // Con "reducir movimiento" no se activa nada: el nombre queda en contorno y el fondo vacío
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  // Marca la página para que la sección de filosofía se alargue solo cuando hay animación
+  document.documentElement.classList.add('con-pixeles');
   gsap.registerPlugin(ScrollTrigger);
   gsap.ticker.fps(60);
   fondo();

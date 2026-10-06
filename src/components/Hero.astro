@@ -1,15 +1,29 @@
 ---
 import site from '../data/site.json';
-import textos from '../data/textos.json';
-import { proyectos } from '../data/proyectos.json';
+import { casos } from '../data/casos.json';
+import { clientes } from '../data/clientes.json';
 import { creadores } from '../data/creadores.json';
 import { enlaceWhatsapp } from '../lib/enlaces';
+import { textosDe, tr, type Idioma } from '../lib/i18n';
 
-const t = textos.hero;
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+const t = textosDe(lang).hero;
 
 const reels = [
-  ...proyectos.map((p) => ({ nombre: p.nombre, categoria: p.categoria, video: p.video, poster: p.poster })),
-  ...creadores.map((c) => ({ nombre: c.handle, categoria: c.categoria, video: c.video, poster: c.poster })),
+  // De cada caso con videos sale un reel: el primero de su lista
+  ...casos
+    .filter((c) => c.videos.length > 0)
+    .map((c) => ({
+      nombre: clientes.find((cl) => cl.id === c.cliente)?.nombre ?? c.cliente,
+      categoria: tr(c, 'categoria', lang),
+      video: c.videos[0].video,
+      poster: c.videos[0].poster,
+    })),
+  ...creadores.map((c) => ({ nombre: c.handle, categoria: tr(c, 'categoria', lang), video: c.video, poster: c.poster })),
 ];
 
 // Abanico: cada reel rota y baja según su distancia al centro
@@ -22,7 +36,7 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
   <h1>
     {t.titulo.a}{' '}<span class="junto"><span class="chip" aria-hidden="true"
       ><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"></path></svg></span
-    >{' '}<em>{t.titulo.b}</em></span><br />
+    >{' '}<em>{t.titulo.b}</em></span>{' '}
     {t.titulo.c}{' '}<span class="junto"><span class="chip chip-claro" aria-hidden="true"
       ><svg viewBox="0 0 24 24"
         ><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor"></path></svg
@@ -31,8 +45,8 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
   </h1>
   <p class="bajada">{t.bajada}</p>
   <div class="acciones">
-    <a class="boton boton-oscuro" href={enlaceWhatsapp} target="_blank" rel="noopener noreferrer">{t.cta}</a>
-    <a class="boton boton-claro" href="#servicios">{t.secundario}</a>
+    <a class="boton boton-oscuro" href={enlaceWhatsapp(lang)} target="_blank" rel="noopener noreferrer">{t.cta}</a>
+    <a class="boton boton-claro" href="#casos">{t.secundario}</a>
   </div>
 
   <div class="escenario" id="reels">
@@ -98,6 +112,12 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
   .hero {
     padding: clamp(2.5rem, 6vw, 5rem) 1.5rem 0;
     text-align: center;
+  }
+
+  h1 {
+    max-width: 18ch;
+    margin-inline: auto;
+    font-size: clamp(2.1rem, 5.6vw, 4.5rem);
   }
 
   .estado {

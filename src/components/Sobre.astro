@@ -1,44 +1,40 @@
 ---
-import { Image } from 'astro:assets';
-import textos from '../data/textos.json';
+import { existsSync } from 'node:fs';
+import site from '../data/site.json';
 import Herramientas from './Herramientas.astro';
+import { textosDe, type Idioma } from '../lib/i18n';
 
-const t = textos.sobre;
+interface Props {
+  lang: Idioma;
+}
 
-// La foto se toma de src/assets/foto-pyero.(jpg|jpeg|png|webp|avif); si no existe, queda el placeholder
-const fotos = import.meta.glob<ImageMetadata>('../assets/foto-pyero.{jpg,jpeg,png,webp,avif}', {
-  eager: true,
-  import: 'default',
-});
-const foto = Object.values(fotos)[0];
+const t = textosDe(Astro.props.lang).sobre;
+
+// La foto vive en public/media/yo.(jpg|jpeg|webp|png); si no existe queda un espacio con la inicial
+const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).find((r) => existsSync(`public${r}`));
 ---
 
 <section class="seccion sobre" id="sobre-mi">
   <div class="foto">
-    {foto ? <Image src={foto} alt={t.fotoAlt} width={720} /> : <span>{t.fotoPendiente}</span>}
+    {
+      foto ? (
+        <img src={foto} alt={t.fotoAlt} width="900" height="1200" loading="lazy" decoding="async" />
+      ) : (
+        <span aria-hidden="true">{site.marca.charAt(0)}</span>
+      )
+    }
   </div>
   <div>
     <p class="etiqueta">{t.etiqueta}</p>
     <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
     {t.parrafos.map((p) => <p class="texto">{p}</p>)}
 
-    <dl class="datos">
-      {
-        t.datos.map((d) => (
-          <div>
-            <dt>{d.titulo}</dt>
-            <dd>{d.valor}</dd>
-          </div>
-        ))
-      }
-    </dl>
-
     <p class="etiqueta herramientas-titulo">{t.herramientas}</p>
     <Herramientas />
 
     <div class="acciones">
       <a class="boton boton-oscuro" href="#contacto">{t.cta}</a>
-      <a class="enlace" href="#reels">{t.ctaSecundario}</a>
+      <a class="enlace" href="#casos">{t.ctaSecundario}</a>
     </div>
   </div>
 </section>
@@ -55,12 +51,14 @@ const foto = Object.values(fotos)[0];
   .foto {
     display: grid;
     place-items: center;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;
     border-radius: 28px;
     overflow: hidden;
-    background: var(--superficie);
-    color: var(--gris);
-    font-size: 0.875rem;
+    background: linear-gradient(160deg, var(--acento-suave), var(--acento));
+    color: rgb(255 255 255 / 0.9);
+    font-size: clamp(5rem, 14vw, 10rem);
+    font-weight: 600;
+    letter-spacing: -0.05em;
     transform: rotate(-2deg);
     transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
@@ -75,33 +73,16 @@ const foto = Object.values(fotos)[0];
     margin-bottom: 1.5rem;
   }
 
+  .texto {
+    font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  }
+
   .texto + .texto {
     margin-top: 1rem;
   }
 
-  .datos {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-    margin: 2rem 0 0;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--linea);
-  }
-
-  dt {
-    font-size: 0.8125rem;
-    color: var(--gris);
-  }
-
-  dd {
-    margin: 0.2rem 0 0;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-  }
-
   .herramientas-titulo {
-    margin: 2rem 0 0.75rem;
+    margin: 2.25rem 0 0.75rem;
   }
 
   .acciones {
@@ -140,14 +121,7 @@ const foto = Object.values(fotos)[0];
 
     .foto {
       width: 100%;
-      max-width: 360px;
-    }
-  }
-
-  @media (max-width: 560px) {
-    .datos {
-      grid-template-columns: 1fr;
-      gap: 0.9rem;
+      max-width: 340px;
     }
   }
 </style>

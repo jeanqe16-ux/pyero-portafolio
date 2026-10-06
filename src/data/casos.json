@@ -1,0 +1,70 @@
+{
+  "casos": [
+    {
+      "cliente": "cero",
+      "categoria": "Edición de video y motion",
+      "categoria_en": "Video editing and motion",
+      "reto": "Explicar servicios técnicos de tomografía y radiología digital sin perder a la audiencia.",
+      "reto_en": "Explain technical tomography and digital radiology services without losing the audience.",
+      "hice": "Edición de video, motion graphics sobre las tomas y posts con una misma línea gráfica.",
+      "hice_en": "Video editing, motion graphics over the footage, and posts that share one graphic line.",
+      "resultado": "Servicios técnicos explicados en menos de 30 segundos y una imagen que se reconoce en cada publicación.",
+      "resultado_en": "Technical services explained in under 30 seconds and a look that is recognized in every post.",
+      "prueba": "videos",
+      "videos": [
+        {
+          "titulo": "Regreso a clases",
+          "video": "/media/cero/videos/cero-regreso-a-clases.mp4",
+          "poster": "/media/cero/videos/cero-regreso-a-clases.jpg"
+        },
+        {
+          "titulo": "Motion graphics",
+          "video": "/media/cero/videos/cero-motion.mp4",
+          "poster": "/media/cero/videos/cero-motion.jpg"
+        },
+        {
+          "titulo": "Ubicación",
+          "video": "/media/cero/videos/cero-ubicacion.mp4",
+          "poster": "/media/cero/videos/cero-ubicacion.jpg"
+        }
+      ]
+    },
+    {
+      "cliente": "clinica-dental-imagen",
+      "categoria": "Edición de video y motion",
+      "categoria_en": "Video editing and motion",
+      "reto": "Mostrar tratamientos y casos clínicos de forma cercana, sin que suenen a publicidad fría.",
+      "reto_en": "Show treatments and clinical cases in a warm way, without sounding like cold advertising.",
+      "hice": "Videos con motion graphics que acompañan al especialista, más posts y portadas para fechas clave.",
+      "hice_en": "Videos with motion graphics that support the specialist, plus posts and covers for key dates.",
+      "resultado": "Tratamientos explicados con claridad y una línea visual coherente en todas sus redes.",
+      "resultado_en": "Treatments explained clearly and a consistent visual line across all their channels.",
+      "prueba": "videos",
+      "videos": [
+        {
+          "titulo": "Aplicaciones clínicas",
+          "video": "/media/clinica-dental-imagen/videos/clinica-dental-motion.mp4",
+          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion.jpg"
+        },
+        {
+          "titulo": "Caso clínico",
+          "video": "/media/clinica-dental-imagen/videos/clinica-dental-motion-2.mp4",
+          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion-2.jpg"
+        }
+      ]
+    },
+    {
+      "cliente": "clinica-zarate",
+      "categoria": "Diseño gráfico para redes",
+      "categoria_en": "Graphic design for social media",
+      "reto": "Comunicar campañas y consejos de salud de varias especialidades con un mismo estilo.",
+      "reto_en": "Communicate campaigns and health tips from several specialties in one consistent style.",
+      "hice": "Posts y carruseles informativos con una plantilla flexible para cada campaña.",
+      "hice_en": "Informative posts and carousels built on a flexible template for each campaign.",
+      "resultado": "Contenido de salud fácil de leer y una marca que se reconoce en cada post.",
+      "resultado_en": "Health content that is easy to read and a brand you recognize in every post.",
+      "prueba": "posts",
+      "videos": []
+    }
+  ]
+}

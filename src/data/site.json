@@ -2,12 +2,15 @@
   "marca": "Pyero",
   "marcaSufijo": ".workz",
   "whatsapp": "51964544392",
-  "mensajeWhatsapp": "Hola Pyero, vi tu portafolio y quiero cotizar un proyecto.",
+  "mensajeWhatsapp": "Hola Jean, vi tu portafolio y quiero cotizar un proyecto.",
   "instagram": "https://instagram.com/pyero.workz",
   "tiktok": "https://tiktok.com/@pyero.workz",
   "seo": {
-    "titulo": "Pyero.workz | Edición de video y motion graphics",
-    "descripcion": "Portafolio de Pyero.workz: diseño gráfico, edición de video y motion graphics para marcas y creadores de contenido.",
-    "imagen": "/og.png"
-  }
+    "titulo": "Pyero.workz | Edición y motion graphics para creadores de IA y tecnología",
+    "descripcion": "Edición de video y motion graphics para creadores de IA y tecnología que quieren retener desde el primer segundo.",
+    "imagen": "/og.png",
+    "titulo_en": "Pyero.workz | Editing and motion graphics for AI and tech creators",
+    "descripcion_en": "Video editing and motion graphics for AI and tech creators who want to hold attention from the first second."
+  },
+  "mensajeWhatsapp_en": "Hi Jean, I saw your portfolio and I would like a quote for a project."
 }

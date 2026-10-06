@@ -2,16 +2,21 @@
 import '@fontsource-variable/inter';
 import '../styles/global.css';
 import site from '../data/site.json';
-import textos from '../data/textos.json';
 import Redes from '../components/Redes.astro';
 import { enlaceWhatsapp, iconoWhatsapp } from '../lib/enlaces';
+import { ruta, textosDe, tr, type Idioma } from '../lib/i18n';
 
 interface Props {
+  lang: Idioma;
   titulo?: string;
   descripcion?: string;
 }
 
-const { titulo = site.seo.titulo, descripcion = site.seo.descripcion } = Astro.props;
+const { lang } = Astro.props;
+const { titulo = tr(site.seo, 'titulo', lang), descripcion = tr(site.seo, 'descripcion', lang) } = Astro.props;
+const textos = textosDe(lang);
+const inicio = ruta(lang);
+const otroIdioma: Idioma = lang === 'es' ? 'en' : 'es';
 
 // Con `site` definido en astro.config.mjs las URL de Open Graph salen absolutas
 const urlPagina = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
@@ -19,15 +24,17 @@ const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={urlPagina} />
+    <link rel="alternate" hreflang="es" href={new URL(ruta('es'), Astro.site ?? Astro.url)} />
+    <link rel="alternate" hreflang="en" href={new URL(ruta('en'), Astro.site ?? Astro.url)} />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_PE" />
+    <meta property="og:locale" content={lang === 'es' ? 'es_PE' : 'en_US'} />
     <meta property="og:site_name" content={site.marca + site.marcaSufijo} />
     <meta property="og:title" content={titulo} />
     <meta property="og:description" content={descripcion} />
@@ -61,15 +68,20 @@ const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
 
     <header class="nav">
       <div class="nav-interior">
-        <a class="marca" href="/">{site.marca}<span>{site.marcaSufijo}</span></a>
+        <a class="marca" href={inicio}>{site.marca}<span>{site.marcaSufijo}</span></a>
         <nav class="nav-links" aria-label="Principal">
-          <a href="/#servicios">{textos.nav.servicios}</a>
-          <a href="/#sobre-mi">{textos.nav.sobre}</a>
-          <a href="/#contacto">{textos.nav.contacto}</a>
+          <a href={`${inicio}#casos`}>{textos.nav.casos}</a>
+          <a href={`${inicio}#servicios`}>{textos.nav.servicios}</a>
+          <a href={`${inicio}#sobre-mi`}>{textos.nav.sobre}</a>
+          <a href={`${inicio}#contacto`}>{textos.nav.contacto}</a>
         </nav>
         <div class="nav-acciones">
           <Redes />
-          <a class="boton boton-oscuro boton-chico" href="/#contacto">{textos.nav.cta}</a>
+          <a class="idioma" href={ruta(otroIdioma)} hreflang={otroIdioma} aria-label={textos.nav.idioma}>
+            <span class:list={{ activo: lang === 'es' }}>ES</span>
+            <span class:list={{ activo: lang === 'en' }}>EN</span>
+          </a>
+          <a class="boton boton-oscuro boton-chico" href={`${inicio}#contacto`}>{textos.nav.cta}</a>
         </div>
       </div>
     </header>
@@ -85,7 +97,7 @@ const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
 
     <a
       class="flotante"
-      href={enlaceWhatsapp}
+      href={enlaceWhatsapp(lang)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={textos.whatsapp}

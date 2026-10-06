@@ -193,6 +193,26 @@ h2 em {
   gap: 0.75rem;
 }
 
+.idioma {
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--superficie);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.idioma span {
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  color: var(--gris);
+}
+
+.idioma .activo {
+  background: var(--negro);
+  color: #fff;
+}
+
 .pie {
   display: flex;
   flex-wrap: wrap;
@@ -287,7 +307,13 @@ h2 em {
   }
 }
 
-@media (max-width: 820px) {
+@media (max-width: 1100px) {
+  .nav-links {
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 900px) {
   .nav-links {
     display: none;
   }
@@ -299,8 +325,27 @@ h2 em {
     bottom: 0.9rem;
   }
 
-  .nav-acciones .redes {
+  .nav .nav-acciones .redes {
     display: none;
+  }
+
+  /* Con el selector de idioma el encabezado va más justo en pantallas chicas */
+  .nav-interior {
+    gap: 0.5rem;
+    padding-inline: 1rem;
+  }
+
+  .nav-acciones {
+    gap: 0.5rem;
+  }
+
+  .marca {
+    font-size: 1rem;
+  }
+
+  .nav .boton-chico {
+    padding: 0.55rem 0.85rem;
+    font-size: 0.8125rem;
   }
 }
 
