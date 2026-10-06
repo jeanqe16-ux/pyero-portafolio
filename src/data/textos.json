@@ -11,12 +11,12 @@
     "hero": {
       "estado": "Disponible para nuevos proyectos",
       "titulo": {
-        "a": "Tus ideas sobre",
-        "b": "IA",
-        "c": "merecen videos que las hagan",
-        "d": "escuchar"
+        "a": "Tu",
+        "b": "marca",
+        "c": "tiene algo que decir. Yo hago que se vea y se",
+        "d": "escuche."
       },
-      "bajada": "Edición y motion graphics para creadores de IA y tecnología que quieren retener desde el primer segundo.",
+      "bajada": "Edición de video, motion graphics y diseño para marcas que quieren comunicar con claridad y verse profesionales.",
       "cta": "Quiero resultados así",
       "secundario": "Ver casos",
       "proximamente": "Próximamente"
@@ -27,15 +27,6 @@
     },
     "franja": {
       "etiqueta": "Marcas y creadores con los que he trabajado"
-    },
-    "filosofia": {
-      "etiqueta": "Filosofía",
-      "titulo": {
-        "antes": "Cambio de forma, no de",
-        "destacado": "esencia",
-        "despues": ""
-      },
-      "frase": "Primero entiendo tu negocio. La edición es la consecuencia."
     },
     "casos": {
       "etiqueta": "Casos de estudio",
@@ -49,7 +40,8 @@
       "hice": "Lo que hice",
       "resultado": "Resultado",
       "verVideo": "Ver video:",
-      "posts": "Posts diseñados para"
+      "verImagen": "Ver en grande:",
+      "piezas": "Piezas de"
     },
     "servicios": {
       "etiqueta": "Servicios",
@@ -64,22 +56,6 @@
       "ctaProyectos": "Ver casos",
       "ctaCotizar": "Cotizar mi proyecto",
       "pase": "Muestra de posts diseñados para redes"
-    },
-    "diseno": {
-      "etiqueta": "Diseño gráfico",
-      "titulo": {
-        "antes": "Posts y portadas que se",
-        "destacado": "reconocen",
-        "despues": ""
-      },
-      "filtro": "Filtrar por empresa",
-      "posts": "Posts",
-      "portadas": "Portadas",
-      "ver": "Ver en grande:",
-      "anterior": "Anterior",
-      "siguiente": "Siguiente",
-      "cerrar": "Cerrar",
-      "visor": "Visor de imágenes"
     },
     "proceso": {
       "etiqueta": "Proceso",
@@ -117,7 +93,13 @@
     },
     "pie": "Todos los derechos reservados.",
     "whatsapp": "Chatear por WhatsApp",
-    "pixeles": ["IA", "TECH", "MOTION", "EDIT", "VISUAL"]
+    "pixeles": [
+      "IA",
+      "TECH",
+      "MOTION",
+      "EDIT",
+      "VISUAL"
+    ]
   },
   "en": {
     "nav": {
@@ -131,12 +113,12 @@
     "hero": {
       "estado": "Available for new projects",
       "titulo": {
-        "a": "Your ideas on",
-        "b": "AI",
-        "c": "deserve videos that get them",
-        "d": "heard"
+        "a": "Your",
+        "b": "brand",
+        "c": "has something to say. I make it seen and",
+        "d": "heard."
       },
-      "bajada": "Editing and motion graphics for AI and tech creators who want to hold attention from the first second.",
+      "bajada": "Video editing, motion graphics and design for brands that want to communicate clearly and look professional.",
       "cta": "I want results like these",
       "secundario": "See cases",
       "proximamente": "Coming soon"
@@ -147,15 +129,6 @@
     },
     "franja": {
       "etiqueta": "Brands and creators I have worked with"
-    },
-    "filosofia": {
-      "etiqueta": "Philosophy",
-      "titulo": {
-        "antes": "I change the form, not the",
-        "destacado": "essence",
-        "despues": ""
-      },
-      "frase": "First I understand your business. The edit is the consequence."
     },
     "casos": {
       "etiqueta": "Case studies",
@@ -169,7 +142,8 @@
       "hice": "What I did",
       "resultado": "Result",
       "verVideo": "Watch video:",
-      "posts": "Posts designed for"
+      "verImagen": "View larger:",
+      "piezas": "Pieces for"
     },
     "servicios": {
       "etiqueta": "Services",
@@ -184,22 +158,6 @@
       "ctaProyectos": "See cases",
       "ctaCotizar": "Get a quote",
       "pase": "Sample of posts designed for social media"
-    },
-    "diseno": {
-      "etiqueta": "Graphic design",
-      "titulo": {
-        "antes": "Posts and covers you",
-        "destacado": "recognize",
-        "despues": ""
-      },
-      "filtro": "Filter by company",
-      "posts": "Posts",
-      "portadas": "Covers",
-      "ver": "View larger:",
-      "anterior": "Previous",
-      "siguiente": "Next",
-      "cerrar": "Close",
-      "visor": "Image viewer"
     },
     "proceso": {
       "etiqueta": "Process",
@@ -237,6 +195,12 @@
     },
     "pie": "All rights reserved.",
     "whatsapp": "Chat on WhatsApp",
-    "pixeles": ["AI", "TECH", "MOTION", "EDIT", "VISUAL"]
+    "pixeles": [
+      "AI",
+      "TECH",
+      "MOTION",
+      "EDIT",
+      "VISUAL"
+    ]
   }
 }

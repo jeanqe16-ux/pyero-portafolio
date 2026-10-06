@@ -1,7 +1,7 @@
 {
   "cifras": [
-    { "valor": "", "sufijo": "", "etiqueta": "proyectos entregados", "etiqueta_en": "projects delivered" },
-    { "valor": "", "sufijo": "", "etiqueta": "marcas", "etiqueta_en": "brands" },
-    { "valor": "", "sufijo": "", "etiqueta": "años creando", "etiqueta_en": "years creating" }
+    { "prefijo": "+", "valor": "15", "etiqueta": "proyectos entregados", "etiqueta_en": "projects delivered" },
+    { "prefijo": "+", "valor": "5", "etiqueta": "marcas trabajadas", "etiqueta_en": "brands" },
+    { "prefijo": "", "valor": "2", "etiqueta": "años creando", "etiqueta_en": "years creating" }
   ]
 }

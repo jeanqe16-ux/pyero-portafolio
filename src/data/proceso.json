@@ -1,22 +1,22 @@
 {
   "pasos": [
     {
-      "titulo": "Entiendo tu marca",
-      "titulo_en": "I understand your brand",
-      "texto": "Reviso tu contenido, tu audiencia y lo que te hace distinto.",
-      "texto_en": "I review your content, your audience and what sets you apart."
+      "titulo": "Entiendo tu objetivo",
+      "titulo_en": "I understand your goal",
+      "texto": "Antes de editar, entiendo qué quieres lograr con tu contenido: más confianza, más alcance o más clientes.",
+      "texto_en": "Before editing, I understand what you want your content to achieve: more trust, more reach or more clients."
     },
     {
-      "titulo": "Creo el sistema visual",
-      "titulo_en": "I build the visual system",
-      "texto": "Defino tipografías, colores, ritmo y animaciones para tus videos y posts.",
-      "texto_en": "I define type, color, pacing and animation for your videos and posts."
+      "titulo": "Diseño tu sistema visual",
+      "titulo_en": "I design your visual system",
+      "texto": "Busco el estilo, colores, tipografía y ritmo que mejor transmiten tu marca, y los convierto en una línea visual que se repite en cada pieza.",
+      "texto_en": "I find the style, colors, typography and pacing that best convey your brand, and turn them into a visual line repeated in every piece."
     },
     {
-      "titulo": "Entrego y optimizamos",
-      "titulo_en": "I deliver and we optimize",
-      "texto": "Recibes las piezas listas para publicar y ajustamos según cómo responden.",
-      "texto_en": "You get pieces ready to publish and we adjust based on how they perform."
+      "titulo": "Produzco y optimizo",
+      "titulo_en": "I produce and optimize",
+      "texto": "Edito, entrego listo para publicar y ajustamos según cómo responde tu audiencia.",
+      "texto_en": "I edit, deliver ready to publish, and we adjust based on how your audience responds."
     }
   ]
 }

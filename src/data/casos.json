@@ -10,7 +10,6 @@
       "hice_en": "Video editing, motion graphics over the footage, and posts that share one graphic line.",
       "resultado": "Servicios técnicos explicados en menos de 30 segundos y una imagen que se reconoce en cada publicación.",
       "resultado_en": "Technical services explained in under 30 seconds and a look that is recognized in every post.",
-      "prueba": "videos",
       "videos": [
         {
           "titulo": "Regreso a clases",
@@ -39,7 +38,6 @@
       "hice_en": "Videos with motion graphics that support the specialist, plus posts and covers for key dates.",
       "resultado": "Tratamientos explicados con claridad y una línea visual coherente en todas sus redes.",
       "resultado_en": "Treatments explained clearly and a consistent visual line across all their channels.",
-      "prueba": "videos",
       "videos": [
         {
           "titulo": "Aplicaciones clínicas",
@@ -63,7 +61,6 @@
       "hice_en": "Informative posts and carousels built on a flexible template for each campaign.",
       "resultado": "Contenido de salud fácil de leer y una marca que se reconoce en cada post.",
       "resultado_en": "Health content that is easy to read and a brand you recognize in every post.",
-      "prueba": "posts",
       "videos": []
     }
   ]

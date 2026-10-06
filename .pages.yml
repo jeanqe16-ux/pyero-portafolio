@@ -36,8 +36,8 @@ content:
         type: object
         list: true
         fields:
-          - { name: valor, label: 'Número (vacío muestra [X])', type: string }
-          - { name: sufijo, label: 'Sufijo opcional, por ejemplo +', type: string }
+          - { name: prefijo, label: 'Prefijo opcional, por ejemplo +', type: string }
+          - { name: valor, label: Número, type: string }
           - { name: etiqueta, label: Texto, type: string }
           - { name: etiqueta_en, label: Texto (inglés), type: string }
 
@@ -60,11 +60,6 @@ content:
           - { name: hice_en, label: Lo que hice (inglés), type: text }
           - { name: resultado, label: 'Resultado (cualitativo, sin cifras inventadas)', type: text }
           - { name: resultado_en, label: Resultado (inglés), type: text }
-          - name: prueba
-            label: Qué se muestra como prueba
-            type: select
-            options:
-              values: [videos, posts]
           - name: videos
             label: 'Videos (el primero es también el reel del inicio)'
             type: object
@@ -135,7 +130,7 @@ content:
           - { name: poster, label: Portada del video, type: image }
 
   - name: diseno
-    label: Diseño gráfico
+    label: Posts y portadas por cliente
     type: file
     path: src/data/diseno.json
     fields:
@@ -235,8 +230,8 @@ content:
             type: object
             fields:
               - { name: etiqueta, label: Descripción para lectores de pantalla, type: string }
-          - name: filosofia
-            label: Filosofía
+          - name: casos
+            label: Casos de estudio
             type: object
             fields:
               - { name: etiqueta, label: Etiqueta, type: string }
@@ -247,19 +242,13 @@ content:
                   - { name: antes, label: Antes de la palabra en naranja, type: string }
                   - { name: destacado, label: Palabra en naranja, type: string }
                   - { name: despues, label: Después de la palabra en naranja, type: string }
-              - { name: frase, label: Frase, type: text }
-          - name: casos
-            label: Casos de estudio
-            type: object
-            fields:
-              - { name: etiqueta, label: Etiqueta, type: string }
-              - { name: titulo, label: Titular, type: object, fields: *titular }
               - { name: caso, label: Palabra Caso, type: string }
               - { name: reto, label: Título Reto, type: string }
               - { name: hice, label: Título Lo que hice, type: string }
               - { name: resultado, label: Título Resultado, type: string }
               - { name: verVideo, label: Texto Ver video, type: string }
-              - { name: posts, label: Texto Posts diseñados para, type: string }
+              - { name: verImagen, label: Texto Ver en grande, type: string }
+              - { name: piezas, label: Texto Piezas de, type: string }
           - name: servicios
             label: Servicios
             type: object
@@ -272,20 +261,6 @@ content:
               - { name: ctaProyectos, label: Botón Ver casos, type: string }
               - { name: ctaCotizar, label: Botón Cotizar, type: string }
               - { name: pase, label: Descripción del pase de posts, type: string }
-          - name: diseno
-            label: Diseño gráfico
-            type: object
-            fields:
-              - { name: etiqueta, label: Etiqueta, type: string }
-              - { name: titulo, label: Titular, type: object, fields: *titular }
-              - { name: filtro, label: Descripción del filtro por empresa, type: string }
-              - { name: posts, label: Título Posts, type: string }
-              - { name: portadas, label: Título Portadas, type: string }
-              - { name: ver, label: Texto Ver en grande, type: string }
-              - { name: anterior, label: Botón Anterior, type: string }
-              - { name: siguiente, label: Botón Siguiente, type: string }
-              - { name: cerrar, label: Botón Cerrar, type: string }
-              - { name: visor, label: Nombre del visor, type: string }
           - name: proceso
             label: Proceso
             type: object

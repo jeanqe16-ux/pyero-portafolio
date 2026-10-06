@@ -1,7 +1,7 @@
 ---
 import { casos } from '../data/casos.json';
 import { clientes } from '../data/clientes.json';
-import { posts } from '../data/diseno.json';
+import { posts, portadas } from '../data/diseno.json';
 import { textosDe, tr, type Idioma } from '../lib/i18n';
 
 interface Props {
@@ -11,6 +11,17 @@ interface Props {
 const { lang } = Astro.props;
 const t = textosDe(lang).casos;
 const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
+
+// Piezas de cada caso, en orden: sus videos, luego sus posts (todas las láminas) y sus portadas
+const piezasDe = (caso: (typeof casos)[number]) => [
+  ...caso.videos.map((v) => ({ tipo: 'video', src: v.video, miniatura: v.poster, titulo: v.titulo })),
+  ...posts
+    .filter((p) => p.cliente === caso.cliente)
+    .flatMap((p) => p.imagenes.map((src) => ({ tipo: 'imagen', src, miniatura: src, titulo: p.titulo }))),
+  ...portadas
+    .filter((p) => p.cliente === caso.cliente)
+    .map((p) => ({ tipo: 'imagen', src: p.imagen, miniatura: p.imagen, titulo: p.titulo })),
+];
 ---
 
 <section class="seccion" id="casos">
@@ -20,44 +31,48 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
   {
     casos.map((caso, i) => {
       const nombre = nombreDe(caso.cliente);
-      const piezas = posts.filter((p) => p.cliente === caso.cliente).slice(0, 4);
+      const piezas = piezasDe(caso);
+      const primera = piezas[0];
       return (
         <article class="caso" id={`caso-${caso.cliente}`}>
-          <div class="prueba">
-            {caso.prueba === 'videos' && caso.videos.length > 0 ? (
-              <div class="reproductor">
-                <video
-                  src={caso.videos[0].video}
-                  poster={caso.videos[0].poster}
-                  aria-label={`${nombre}: ${caso.videos[0].titulo}`}
-                  controls
-                  playsinline
-                  preload="none"
-                />
-                {caso.videos.length > 1 && (
-                  <ul class="miniaturas">
-                    {caso.videos.map((v, n) => (
-                      <li>
-                        <button
-                          type="button"
-                          data-video={v.video}
-                          data-poster={v.poster}
-                          data-titulo={`${nombre}: ${v.titulo}`}
-                          aria-label={`${t.verVideo} ${v.titulo}`}
-                          aria-pressed={n === 0 ? 'true' : 'false'}
-                        >
-                          <img src={v.poster} alt="" loading="lazy" decoding="async" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ) : (
-              <ul class="piezas" aria-label={`${t.posts} ${nombre}`}>
-                {piezas.map((p) => (
+          <div class="visor">
+            <div class="escena">
+              <video
+                src={primera?.tipo === 'video' ? primera.src : undefined}
+                poster={primera?.tipo === 'video' ? primera.miniatura : undefined}
+                aria-label={primera?.tipo === 'video' ? `${nombre}: ${primera.titulo}` : undefined}
+                hidden={primera?.tipo !== 'video'}
+                controls
+                playsinline
+                preload="none"
+              />
+              <img
+                src={primera?.tipo === 'imagen' ? primera.src : undefined}
+                alt={primera?.tipo === 'imagen' ? `${nombre}: ${primera.titulo}` : ''}
+                hidden={primera?.tipo !== 'imagen'}
+                decoding="async"
+              />
+            </div>
+            {piezas.length > 1 && (
+              <ul class="miniaturas" aria-label={`${t.piezas} ${nombre}`}>
+                {piezas.map((p, n) => (
                   <li>
-                    <img src={p.imagenes[0]} alt={p.titulo} width="1080" height="1080" loading="lazy" decoding="async" />
+                    <button
+                      type="button"
+                      data-tipo={p.tipo}
+                      data-src={p.src}
+                      data-miniatura={p.miniatura}
+                      data-titulo={`${nombre}: ${p.titulo}`}
+                      aria-label={`${p.tipo === 'video' ? t.verVideo : t.verImagen} ${p.titulo}`}
+                      aria-pressed={n === 0 ? 'true' : 'false'}
+                    >
+                      <img src={p.miniatura} alt="" loading="lazy" decoding="async" />
+                      {p.tipo === 'video' && (
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
+                        </svg>
+                      )}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -91,17 +106,28 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
 </section>
 
 <script>
-  // Las miniaturas cambian el video del caso sin recargar nada más
-  document.querySelectorAll<HTMLElement>('.reproductor').forEach((reproductor) => {
-    const video = reproductor.querySelector('video')!;
-    const botones = [...reproductor.querySelectorAll<HTMLElement>('.miniaturas button')];
+  // Cada miniatura pone su video o su imagen en el espacio principal del caso
+  document.querySelectorAll<HTMLElement>('.visor').forEach((visor) => {
+    const video = visor.querySelector('video')!;
+    const imagen = visor.querySelector<HTMLImageElement>('.escena img')!;
+    const botones = [...visor.querySelectorAll<HTMLElement>('.miniaturas button')];
+
     botones.forEach((boton) =>
       boton.addEventListener('click', () => {
+        const { tipo, src, miniatura, titulo } = boton.dataset;
         botones.forEach((otro) => otro.setAttribute('aria-pressed', String(otro === boton)));
-        video.poster = boton.dataset.poster!;
-        video.src = boton.dataset.video!;
-        video.setAttribute('aria-label', boton.dataset.titulo!);
-        video.play().catch(() => {});
+        video.pause();
+        video.hidden = tipo !== 'video';
+        imagen.hidden = tipo === 'video';
+        if (tipo === 'video') {
+          video.poster = miniatura!;
+          video.src = src!;
+          video.setAttribute('aria-label', titulo!);
+          video.play().catch(() => {});
+        } else {
+          imagen.src = src!;
+          imagen.alt = titulo!;
+        }
       }),
     );
   });
@@ -111,60 +137,84 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
   .caso {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(1.5rem, 5vw, 4.5rem);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
     align-items: center;
-    margin-top: clamp(3rem, 7vw, 5.5rem);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
     scroll-margin-top: 6rem;
   }
 
+  h2 + .caso {
+    margin-top: 2rem;
+  }
+
   /* Diseño alternado: en los casos pares el texto va a la izquierda */
-  .caso:nth-of-type(even) .prueba {
+  .caso:nth-of-type(even) .visor {
     order: 2;
   }
 
-  .prueba {
+  .visor {
     display: grid;
-    place-items: center;
-    padding: clamp(1.25rem, 3vw, 2.5rem);
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    padding: clamp(1rem, 2.4vw, 1.75rem);
     border-radius: 28px;
     background: var(--superficie);
   }
 
-  .reproductor {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    width: 100%;
+  /* Espacio principal: el video o la imagen se ajustan dentro sin recortarse */
+  .escena {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 5;
+    min-width: 0;
   }
 
-  video {
+  .escena video,
+  .escena img {
     display: block;
-    flex: 0 1 290px;
-    min-width: 0;
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 0;
+    border-radius: 20px;
+    box-shadow: 0 26px 44px -30px rgb(0 0 0 / 0.55);
+  }
+
+  .escena video {
+    height: 100%;
     aspect-ratio: 9 / 16;
-    border-radius: 22px;
     background: var(--negro);
     object-fit: cover;
-    box-shadow: 0 30px 50px -30px rgb(0 0 0 / 0.55);
   }
 
+  .escena [hidden] {
+    display: none;
+  }
+
+  /* Miniaturas en columna a la derecha; si son muchas, se desplazan */
   .miniaturas {
-    flex: none;
     display: grid;
-    gap: 0.6rem;
+    align-content: start;
+    gap: 0.5rem;
+    height: 0;
+    min-height: 100%;
+    padding: 2px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
   }
 
   .miniaturas button {
+    position: relative;
     display: block;
-    width: clamp(3rem, 6vw, 4rem);
-    aspect-ratio: 9 / 16;
+    width: clamp(3rem, 5vw, 3.75rem);
+    aspect-ratio: 1 / 1;
     padding: 0;
     border: 2px solid transparent;
     border-radius: 12px;
     overflow: hidden;
     background: var(--negro);
-    opacity: 0.6;
+    color: #fff;
+    opacity: 0.62;
     cursor: pointer;
     transition:
       opacity 0.25s ease,
@@ -176,6 +226,10 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
     opacity: 1;
   }
 
+  .miniaturas button:focus-visible {
+    outline-offset: 1px;
+  }
+
   .miniaturas img {
     display: block;
     width: 100%;
@@ -183,29 +237,17 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
     object-fit: cover;
   }
 
-  .piezas {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    width: 100%;
-  }
-
-  .piezas li {
-    aspect-ratio: 1 / 1;
-    border-radius: 18px;
-    overflow: hidden;
-    background: #fff;
-  }
-
-  .piezas img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .miniaturas svg {
+    position: absolute;
+    inset: 0;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: auto;
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.8));
   }
 
   .numero {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     font-size: 0.8125rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -221,12 +263,12 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
 
   dl {
     display: grid;
-    gap: 1.25rem;
-    margin: 1.75rem 0 0;
+    gap: 1rem;
+    margin: 1.25rem 0 0;
   }
 
   dt {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--gris);
@@ -239,7 +281,7 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
   }
 
   .resultado {
-    padding: 1rem 1.25rem;
+    padding: 0.9rem 1.25rem;
     border-left: 3px solid var(--acento);
     border-radius: 0 16px 16px 0;
     background: var(--superficie);
@@ -262,8 +304,28 @@ const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id
     }
 
     /* En celular siempre va primero la prueba y luego el texto */
-    .caso:nth-of-type(even) .prueba {
+    .caso:nth-of-type(even) .visor {
       order: 0;
+    }
+
+    /* Las miniaturas pasan a una fila deslizable bajo el espacio principal */
+    .visor {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .miniaturas {
+      display: flex;
+      height: auto;
+      min-height: 0;
+      overflow: auto hidden;
+    }
+
+    .miniaturas li {
+      flex: none;
+    }
+
+    .miniaturas button {
+      width: 3.25rem;
     }
   }
 </style>

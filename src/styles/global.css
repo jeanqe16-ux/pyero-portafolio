@@ -92,7 +92,7 @@ h2 em {
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--acento-texto);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .texto {
@@ -104,7 +104,7 @@ h2 em {
 .seccion {
   max-width: var(--ancho);
   margin: 0 auto;
-  padding: clamp(4rem, 9vw, 7.5rem) 1.5rem;
+  padding: clamp(4rem, 7.5vw, 6rem) 1.5rem;
 }
 
 /* Botones */
@@ -260,6 +260,53 @@ h2 em {
 .animar main > .visible:not(.hero) {
   opacity: 1;
   transform: none;
+}
+
+/* Texto que se rellena con pixeles: un lienzo de colores, una máscara que solo lo deja ver dentro de las letras y el texto encima */
+.pixel {
+  --lleno: 0;
+  position: relative;
+  display: inline-block;
+  /* El interletrado negativo deja la última letra fuera de la caja; el relleno la vuelve a incluir */
+  padding-inline: 0.08em;
+  isolation: isolate;
+  /* Recorta 2 px a los lados para que no asomen pixeles por el borde de la máscara; arriba y abajo deja pasar el resplandor */
+  clip-path: inset(-3rem 2px);
+  white-space: nowrap;
+}
+
+.pixel-contorno {
+  position: relative;
+  margin: 0;
+  /* Resplandor leve que crece con el relleno */
+  text-shadow: 0 0 22px rgb(251 142 31 / calc(var(--lleno) * 0.28));
+}
+
+/* Solo se activan cuando el script de pixeles está en marcha */
+.pixel-lienzo,
+.pixel-mascara {
+  display: none;
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+
+.pixel.activo .pixel-lienzo,
+.pixel.activo .pixel-mascara {
+  display: block;
+}
+
+.pixel-lienzo {
+  width: 100%;
+  height: 100%;
+}
+
+/* Texto negro sobre blanco en modo screen: el blanco tapa y el negro deja ver el lienzo */
+.pixel-mascara {
+  padding-inline: inherit;
+  background: #fff;
+  color: #000;
+  mix-blend-mode: screen;
 }
 
 /* Pixeles de fondo: lienzo fijo detrás de todo el contenido */

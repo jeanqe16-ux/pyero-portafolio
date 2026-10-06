@@ -1,4 +1,4 @@
-// Animaciones de pixeles ligadas al scroll: relleno del nombre del hero y pixeles de fondo que forman palabras
+// Animaciones de pixeles ligadas al scroll: textos que se rellenan (nombre del hero y cifras) y pixeles de fondo que forman palabras
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -48,12 +48,11 @@ const suave = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-/* Nombre del hero: se rellena pixel a pixel, en orden aleatorio, según el scroll */
-function nombre() {
-  const caja = document.querySelector<HTMLElement>('.bit');
-  const lienzo = caja?.querySelector<HTMLCanvasElement>('.bit-lienzo');
+/* Texto .pixel: se rellena pixel a pixel, en orden aleatorio, según el scroll, y se vacía al subir */
+function rellenar(caja: HTMLElement, disparador: ScrollTrigger.Vars) {
+  const lienzo = caja.querySelector<HTMLCanvasElement>('.pixel-lienzo');
   const ctx = lienzo?.getContext('2d');
-  if (!caja || !lienzo || !ctx) return;
+  if (!lienzo || !ctx) return;
 
   const estado = { lleno: 0 };
   let lado = 0;
@@ -91,12 +90,7 @@ function nombre() {
   armar();
   new ResizeObserver(armar).observe(caja);
 
-  gsap.to(estado, {
-    lleno: 1,
-    ease: 'none',
-    onUpdate: pintar,
-    scrollTrigger: { trigger: caja, start: 'clamp(top 62%)', end: 'top 12%', scrub: 0.4 },
-  });
+  gsap.to(estado, { lleno: 1, ease: 'none', onUpdate: pintar, scrollTrigger: { scrub: 0.4, ...disparador } });
 }
 
 /* Fondo: pixeles repartidos que cambian con el scroll y por momentos se agrupan en palabras */
@@ -106,7 +100,7 @@ function fondo() {
   if (!lienzo || !ctx) return;
 
   const palabras: string[] = JSON.parse(lienzo.dataset.palabras || '[]').map((p: string) => p.toUpperCase());
-  const colores = PALETA.slice(0, 5); // el negro solo se usa en el nombre, aquí restaría legibilidad
+  const colores = PALETA.slice(0, 5); // el negro solo se usa en los textos, aquí restaría legibilidad
   let cantidad = movil ? 120 : 240;
   const estado = { avance: 0 };
   let ancho = 0;
@@ -132,8 +126,7 @@ function fondo() {
       const columnas = palabra.length * 6 - 1;
       const paso = Math.max(8, Math.min(30, Math.floor((ancho * (movil ? 0.86 : 0.6)) / columnas)));
       const x0 = Math.round((ancho - columnas * paso) / 2);
-      // Alternan arriba y abajo del texto de la sección para no quedar detrás de él
-      const y0 = Math.round(alto * (n % 2 ? 0.82 : 0.2) - 3.5 * paso);
+      const y0 = Math.round(alto * (n % 2 ? 0.58 : 0.4) - 3.5 * paso);
       const puntos: { x: number; y: number; lado: number }[] = [];
       [...palabra].forEach((letra, l) =>
         (LETRAS[letra] ?? []).forEach((fila, f) => {
@@ -145,10 +138,6 @@ function fondo() {
     });
   };
 
-  // Las palabras se forman mientras se recorre la sección de filosofía, que queda fija en pantalla
-  const seccion = document.querySelector<HTMLElement>('.filosofia');
-  const tramo = { t: 0 };
-
   let costo = 0;
   let muestras = 0;
 
@@ -158,12 +147,11 @@ function fondo() {
     ctx.setTransform(escala, 0, 0, escala, 0, 0);
     ctx.clearRect(0, 0, ancho, alto);
 
-    // Cada palabra ocupa un tramo de la sección: se arma, se sostiene y se deshace
+    // Cada palabra ocupa un tramo del recorrido de la página: se arma, se sostiene y se deshace
     let palabra = -1;
     let fuerza = 0;
     for (let n = 0; n < destinos.length; n++) {
-      const centro = 0.08 + (0.84 * (n + 0.5)) / destinos.length;
-      const f = seccion ? 1 - suave(0.045, 0.08, Math.abs(tramo.t - centro)) : 0;
+      const f = 1 - suave(0.03, 0.07, Math.abs(p - (n + 1) / (destinos.length + 1)));
       if (f > fuerza) [palabra, fuerza] = [n, f];
     }
     const puntos = palabra >= 0 ? destinos[palabra] : [];
@@ -212,25 +200,21 @@ function fondo() {
     onUpdate: pintar,
     scrollTrigger: { start: 0, end: 'max', scrub: 0.6 },
   });
-
-  if (seccion)
-    gsap.to(tramo, {
-      t: 1,
-      ease: 'none',
-      onUpdate: pintar,
-      scrollTrigger: { trigger: seccion, start: 'top top', end: 'bottom bottom', scrub: 0.6 },
-    });
 }
 
-// Con "reducir movimiento" no se activa nada: el nombre queda en contorno y el fondo vacío
+// Con "reducir movimiento" no se activa nada: los textos quedan como están y el fondo vacío
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  // Marca la página para que la sección de filosofía se alargue solo cuando hay animación
-  document.documentElement.classList.add('con-pixeles');
   gsap.registerPlugin(ScrollTrigger);
   gsap.ticker.fps(60);
   fondo();
   document.fonts.ready.then(() => {
-    nombre();
+    const nombre = document.querySelector<HTMLElement>('.bit');
+    if (nombre) rellenar(nombre, { trigger: nombre, start: 'clamp(top 62%)', end: 'top 12%' });
+    // Las tres cifras se rellenan juntas al pasar su sección
+    const prueba = document.querySelector<HTMLElement>('.prueba');
+    document
+      .querySelectorAll<HTMLElement>('.cifra.pixel')
+      .forEach((cifra) => rellenar(cifra, { trigger: prueba, start: 'clamp(top 92%)', end: 'top 48%' }));
     ScrollTrigger.refresh();
   });
 }
