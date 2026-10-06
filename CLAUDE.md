@@ -13,7 +13,7 @@ Portafolio de una sola página para Pyero.workz (Jean, editor y motion designer 
 ```
 src/
   data/            Todo el contenido editable (JSON)
-    site.json        Marca, WhatsApp, redes, SEO
+    site.json        Marca, dirección pública (url), persona, ubicación, WhatsApp, redes, SEO
     textos.json      Textos de todas las secciones, en `es` y `en`
     cifras.json      Las tres cifras de trabajo (prefijo, valor y texto)
     casos.json       Casos de estudio: reto, lo que hice, resultado y videos
@@ -26,6 +26,7 @@ src/
   layouts/Base.astro   <head>, SEO, header, footer, WhatsApp flotante, animación de entrada
   components/        Inicio (arma la página), Hero, Prueba, Franja, Casos, Servicios, Proceso, Sobre, Herramientas, Contacto, Redes
   pages/index.astro, pages/en/index.astro   Solo llaman a Inicio con su idioma
+  pages/sitemap.xml.ts, pages/robots.txt.ts   Generados en el build a partir de la url del sitio
   styles/global.css  Variables, base, botones, navegación
   lib/enlaces.ts     Enlace de WhatsApp e iconos SVG compartidos
   lib/i18n.ts        textosDe(lang), tr(objeto, campo, lang) y ruta(lang)
@@ -34,7 +35,11 @@ public/media/<cliente>/   logo.png, videos/, posts/, portadas/ (ruta pública /m
 public/media/yo.jpg       Foto de "Sobre mí" (también acepta jpeg, webp o png)
 public/media/creadores/videos/   Reels de creadores
 public/media/servicios/   Loops cuadrados de las tarjetas de Servicios
+public/fonts/             Silkscreen autoalojada
+public/og.png, og-en.png  Imágenes al compartir (1200x630), una por idioma
+public/favicon.*, icon-*.png, apple-touch-icon.png, site.webmanifest   Iconos del sitio
 scripts/generar-loops.sh   Regenera esos loops con ffmpeg desde el material fuente
+scripts/generar-miniaturas.mjs   Crea las `.min.webp` de posts, portadas y portadas de video para las miniaturas de los casos
 .pages.yml           Configuración de Pages CMS sobre los JSON de src/data
 wrangler.jsonc       Despliegue en Cloudflare Workers: sirve ./dist como assets estáticos
 ```
@@ -65,6 +70,9 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero → Prueba
 - **Tarjetas de Servicios**: `media: "video"` reproduce un loop pregenerado (720x720, sin audio) que solo se descarga cuando la tarjeta entra en pantalla; `media: "posts"` muestra un pase con disolución de los posts de `diseno.json`. Si cambian los videos fuente, volver a correr `bash scripts/generar-loops.sh`.
 - **Pixeles**: lienzos `canvas` movidos por el scroll con `scrub` (solo se repintan al hacer scroll, tope de 60 fps). Los textos con clase `.pixel` (nombre del hero y las tres cifras) llevan tres capas definidas en `global.css`: un lienzo de celdas de colores, una máscara en `mix-blend-mode: screen` que lo recorta a la forma de las letras y el texto encima; `rellenar()` en `scripts/pixeles.ts` los llena al bajar y los vacía al subir. El fondo es un lienzo fijo con `z-index: -1`, opacidad máxima 0.25, que forma las palabras de `textos.json > pixeles` (letras A-Z de 5x7, sin tildes) repartidas a lo largo de la página. 240 pixeles en escritorio, 120 en celular, y la mitad si pintar sale caro. Con `prefers-reduced-motion` no se activa nada y las cifras quedan como texto negro normal.
 - **Espaciado**: las secciones usan `clamp(4rem, 7.5vw, 6rem)` de relleno vertical (64 px en celular, 96 px en escritorio) y unos 2rem entre titular y contenido. Mantenerlo compacto.
+- **SEO y compartir**: la dirección pública vive en `site.json > url` (hoy `https://pyero-portafolio.jeanqe16.workers.dev`); de ahí salen canonical, hreflang, Open Graph, Twitter, sitemap y robots. Si cambia el dominio, basta con editar ese campo. `Base.astro` incluye los datos estructurados (`ProfessionalService` con su `Person`, en Huancayo, Perú). Las imágenes og llevan el titular del hero: si cambia el titular, hay que regenerarlas.
+- **Rendimiento**: sin fuentes externas (Inter por fontsource con su woff2 latino precargado, Silkscreen en `public/fonts`). Portadas de video en WebP de 720 px. Todo video usa `preload="none"`; los de Servicios y las portadas de los casos se piden recién al acercarse a la pantalla. Toda imagen bajo el primer pantallazo lleva `loading="lazy"`. Las miniaturas de los casos usan una versión `.min.webp` de 200 px junto al original; al agregar imágenes hay que correr `node scripts/generar-miniaturas.mjs` (si falta, la miniatura cae a la imagen completa).
+- **Favicon**: no hay un logo propio de Pyero.workz; los iconos salen de la marca provisional (cuadro negro con triángulo naranja de `favicon.svg`).
 - **Nombres de clase**: `.pie` es el footer global; no reutilizarlo dentro de componentes.
 - **Git**: un commit por fase. Los commits usan el correo privado de GitHub (noreply), configurado solo en este repositorio; no publicar el correo personal. `referencias/` está en `.gitignore` y fuera del historial. La rama `respaldo-local-sin-publicar` conserva el historial anterior y no debe subirse.
 
@@ -75,7 +83,7 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero → Prueba
 - Revisar la redacción de los casos de estudio y la traducción al inglés.
 - Los tres videos de CERO están sin audio; confirmar cuál era el que no tenía sound design y restaurar el audio de los otros.
 - Confirmar los handles de redes y agregar los enlaces de @Loreimp y @Basee44 en `creadores.json`.
-- Definir `site` en `astro.config.mjs` cuando haya dominio, para que las URL de Open Graph salgan absolutas.
+- Si se conecta un dominio propio, actualizar `site.json > url`.
+- Reemplazar el favicon provisional cuando exista un logo de Pyero.workz.
 - Conectar el repositorio (github.com/jeanqe16-ux/pyero-portafolio, público) a Pages CMS y desplegarlo en Cloudflare Workers con `wrangler.jsonc` (comando de build `npm run build`; límite de 25 MB por archivo).
-- Silkscreen (fuente bit del nombre) aún se carga desde Google Fonts; autoalojarla si se quiere evitar la dependencia externa.
 - Los efectos hover y la reproducción de videos no se han probado con contenido real.

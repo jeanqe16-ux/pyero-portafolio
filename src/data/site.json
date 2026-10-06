@@ -1,6 +1,17 @@
 {
   "marca": "Pyero",
   "marcaSufijo": ".workz",
+  "url": "https://pyero-portafolio.jeanqe16.workers.dev",
+  "persona": {
+    "nombre": "Jean",
+    "cargo": "Editor de video y motion designer",
+    "cargo_en": "Video editor and motion designer"
+  },
+  "ubicacion": {
+    "ciudad": "Huancayo",
+    "region": "Junín",
+    "pais": "PE"
+  },
   "whatsapp": "51964544392",
   "mensajeWhatsapp": "Hola Jean, vi tu portafolio y quiero cotizar un proyecto.",
   "instagram": "https://instagram.com/pyero.workz",
@@ -10,7 +21,10 @@
     "descripcion": "Edición de video, motion graphics y diseño para marcas que quieren comunicar con claridad y verse profesionales.",
     "imagen": "/og.png",
     "titulo_en": "Pyero.workz | Video editing, motion graphics and design",
-    "descripcion_en": "Video editing, motion graphics and design for brands that want to communicate clearly and look professional."
+    "descripcion_en": "Video editing, motion graphics and design for brands that want to communicate clearly and look professional.",
+    "imagen_en": "/og-en.png",
+    "imagenAlt": "Pyero.workz: tu marca tiene algo que decir, yo hago que se vea y se escuche",
+    "imagenAlt_en": "Pyero.workz: your brand has something to say, I make it seen and heard"
   },
   "mensajeWhatsapp_en": "Hi Jean, I saw your portfolio and I would like a quote for a project."
 }

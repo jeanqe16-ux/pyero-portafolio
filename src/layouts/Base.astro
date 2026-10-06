@@ -2,7 +2,9 @@
 import '@fontsource-variable/inter';
 import '../styles/global.css';
 import site from '../data/site.json';
+import { servicios } from '../data/servicios.json';
 import Redes from '../components/Redes.astro';
+import fuenteInter from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import { enlaceWhatsapp, iconoWhatsapp } from '../lib/enlaces';
 import { ruta, textosDe, tr, type Idioma } from '../lib/i18n';
 
@@ -18,9 +20,53 @@ const textos = textosDe(lang);
 const inicio = ruta(lang);
 const otroIdioma: Idioma = lang === 'es' ? 'en' : 'es';
 
-// Con `site` definido en astro.config.mjs las URL de Open Graph salen absolutas
-const urlPagina = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
-const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
+// Con `site` definido (src/data/site.json > url) todas las URL salen absolutas, como exigen las redes al compartir
+const base = Astro.site ?? Astro.url;
+const urlPagina = new URL(Astro.url.pathname, base);
+const urlDe = (l: Idioma) => new URL(ruta(l), base).href;
+const imagen = new URL(tr(site.seo, 'imagen', lang), base).href;
+const imagenAlt = tr(site.seo, 'imagenAlt', lang);
+const nombre = site.marca + site.marcaSufijo;
+
+// Datos estructurados: servicio profesional con su persona y ubicación
+const direccion = {
+  '@type': 'PostalAddress',
+  addressLocality: site.ubicacion.ciudad,
+  addressRegion: site.ubicacion.region,
+  addressCountry: site.ubicacion.pais,
+};
+const redes = [site.instagram, site.tiktok].filter(Boolean);
+const datosEstructurados = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': new URL('/#negocio', base).href,
+  name: nombre,
+  url: urlDe(lang),
+  description: descripcion,
+  image: imagen,
+  logo: new URL('/icon-512.png', base).href,
+  telephone: `+${site.whatsapp}`,
+  address: direccion,
+  sameAs: redes,
+  knowsLanguage: ['es', 'en'],
+  founder: {
+    '@type': 'Person',
+    '@id': new URL('/#persona', base).href,
+    name: site.persona.nombre,
+    alternateName: site.marca,
+    jobTitle: tr(site.persona, 'cargo', lang),
+    address: direccion,
+    sameAs: redes,
+  },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: textos.servicios.etiqueta,
+    itemListElement: servicios.map((s) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: tr(s, 'titulo', lang), description: tr(s, 'texto', lang) },
+    })),
+  },
+};
 ---
 
 <!doctype html>
@@ -31,25 +77,41 @@ const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
     <title>{titulo}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={urlPagina} />
-    <link rel="alternate" hreflang="es" href={new URL(ruta('es'), Astro.site ?? Astro.url)} />
-    <link rel="alternate" hreflang="en" href={new URL(ruta('en'), Astro.site ?? Astro.url)} />
+    <link rel="alternate" hreflang="es" href={urlDe('es')} />
+    <link rel="alternate" hreflang="en" href={urlDe('en')} />
+    <link rel="alternate" hreflang="x-default" href={urlDe('es')} />
+
     <meta property="og:type" content="website" />
     <meta property="og:locale" content={lang === 'es' ? 'es_PE' : 'en_US'} />
-    <meta property="og:site_name" content={site.marca + site.marcaSufijo} />
+    <meta property="og:locale:alternate" content={lang === 'es' ? 'en_US' : 'es_PE'} />
+    <meta property="og:site_name" content={nombre} />
     <meta property="og:title" content={titulo} />
     <meta property="og:description" content={descripcion} />
     <meta property="og:url" content={urlPagina} />
     <meta property="og:image" content={imagen} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imagenAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titulo} />
+    <meta name="twitter:description" content={descripcion} />
+    <meta name="twitter:image" content={imagen} />
+    <meta name="twitter:image:alt" content={imagenAlt} />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <link rel="preload" href={fuenteInter} as="font" type="font/woff2" crossorigin />
+    <script type="application/ld+json" set:html={JSON.stringify(datosEstructurados)} />
     <script is:inline>
       // Activa la animación de entrada solo si el usuario no pidió menos movimiento
       if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches)
         document.documentElement.classList.add('animar');
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <canvas class="fondo-pixeles" data-palabras={JSON.stringify(textos.pixeles)} aria-hidden="true"></canvas>
@@ -91,7 +153,7 @@ const imagen = new URL(site.seo.imagen, Astro.site ?? Astro.url);
     </main>
 
     <footer class="pie">
-      <span>© {new Date().getFullYear()} {site.marca}{site.marcaSufijo}. {textos.pie}</span>
+      <span>© {new Date().getFullYear()} {nombre}. {textos.pie}</span>
       <Redes />
     </footer>
 

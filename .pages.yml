@@ -11,6 +11,21 @@ content:
     fields:
       - { name: marca, label: Nombre de la marca, type: string }
       - { name: marcaSufijo, label: Parte del nombre en naranja, type: string }
+      - { name: url, label: 'Dirección pública del sitio (con https, sin barra final)', type: string }
+      - name: persona
+        label: Persona
+        type: object
+        fields:
+          - { name: nombre, label: Nombre, type: string }
+          - { name: cargo, label: Cargo, type: string }
+          - { name: cargo_en, label: Cargo (inglés), type: string }
+      - name: ubicacion
+        label: Ubicación
+        type: object
+        fields:
+          - { name: ciudad, label: Ciudad, type: string }
+          - { name: region, label: Región, type: string }
+          - { name: pais, label: 'País (código de dos letras)', type: string }
       - { name: whatsapp, label: 'WhatsApp (con código de país, sin +)', type: string }
       - { name: mensajeWhatsapp, label: Mensaje prellenado de WhatsApp, type: text }
       - { name: mensajeWhatsapp_en, label: Mensaje prellenado de WhatsApp (inglés), type: text }
@@ -25,6 +40,9 @@ content:
           - { name: descripcion, label: Descripción, type: text }
           - { name: descripcion_en, label: Descripción (inglés), type: text }
           - { name: imagen, label: Imagen al compartir (1200x630), type: image }
+          - { name: imagen_en, label: Imagen al compartir en inglés (1200x630), type: image }
+          - { name: imagenAlt, label: Descripción de la imagen al compartir, type: string }
+          - { name: imagenAlt_en, label: Descripción de la imagen al compartir (inglés), type: string }
 
   - name: cifras
     label: Cifras de trabajo

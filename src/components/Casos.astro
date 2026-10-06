@@ -12,6 +12,9 @@ const { lang } = Astro.props;
 const t = textosDe(lang).casos;
 const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
 
+// Versión pequeña de una imagen para su miniatura (la crea scripts/generar-miniaturas.mjs)
+const mini = (src: string) => src.replace(/\.webp$/, '.min.webp');
+
 // Piezas de cada caso, en orden: sus videos, luego sus posts (todas las láminas) y sus portadas
 const piezasDe = (caso: (typeof casos)[number]) => [
   ...caso.videos.map((v) => ({ tipo: 'video', src: v.video, miniatura: v.poster, titulo: v.titulo })),
@@ -39,7 +42,7 @@ const piezasDe = (caso: (typeof casos)[number]) => [
             <div class="escena">
               <video
                 src={primera?.tipo === 'video' ? primera.src : undefined}
-                poster={primera?.tipo === 'video' ? primera.miniatura : undefined}
+                data-poster={primera?.tipo === 'video' ? primera.miniatura : undefined}
                 aria-label={primera?.tipo === 'video' ? `${nombre}: ${primera.titulo}` : undefined}
                 hidden={primera?.tipo !== 'video'}
                 controls
@@ -50,6 +53,7 @@ const piezasDe = (caso: (typeof casos)[number]) => [
                 src={primera?.tipo === 'imagen' ? primera.src : undefined}
                 alt={primera?.tipo === 'imagen' ? `${nombre}: ${primera.titulo}` : ''}
                 hidden={primera?.tipo !== 'imagen'}
+                loading="lazy"
                 decoding="async"
               />
             </div>
@@ -66,7 +70,14 @@ const piezasDe = (caso: (typeof casos)[number]) => [
                       aria-label={`${p.tipo === 'video' ? t.verVideo : t.verImagen} ${p.titulo}`}
                       aria-pressed={n === 0 ? 'true' : 'false'}
                     >
-                      <img src={p.miniatura} alt="" loading="lazy" decoding="async" />
+                      {/* Si falta la versión pequeña, cae a la imagen completa */}
+                      <img
+                        src={mini(p.miniatura)}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        onerror={`this.onerror=null;this.src='${p.miniatura}'`}
+                      />
                       {p.tipo === 'video' && (
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                           <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
@@ -106,6 +117,19 @@ const piezasDe = (caso: (typeof casos)[number]) => [
 </section>
 
 <script>
+  // La portada de cada video se descarga recién cuando su caso se acerca a la pantalla
+  const cercanos = new IntersectionObserver(
+    (entradas) =>
+      entradas.forEach(({ target, isIntersecting }) => {
+        if (!isIntersecting) return;
+        const video = target as HTMLVideoElement;
+        if (!video.poster) video.poster = video.dataset.poster!;
+        cercanos.unobserve(video);
+      }),
+    { rootMargin: '600px' },
+  );
+  document.querySelectorAll<HTMLVideoElement>('.escena video[data-poster]').forEach((video) => cercanos.observe(video));
+
   // Cada miniatura pone su video o su imagen en el espacio principal del caso
   document.querySelectorAll<HTMLElement>('.visor').forEach((visor) => {
     const video = visor.querySelector('video')!;

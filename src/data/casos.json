@@ -14,17 +14,17 @@
         {
           "titulo": "Regreso a clases",
           "video": "/media/cero/videos/cero-regreso-a-clases.mp4",
-          "poster": "/media/cero/videos/cero-regreso-a-clases.jpg"
+          "poster": "/media/cero/videos/cero-regreso-a-clases.webp"
         },
         {
           "titulo": "Motion graphics",
           "video": "/media/cero/videos/cero-motion.mp4",
-          "poster": "/media/cero/videos/cero-motion.jpg"
+          "poster": "/media/cero/videos/cero-motion.webp"
         },
         {
           "titulo": "Ubicación",
           "video": "/media/cero/videos/cero-ubicacion.mp4",
-          "poster": "/media/cero/videos/cero-ubicacion.jpg"
+          "poster": "/media/cero/videos/cero-ubicacion.webp"
         }
       ]
     },
@@ -42,12 +42,12 @@
         {
           "titulo": "Aplicaciones clínicas",
           "video": "/media/clinica-dental-imagen/videos/clinica-dental-motion.mp4",
-          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion.jpg"
+          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion.webp"
         },
         {
           "titulo": "Caso clínico",
           "video": "/media/clinica-dental-imagen/videos/clinica-dental-motion-2.mp4",
-          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion-2.jpg"
+          "poster": "/media/clinica-dental-imagen/videos/clinica-dental-motion-2.webp"
         }
       ]
     },

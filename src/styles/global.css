@@ -10,6 +10,15 @@
   --ancho: 1180px;
 }
 
+/* Fuente bit del nombre, autoalojada (solo latín, negrita) */
+@font-face {
+  font-family: Silkscreen;
+  src: url('/fonts/silkscreen-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
