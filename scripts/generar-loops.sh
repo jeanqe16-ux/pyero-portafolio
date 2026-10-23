@@ -26,8 +26,8 @@ for i in "${!INICIOS[@]}"; do filtro+="[v$i]"; done
 filtro+="concat=n=${#INICIOS[@]}:v=1:a=0[salida]"
 ffmpeg -v error -y "${entradas[@]}" -filter_complex "$filtro" -map "[salida]" $X -crf 25 "$D/edicion-de-video.mp4"
 
-# Motion graphics: los dos videos de motion más recientes, uno tras otro
-ffmpeg -v error -y -i "$M/AGENTE DE IA ANIMATION.mp4" -i "$M/VIDEO 2.mp4" \
+# Motion graphics: los dos videos de motion más recientes (el más nuevo primero), uno tras otro
+ffmpeg -v error -y -i "$M/Video 03.mp4" -i "$M/AGENTE DE IA ANIMATION.mp4" \
   -filter_complex "[0:v]$CUADRO[a];[1:v]$CUADRO[b];[a][b]concat=n=2:v=1:a=0[salida]" \
   -map "[salida]" $X -crf 27 "$D/motion-graphics.mp4"
 

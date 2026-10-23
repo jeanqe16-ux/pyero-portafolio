@@ -22,7 +22,9 @@
       "cta": "Quiero resultados así",
       "secundario": "Ver casos",
       "proximamente": "Próximamente",
-      "reels": "Reels de trabajos recientes"
+      "reels": "Reels de trabajos recientes",
+      "sonidoActivar": "Activar sonido",
+      "sonidoSilenciar": "Silenciar"
     },
     "prueba": {
       "etiqueta": "Mi trabajo en cifras",
@@ -135,7 +137,9 @@
       "cta": "I want results like these",
       "secundario": "See cases",
       "proximamente": "Coming soon",
-      "reels": "Reels of recent work"
+      "reels": "Reels of recent work",
+      "sonidoActivar": "Turn sound on",
+      "sonidoSilenciar": "Mute"
     },
     "prueba": {
       "etiqueta": "My work in numbers",

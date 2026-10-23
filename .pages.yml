@@ -256,6 +256,8 @@ content:
               - { name: secundario, label: Botón secundario, type: string }
               - { name: proximamente, label: Texto de reel sin video, type: string }
               - { name: reels, label: Descripción de la sección de reels, type: string }
+              - { name: sonidoActivar, label: Botón para activar el sonido de los reels, type: string }
+              - { name: sonidoSilenciar, label: Botón para silenciar los reels, type: string }
           - name: prueba
             label: Cifras
             type: object

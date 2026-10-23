@@ -76,6 +76,7 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero (foto a pa
 - **Clientes**: el `id` de `clientes.json` es el nombre de su carpeta en `src/media/` y `public/media/` y el valor de `cliente` en `diseno.json` y `casos.json`.
 - **Sin páginas de proyecto**: se reemplazaron por los casos de estudio en la portada. Los logos de la franja enlazan a `#caso-<id>` y el primer video de cada caso es su reel en la sección de reels, justo debajo del hero.
 - **Franja**: el loop nunca se pausa. Los logos se pintan con `mask` para poder teñirlos de naranja al pasar el mouse.
+- **Audio de los reels**: los reels del hero conservan su audio (AAC 128 kbps) y suenan por defecto. Como el navegador bloquea el sonido hasta el primer clic, toque o tecla, antes de eso corren en silencio; el botón `.sonido` de cada reel activa o silencia, y la elección vale para todos los reels. Un clic sobre el reel también le da sonido. Los videos que solo se ven en los casos pueden ir sin audio.
 - **Tarjetas de Servicios**: `media: "video"` reproduce un loop pregenerado (720x720, sin audio) que solo se descarga cuando la tarjeta entra en pantalla; `media: "posts"` muestra un pase con disolución de los posts de `diseno.json`. Si cambian los videos fuente, volver a correr `bash scripts/generar-loops.sh`.
 - **Pixeles**: lienzos `canvas` movidos por el scroll con `scrub` (solo se repintan al hacer scroll, tope de 60 fps). Los textos con clase `.pixel` (nombre del hero y las tres cifras) llevan tres capas definidas en `global.css`: un lienzo de celdas de colores, una máscara en `mix-blend-mode: screen` que lo recorta a la forma de las letras y el texto encima; `rellenar()` en `scripts/pixeles.ts` los llena al bajar y los vacía al subir. El fondo es un lienzo fijo con `z-index: -1`, opacidad máxima 0.25, que forma las palabras de `textos.json > pixeles` (letras A-Z de 5x7, sin tildes) repartidas a lo largo de la página. 240 pixeles en escritorio, 120 en celular, y la mitad si pintar sale caro. Con `prefers-reduced-motion` no se activa nada y las cifras quedan como texto negro normal.
 - **Espaciado**: las secciones usan `clamp(4rem, 7.5vw, 6rem)` de relleno vertical (64 px en celular, 96 px en escritorio) y unos 2rem entre titular y contenido. Mantenerlo compacto.
@@ -97,8 +98,8 @@ Orden de secciones (cuenta una historia orientada a resultados): Hero (foto a pa
 - Fase 3: icono de YouTube con contador de vistas en "Eleva tu contenido" (sube al acercar el cursor, conteo único en táctil).
 - Fase 4: franja pequeña de logos en gris ("Elevando tu marca"), con datos en `src/data/marcas.json`.
 - Revisar la redacción de los casos de estudio y la traducción al inglés.
-- Los tres videos de CERO están sin audio; confirmar cuál era el que no tenía sound design y restaurar el audio de los otros.
-- Confirmar los handles de redes y agregar los enlaces de @Loreimp y @Basee44 en `creadores.json`.
+- "CERO Motion" y "CERO Ubicación" siguen sin audio (uno no tenía sound design); confirmar cuál y restaurar el del otro.
+- Agregar los enlaces de @Even_Sales, @Loreimp y @Basee44 en `creadores.json`.
 - Si se conecta un dominio propio, actualizar `site.json > url`.
 - Reemplazar el favicon provisional cuando exista un logo de Pyero.workz.
 - Conectar el repositorio (github.com/jeanqe16-ux/pyero-portafolio, público) a Pages CMS y desplegarlo en Cloudflare Workers con `wrangler.jsonc` (comando de build `npm run build`; límite de 25 MB por archivo).

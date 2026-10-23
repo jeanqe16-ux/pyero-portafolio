@@ -30,6 +30,25 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
           {/* La portada es una imagen con srcset; el video va encima y solo se descarga al reproducirse */}
           {r.poster && <Imagen src={r.poster} alt="" anchos={ANCHOS_REEL} sizes={SIZES_REEL} />}
           {r.video && <video src={r.video} aria-label={r.nombre} muted loop playsinline preload="none" />}
+          {r.video && (
+            <button
+              type="button"
+              class="sonido"
+              aria-pressed="false"
+              aria-label={t.sonidoActivar}
+              data-activar={t.sonidoActivar}
+              data-silenciar={t.sonidoSilenciar}
+            >
+              <svg class="icono-silencio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 5 6 9H3v6h3l5 4z" />
+                <path d="m22 9-6 6M16 9l6 6" />
+              </svg>
+              <svg class="icono-sonido" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 5 6 9H3v6h3l5 4z" />
+                <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" />
+              </svg>
+            </button>
+          )}
           {!r.video && !r.poster && (
             <div class="reel-vacio">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -49,29 +68,71 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
 </section>
 
 <script>
+  // Los reels suenan por defecto. El navegador no deja reproducir con sonido hasta que la persona
+  // hace clic, toca o teclea en la página: mientras tanto el reel corre en silencio y su botón lo indica.
+  let conSonido = true;
+
   // Con mouse los reels se reproducen al pasar por encima; en táctil, al tocarlos
   document.addEventListener('astro:page-load', () => {
     const conMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const reels = [...document.querySelectorAll<HTMLElement>('.reel')];
 
+    const mostrarEstado = (reel: HTMLElement) => {
+      const video = reel.querySelector('video');
+      const boton = reel.querySelector<HTMLElement>('.sonido');
+      if (!video || !boton) return;
+      const suena = !video.muted;
+      boton.setAttribute('aria-pressed', String(suena));
+      boton.setAttribute('aria-label', (suena ? boton.dataset.silenciar : boton.dataset.activar) ?? '');
+    };
+
+    const reproducir = (reel: HTMLElement) => {
+      const video = reel.querySelector('video');
+      if (!video) return;
+      reels.forEach((otro) => otro !== reel && otro.querySelector('video')?.pause());
+      video.muted = !conSonido;
+      video
+        .play()
+        .catch(() => {
+          // Sin un gesto previo el navegador bloquea el audio: se reproduce en silencio
+          if (video.muted) return;
+          video.muted = true;
+          return video.play();
+        })
+        .catch(() => {})
+        .finally(() => mostrarEstado(reel));
+      mostrarEstado(reel);
+    };
+
     reels.forEach((reel) => {
       const video = reel.querySelector('video');
       if (!video) return;
-      const reproducir = () => video.play().catch(() => {});
       const detener = () => video.pause();
 
+      reel.querySelector('.sonido')?.addEventListener('click', (evento) => {
+        evento.stopPropagation();
+        conSonido = video.muted;
+        video.muted = !conSonido;
+        if (video.paused) reproducir(reel);
+        mostrarEstado(reel);
+      });
+
       if (conMouse) {
-        reel.addEventListener('pointerenter', reproducir);
+        reel.addEventListener('pointerenter', () => reproducir(reel));
         reel.addEventListener('pointerleave', detener);
-      } else {
+        // Un clic sobre el reel cuenta como gesto: si estaba en silencio, le da sonido
         reel.addEventListener('click', () => {
-          const estabaPausado = video.paused;
-          reels.forEach((otro) => otro.querySelector('video')?.pause());
-          if (estabaPausado) reproducir();
+          if (!video.muted) return;
+          conSonido = true;
+          reproducir(reel);
         });
+      } else {
+        reel.addEventListener('click', () => (video.paused ? reproducir(reel) : detener()));
       }
-      reel.addEventListener('focus', reproducir);
-      reel.addEventListener('blur', detener);
+      reel.addEventListener('focusin', () => video.paused && reproducir(reel));
+      reel.addEventListener('focusout', (evento) => {
+        if (!reel.contains(evento.relatedTarget as Node | null)) detener();
+      });
     });
   });
 </script>
@@ -145,6 +206,41 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
     border-radius: 22px;
   }
 
+  .sonido {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.55);
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background 0.25s ease,
+      color 0.25s ease;
+  }
+
+  .sonido svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .sonido[aria-pressed='true'] .icono-silencio,
+  .sonido[aria-pressed='false'] .icono-sonido {
+    display: none;
+  }
+
+  .sonido[aria-pressed='true'] {
+    background: var(--acento);
+    color: var(--negro);
+  }
+
   .reel-vacio {
     display: grid;
     place-content: center;
@@ -198,6 +294,10 @@ const abanico = (i: number) => `--r:${(i - centro) * 4}deg;--y:${Math.abs(i - ce
       z-index: 5;
       transform: translateY(-12px) rotate(0deg) scale(1.14);
       box-shadow: 0 40px 70px -30px rgb(0 0 0 / 0.7);
+    }
+
+    .sonido[aria-pressed='false']:hover {
+      background: rgb(0 0 0 / 0.8);
     }
 
     .reels:has(.reel:hover) .reel:not(:hover) {
