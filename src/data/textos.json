@@ -134,40 +134,6 @@
       ],
       "categoria": "Categoría de trabajos"
     },
-    "escenaVideo": {
-      "etiqueta": "Edición de video",
-      "titulo": "Cortes, color y música que retienen hasta el final.",
-      "subtitulo": "Esto sí detiene el scroll",
-      "pistas": {
-        "video": "Video",
-        "texto": "Texto",
-        "audio": "Música"
-      },
-      "color": "Color",
-      "exportar": "Exportar",
-      "listo": "Listo para publicar",
-      "monitor": "Vista previa del reel en edición",
-      "cursores": {
-        "corte": "Pyero · Corte",
-        "color": "Pyero · Color",
-        "musica": "Pyero · Música"
-      },
-      "musica": "Pista de música"
-    },
-    "escenaDiseno": {
-      "etiqueta": "Diseño para redes",
-      "titulo": "Posts con una línea visual que se reconoce sin ver el logo.",
-      "paleta": "Paleta",
-      "titular": "Tu mensaje aquí",
-      "publicar": "Publicar",
-      "listo": "Serie lista",
-      "cursores": {
-        "layout": "Pyero · Layout",
-        "tipo": "Pyero · Tipografía",
-        "color": "Pyero · Color"
-      },
-      "lienzo": "Serie de posts en diseño"
-    },
     "trabajos": {
       "etiqueta": "Trabajos",
       "titulo": "Una muestra de lo que entrego cada semana.",
@@ -325,40 +291,6 @@
         "Design"
       ],
       "categoria": "Work category"
-    },
-    "escenaVideo": {
-      "etiqueta": "Video editing",
-      "titulo": "Cuts, color and music that hold attention to the end.",
-      "subtitulo": "This one stops the scroll",
-      "pistas": {
-        "video": "Video",
-        "texto": "Text",
-        "audio": "Music"
-      },
-      "color": "Color",
-      "exportar": "Export",
-      "listo": "Ready to post",
-      "monitor": "Preview of the reel being edited",
-      "cursores": {
-        "corte": "Pyero · Cut",
-        "color": "Pyero · Color",
-        "musica": "Pyero · Music"
-      },
-      "musica": "Music track"
-    },
-    "escenaDiseno": {
-      "etiqueta": "Social media design",
-      "titulo": "Posts with a visual line people recognize without seeing the logo.",
-      "paleta": "Palette",
-      "titular": "Your message here",
-      "publicar": "Publish",
-      "listo": "Series ready",
-      "cursores": {
-        "layout": "Pyero · Layout",
-        "tipo": "Pyero · Type",
-        "color": "Pyero · Color"
-      },
-      "lienzo": "Post series being designed"
     },
     "trabajos": {
       "etiqueta": "Work",

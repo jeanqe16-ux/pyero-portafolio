@@ -19,7 +19,7 @@
   --inverso: #0a0a0a;
   --ancho: 1180px;
   /* Ancho común del contenido de las secciones, para que todo quede alineado */
-  --contenido: 56rem;
+  --contenido: 72rem;
   /* Alto del menú flotante más su separación del borde superior */
   --alto-nav: 5rem;
 }
@@ -453,32 +453,6 @@ h2 em {
   line-height: 1.25;
 }
 
-/* Orbe de color desenfocado detrás de una escena */
-.orbe-fondo {
-  position: absolute;
-  left: 50%;
-  top: 56%;
-  z-index: -1;
-  width: min(50rem, 110vw);
-  aspect-ratio: 1.6;
-  border-radius: 50%;
-  background:
-    radial-gradient(closest-side at 35% 50%, var(--orbe-lila), transparent),
-    radial-gradient(closest-side at 65% 55%, var(--orbe-durazno), transparent);
-  filter: blur(60px);
-  opacity: 0.5;
-  translate: -50% -50%;
-  pointer-events: none;
-}
-
-/* Panel de interfaz: mismo borde, radio y sombra en toda la web */
-.panel {
-  border: 1px solid var(--linea);
-  border-radius: 14px;
-  background: var(--superficie);
-  box-shadow: 0 18px 40px -30px rgb(60 40 20 / 0.45);
-}
-
 /* Cursor con nombre, estilo herramienta colaborativa. --c cambia el color según la tarea */
 .cursor-pyero {
   --c: var(--acento);
@@ -517,13 +491,6 @@ h2 em {
   scale: 0.8;
 }
 
-.cursor-pyero.color {
-  --c: #b39cff;
-}
-
-.cursor-pyero.musica {
-  --c: #6cc4a8;
-}
 
 /* Saltito: corte seco que se corre unos píxeles y se asienta */
 .salto {
@@ -574,9 +541,6 @@ h2 em {
   --c: var(--texto);
 }
 
-.cuadrito.durazno {
-  --c: #f6a46c;
-}
 
 /* Esquinas de marco seleccionado alrededor de una pieza (cuatro <i class="esquina">) */
 .esquina {

@@ -233,7 +233,7 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
   /* Filas: nombre del grupo con su cuadrito a la izquierda y cuatro tarjetas iguales */
   .filas {
     display: grid;
-    gap: 2rem;
+    gap: 2.5rem;
     max-width: var(--contenido);
     margin: 2rem auto 0;
     text-align: left;
@@ -275,7 +275,7 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
   .grupo ul {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: 1.75rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -329,11 +329,6 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
   .reproducir svg {
     width: 0.8rem;
     height: 0.8rem;
-  }
-
-  /* Las esquinas de selección solo aparecen al pasar el mouse */
-  .tarjeta .esquina {
-    visibility: hidden;
   }
 
   .visor-trabajo {
@@ -391,10 +386,6 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .tarjeta:hover .esquina {
-      visibility: visible;
-    }
-
     .pestana[aria-pressed='false']:hover {
       color: var(--texto);
     }
@@ -418,7 +409,7 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
     }
 
     .grupo ul {
-      gap: 0.75rem;
+      gap: 1.25rem;
     }
 
     .pestanas {

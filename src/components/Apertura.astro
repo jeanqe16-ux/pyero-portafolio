@@ -6,7 +6,6 @@ import { servicios } from '../data/servicios.json';
 import { posts } from '../data/diseno.json';
 import { textosDe, tr, type Idioma } from '../lib/i18n';
 import { optimizar } from '../lib/imagenes';
-import { svgIcono, type Icono } from '../lib/iconos';
 
 interface Props {
   lang: Idioma;
@@ -17,35 +16,19 @@ const textos = textosDe(lang);
 const t = textos.hero;
 const a = textos.apertura;
 
-// Trabajo real por categoría (las mismas tres de las pestañas). Si a una le faltan piezas, se completa con posts.
-const CARTAS = 6;
+// Trabajo real por categoría (las mismas tres de las pestañas). Los videos no se mezclan con los posts:
+// si a video o motion le faltan piezas, se completa con los otros videos.
+const CARTAS = 8;
 const videos = casos.flatMap((c) => c.videos);
-const fuentes = {
-  video: videos.filter((v) => !/motion/i.test(v.titulo)).map((v) => v.poster),
-  motion: [...creadores.map((c) => c.poster), ...videos.filter((v) => /motion/i.test(v.titulo)).map((v) => v.poster)],
-  diseno: posts.map((p) => p.imagenes[0]),
-};
-const completar = (lista: string[]) => [...lista, ...fuentes.diseno.filter((p) => !lista.includes(p))].slice(0, CARTAS);
-const categorias = await Promise.all(
-  (['video', 'motion', 'diseno'] as const).map(async (clave) => Promise.all(completar(fuentes[clave]).map((src) => optimizar(src, 300)))),
-);
-
-// Fila: cartas de trabajo del mismo tamaño y, entre ellas, cuadritos de icono más chicos alineados arriba.
-// Las esquinas de selección van en una carta y en un cuadrito, como en una herramienta de diseño.
-type Hueco = { tipo: 'carta'; n: number; marcado?: boolean } | { tipo: 'cuadrito'; icono: Icono; color: string; marcado?: boolean };
-const fila: Hueco[] = [
-  { tipo: 'cuadrito', icono: 'texto', color: 'durazno' },
-  { tipo: 'carta', n: 0 },
-  { tipo: 'carta', n: 1, marcado: true },
-  { tipo: 'cuadrito', icono: 'video', color: '', marcado: true },
-  { tipo: 'carta', n: 2 },
-  { tipo: 'carta', n: 3 },
-  { tipo: 'cuadrito', icono: 'motion', color: 'lila' },
-  { tipo: 'carta', n: 4 },
-  { tipo: 'carta', n: 5 },
-  { tipo: 'cuadrito', icono: 'diseno', color: 'oscuro' },
+const edicion = videos.filter((v) => !/motion/i.test(v.titulo)).map((v) => v.poster);
+const motion = [...creadores.map((c) => c.poster), ...videos.filter((v) => /motion/i.test(v.titulo)).map((v) => v.poster)];
+const fuentes = [
+  [...edicion, ...motion],
+  [...motion, ...edicion],
+  posts.map((p) => p.imagenes[0]),
 ];
-const iconoDe: Icono[] = ['video', 'motion', 'diseno'];
+// Fila: todas son piezas reales del mismo tamaño y cada una lleva sus esquinas de selección
+const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.slice(0, CARTAS).map((src) => optimizar(src, 300)))));
 ---
 
 <section class="apertura" aria-labelledby="apertura-titulo">
@@ -119,35 +102,17 @@ const iconoDe: Icono[] = ['video', 'motion', 'diseno'];
     </div>
   </div>
 
-  <div class="fila" role="img" aria-label={a.trabajos} data-categorias={JSON.stringify(categorias)} data-iconos={JSON.stringify(iconoDe.map(svgIcono))}>
+  <div class="fila" role="img" aria-label={a.trabajos} data-categorias={JSON.stringify(categorias)}>
     {
-      fila.map((h) =>
-        h.tipo === 'carta' ? (
-          <figure class="carta" data-n={h.n}>
-            <img src={categorias[0][h.n]} alt="" loading="eager" decoding="async" fetchpriority="low" />
-            {h.marcado && (
-              <>
-                <i class="esquina" />
-                <i class="esquina" />
-                <i class="esquina" />
-                <i class="esquina" />
-              </>
-            )}
-          </figure>
-        ) : (
-          <span class:list={['cuadrito', h.color, { activo: h.icono === 'video' }]} aria-hidden="true">
-            <Fragment set:html={svgIcono(h.icono)} />
-            {h.marcado && (
-              <>
-                <i class="esquina" />
-                <i class="esquina" />
-                <i class="esquina" />
-                <i class="esquina" />
-              </>
-            )}
-          </span>
-        ),
-      )
+      categorias[0].map((src, n) => (
+        <figure class="carta" data-n={n}>
+          <img src={src} alt="" loading="eager" decoding="async" fetchpriority="low" />
+          <i class="esquina" />
+          <i class="esquina" />
+          <i class="esquina" />
+          <i class="esquina" />
+        </figure>
+      ))
     }
   </div>
 </section>
@@ -198,13 +163,9 @@ const iconoDe: Icono[] = ['video', 'motion', 'diseno'];
       piezas.forEach((pieza, i) => {
         relojes.push(
           window.setTimeout(() => {
-            if (pieza.classList.contains('carta')) {
-              const img = pieza.querySelector('img')!;
-              img.src = categorias[n][Number(pieza.dataset.n)];
-              salto(img);
-            } else {
-              salto(pieza);
-            }
+            const img = pieza.querySelector('img')!;
+            img.src = categorias[n][Number(pieza.dataset.n) % categorias[n].length];
+            salto(pieza);
           }, reducir ? 0 : i * 80),
         );
       });
@@ -559,20 +520,19 @@ const iconoDe: Icono[] = ['video', 'motion', 'diseno'];
     background: var(--gris);
   }
 
-  /* Fila de trabajos: cartas del mismo tamaño y cuadritos más chicos, todos alineados arriba.
+  /* Fila de trabajos: piezas reales del mismo tamaño, cada una con sus esquinas de selección.
      Centrada y más ancha que la pantalla: sale por los dos bordes */
   .fila {
     --alto: clamp(120px, 14vw, 184px);
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 20px;
+    gap: 26px;
     margin-top: clamp(1.75rem, 4svh, 2.5rem);
     padding-block: 10px;
   }
 
-  .carta,
-  .fila .cuadrito {
+  .carta {
     position: relative;
     flex: none;
     margin: 0;
@@ -592,9 +552,6 @@ const iconoDe: Icono[] = ['video', 'motion', 'diseno'];
     background: var(--superficie);
   }
 
-  .fila .cuadrito {
-    width: calc(var(--alto) * 0.62);
-  }
 
   .solo-lector {
     position: absolute;
@@ -619,7 +576,7 @@ const iconoDe: Icono[] = ['video', 'motion', 'diseno'];
   @media (max-width: 560px) {
     .fila {
       --alto: 104px;
-      gap: 16px;
+      gap: 22px;
     }
 
     .prompt .cursor-pyero {

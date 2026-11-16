@@ -44,7 +44,7 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
   /* Sobre mí compacto: foto chica en 4:5 y texto al lado, del mismo ancho que los casos */
   .sobre {
     display: grid;
-    grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
     gap: clamp(1.5rem, 4vw, 3rem);
     align-items: center;
     max-width: var(--contenido);
@@ -85,7 +85,7 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
   }
 
   .texto {
-    max-width: 46ch;
+    max-width: 52ch;
     color: var(--gris);
     font-size: 1rem;
     line-height: 1.55;
