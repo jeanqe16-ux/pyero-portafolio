@@ -125,9 +125,14 @@
       "enviar": "Enviar por WhatsApp",
       "mensaje": "Hola Jean, vi tu portafolio. Esto es lo que necesito:",
       "servicio": "Servicio",
-      "servicios": "Qué necesitas",
       "trabajos": "Trabajos recientes de edición, motion y diseño",
-      "cursor": "Pyero"
+      "cursor": "Pyero",
+      "categorias": [
+        "Video",
+        "Motion",
+        "Diseño"
+      ],
+      "categoria": "Categoría de trabajos"
     },
     "escenaVideo": {
       "etiqueta": "Edición de video",
@@ -148,25 +153,6 @@
         "musica": "Pyero · Música"
       },
       "musica": "Pista de música"
-    },
-    "escenaMotion": {
-      "etiqueta": "Motion graphics",
-      "titulo": "Textos y logos que se mueven con intención.",
-      "capas": {
-        "texto": "Texto",
-        "forma": "Forma",
-        "logo": "Logo"
-      },
-      "curva": "Curva",
-      "render": "Render",
-      "listo": "Animación lista",
-      "cursores": {
-        "keys": "Pyero · Keyframes",
-        "curva": "Pyero · Curva"
-      },
-      "marca": "Tu marca",
-      "lema": "en movimiento",
-      "monitor": "Vista previa de una animación de marca"
     },
     "escenaDiseno": {
       "etiqueta": "Diseño para redes",
@@ -192,15 +178,17 @@
         "diseno": "Diseño"
       },
       "cerrar": "Cerrar",
-      "filtros": "Filtrar trabajos"
-    },
-    "cifras": {
-      "titulo": "Resultados que se pueden contar.",
-      "panel": "Resumen de trabajo"
+      "filtros": "Filtrar trabajos",
+      "grupos": {
+        "video": "Edición de video",
+        "motion": "Motion graphics",
+        "diseno": "Diseño para redes"
+      },
+      "reels": "Reels verticales"
     },
     "clientes": {
       "titulo": "Marcas y creadores que ya se mueven.",
-      "tuMarca": "Tu marca"
+      "creadores": "Creadores"
     }
   },
   "en": {
@@ -329,9 +317,14 @@
       "enviar": "Send on WhatsApp",
       "mensaje": "Hi Jean, I saw your portfolio. This is what I need:",
       "servicio": "Service",
-      "servicios": "What you need",
       "trabajos": "Recent editing, motion and design work",
-      "cursor": "Pyero"
+      "cursor": "Pyero",
+      "categorias": [
+        "Video",
+        "Motion",
+        "Design"
+      ],
+      "categoria": "Work category"
     },
     "escenaVideo": {
       "etiqueta": "Video editing",
@@ -352,25 +345,6 @@
         "musica": "Pyero · Music"
       },
       "musica": "Music track"
-    },
-    "escenaMotion": {
-      "etiqueta": "Motion graphics",
-      "titulo": "Text and logos that move with intent.",
-      "capas": {
-        "texto": "Text",
-        "forma": "Shape",
-        "logo": "Logo"
-      },
-      "curva": "Curve",
-      "render": "Render",
-      "listo": "Animation ready",
-      "cursores": {
-        "keys": "Pyero · Keyframes",
-        "curva": "Pyero · Curve"
-      },
-      "marca": "Your brand",
-      "lema": "in motion",
-      "monitor": "Preview of a brand animation"
     },
     "escenaDiseno": {
       "etiqueta": "Social media design",
@@ -396,15 +370,17 @@
         "diseno": "Design"
       },
       "cerrar": "Close",
-      "filtros": "Filter work"
-    },
-    "cifras": {
-      "titulo": "Results you can count.",
-      "panel": "Work summary"
+      "filtros": "Filter work",
+      "grupos": {
+        "video": "Video editing",
+        "motion": "Motion graphics",
+        "diseno": "Social media design"
+      },
+      "reels": "Vertical reels"
     },
     "clientes": {
       "titulo": "Brands and creators already in motion.",
-      "tuMarca": "Your brand"
+      "creadores": "Creators"
     }
   }
 }

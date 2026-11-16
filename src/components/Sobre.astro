@@ -47,7 +47,7 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
     grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
     gap: clamp(1.5rem, 4vw, 3rem);
     align-items: center;
-    max-width: 52rem;
+    max-width: var(--contenido);
     margin-inline: auto;
   }
 
@@ -55,7 +55,7 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
     display: grid;
     place-items: center;
     aspect-ratio: 4 / 5;
-    border-radius: 14px;
+    border-radius: 4px;
     overflow: hidden;
     background: linear-gradient(160deg, var(--acento-suave), var(--acento));
     color: rgb(255 255 255 / 0.9);

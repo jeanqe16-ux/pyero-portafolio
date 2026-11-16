@@ -9,13 +9,9 @@ interface Props {
 
 const textos = textosDe(Astro.props.lang);
 const t = textos.clientes;
-// Cada mosaico se tapa con una rejilla de 4x4 celdas que se van retirando en orden aleatorio pero fijo
+// Cada ficha se tapa con una rejilla de 4x4 celdas que se retiran en un orden fijo, como un mosaico
 const CELDAS = 16;
 const orden = (semilla: number) => Array.from({ length: CELDAS }, (_, i) => ((i * 7 + semilla * 5) % CELDAS) * 40 + semilla * 90);
-const fichas = [
-  ...clientes.map((c) => ({ tipo: 'logo', nombre: c.nombre, logo: c.logo, id: c.id })),
-  ...creadores.map((c) => ({ tipo: 'creador', nombre: c.handle, logo: '', id: '' })),
-];
 ---
 
 <section class="seccion clientes" aria-labelledby="clientes-titulo">
@@ -26,13 +22,11 @@ const fichas = [
 
   <ul class="mosaico">
     {
-      fichas.map((f, n) => (
+      clientes.map((c, n) => (
         <li class="ficha">
-          {f.tipo === 'logo' ? (
-            <a href={`#caso-${f.id}`} class="logo" style={`--logo:url('${f.logo}')`} aria-label={f.nombre} />
-          ) : (
-            <span class="handle">{f.nombre}</span>
-          )}
+          <a href={`#caso-${c.id}`} aria-label={c.nombre}>
+            <span class="logo" style={`--logo:url('${c.logo}')`} />
+          </a>
           <span class="tapa" aria-hidden="true">
             {orden(n).map((d) => (
               <i style={`--d:${d}ms`} />
@@ -41,15 +35,22 @@ const fichas = [
         </li>
       ))
     }
-    <li class="ficha tu-marca">
-      <a href="#contacto">{t.tuMarca}</a>
-      <span class="tapa" aria-hidden="true">
-        {orden(fichas.length).map((d) => (
-          <i style={`--d:${d}ms`} />
-        ))}
-      </span>
-    </li>
   </ul>
+
+  {/* Creadores: solo texto, repartidos en una línea y separados por cuadritos */}
+  <div class="creadores">
+    <p class="rotulo">{t.creadores}</p>
+    <ul>
+      {
+        creadores.map((c, i) => (
+          <>
+            {i > 0 && <li class="separador" aria-hidden="true" />}
+            <li>{c.enlace ? <a href={c.enlace} target="_blank" rel="noopener noreferrer">{c.handle}</a> : c.handle}</li>
+          </>
+        ))
+      }
+    </ul>
+  </div>
 </section>
 
 <script>
@@ -81,8 +82,8 @@ const fichas = [
   .mosaico {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.75rem;
-    max-width: 50rem;
+    gap: 1rem;
+    max-width: var(--contenido);
     margin: 2rem auto 0;
     padding: 0;
     list-style: none;
@@ -90,46 +91,29 @@ const fichas = [
 
   .ficha {
     position: relative;
-    display: grid;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     border: 1px solid var(--linea);
-    border-radius: 12px;
+    border-radius: 4px;
     background: var(--superficie);
   }
 
-  .ficha > a,
-  .handle {
-    display: grid;
-    place-items: center;
-    padding: 1rem;
+  .ficha a {
+    position: absolute;
+    inset: 0;
   }
 
-  /* Los logos son PNG blancos: se pintan con máscara para teñirlos del color del texto */
+  /* Los logos son PNG blancos: se pintan con máscara, sin deformarse (contain), dentro de una caja fija igual para todos */
   .logo {
+    position: absolute;
+    inset: 26% 18%;
     background: var(--texto);
-    -webkit-mask: var(--logo) center / 62% 52% no-repeat;
-    mask: var(--logo) center / 62% 52% no-repeat;
+    -webkit-mask: var(--logo) center / contain no-repeat;
+    mask: var(--logo) center / contain no-repeat;
+    transition: background-color 0.2s ease;
   }
 
-  .handle {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-
-  .tu-marca {
-    border-style: dashed;
-    background: transparent;
-  }
-
-  .tu-marca a {
-    color: var(--acento-texto);
-    font-size: 0.9375rem;
-    font-weight: 600;
-  }
-
-  /* Tapa de 4x4 celdas del color del fondo */
+  /* Tapa de 4x4 celdas */
   .tapa {
     position: absolute;
     inset: 0;
@@ -153,19 +137,53 @@ const fichas = [
     outline-offset: -4px;
   }
 
-  @media (hover: hover) and (pointer: fine) {
-    .logo:hover {
-      background: var(--acento);
-    }
+  .creadores {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
 
-    .tu-marca:hover {
-      border-color: var(--acento);
+  .rotulo {
+    color: var(--gris);
+    font-size: 0.8125rem;
+  }
+
+  .creadores ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem clamp(1.25rem, 4vw, 2.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    font-weight: 560;
+    letter-spacing: -0.02em;
+  }
+
+  .creadores .separador {
+    width: 5px;
+    height: 5px;
+    background: var(--gris);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ficha a:hover .logo {
+      background: var(--acento);
     }
   }
 
   @media (max-width: 640px) {
+    .creadores ul {
+      gap: 0.5rem 0.9rem;
+      font-size: 0.9375rem;
+    }
+
     .mosaico {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
     }
   }
 </style>

@@ -14,8 +14,8 @@ const colores = ['var(--acento)', 'var(--orbe-lila)', 'var(--texto)'];
 const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>';
 ---
 
-<section class="escena-scroll escena-diseno" id="diseno" aria-labelledby="escena-diseno-titulo">
-  <div class="escena-fija">
+<section class="seccion escena-diseno" id="diseno" aria-labelledby="escena-diseno-titulo">
+  <div class="diseno-interior">
     <div class="orbe-fondo" aria-hidden="true"></div>
     <header class="cabecera-chica">
       <p class="paso">{t.etiqueta}</p>
@@ -62,8 +62,9 @@ const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5
 </section>
 
 <script>
-  // Tres cursores arman una serie de posts: layout, tipografía y color; al final aparecen las piezas reales
-  import { montarEscena, moverCursor, punto, recorrido, salto, type Punto } from '../scripts/escena';
+  // Tres cursores arman una serie de posts: layout, tipografía y color; al final aparecen las piezas reales.
+  // No depende del scroll: corre sola en bucle mientras la sección está en pantalla
+  import { reproducirEnBucle, moverCursor, punto, recorrido, salto, type Punto } from '../scripts/escena';
 
   let limpiar: (() => void) | null = null;
 
@@ -110,13 +111,19 @@ const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5
       exportar.classList.toggle('pulsado', p > 0.87 && p < 0.9);
     };
 
-    limpiar = montarEscena(escena, pintar);
+    limpiar = reproducirEnBucle(escena, pintar, 10000, 3000);
   });
 </script>
 
 <style>
+  /* La escena se anima de fondo; los cursores que salen por el borde no deben crear scroll lateral */
   .escena-diseno {
-    --largo: 320vh;
+    overflow: clip;
+  }
+
+  .diseno-interior {
+    position: relative;
+    isolation: isolate;
   }
 
   .escenario {
@@ -127,7 +134,7 @@ const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5
     justify-items: center;
     gap: clamp(0.75rem, 2.5svh, 1.5rem);
     min-height: 0;
-    margin-top: clamp(0.75rem, 2.5svh, 1.25rem);
+    margin-top: 2rem;
   }
 
   /* Tres tableros iguales en 4:5 */
@@ -136,7 +143,7 @@ const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5
     justify-content: center;
     align-items: center;
     gap: clamp(1.25rem, 3vw, 2.5rem);
-    height: clamp(11rem, 44svh, 20rem);
+    height: clamp(10rem, 32svh, 15rem);
     padding: 12px;
   }
 

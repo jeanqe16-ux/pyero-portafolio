@@ -18,6 +18,8 @@
   /* Bloques invertidos, como el cierre: negros en claro, gris oscuro en oscuro */
   --inverso: #0a0a0a;
   --ancho: 1180px;
+  /* Ancho común del contenido de las secciones, para que todo quede alineado */
+  --contenido: 56rem;
   /* Alto del menú flotante más su separación del borde superior */
   --alto-nav: 5rem;
 }
@@ -132,7 +134,7 @@ h2 em {
 .seccion {
   max-width: var(--ancho);
   margin: 0 auto;
-  padding: clamp(4rem, 7.5vw, 6rem) 1.5rem;
+  padding: clamp(3rem, 5.5vw, 4.5rem) 1.5rem;
 }
 
 /* Botones */
@@ -427,7 +429,7 @@ h2 em {
   min-height: 100svh;
 }
 
-.escena-scroll.estatica .cursor-pyero {
+.estatica .cursor-pyero {
   display: none;
 }
 
@@ -544,4 +546,62 @@ h2 em {
   .salto {
     animation: none;
   }
+}
+
+/* Cuadrito de icono con textura de puntos: rellena huecos de las filas y marca cada grupo. --c es su color */
+.cuadrito {
+  --c: var(--acento);
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background:
+    radial-gradient(rgb(255 255 255 / 0.22) 1px, transparent 1.3px) 0 0 / 6px 6px,
+    var(--c);
+  color: #fff;
+}
+
+.cuadrito svg {
+  width: 42%;
+  height: 42%;
+}
+
+.cuadrito.lila {
+  --c: #9d86f5;
+}
+
+.cuadrito.oscuro {
+  --c: var(--texto);
+}
+
+.cuadrito.durazno {
+  --c: #f6a46c;
+}
+
+/* Esquinas de marco seleccionado alrededor de una pieza (cuatro <i class="esquina">) */
+.esquina {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--texto);
+}
+
+.esquina:nth-of-type(1) {
+  top: -9px;
+  left: -9px;
+}
+
+.esquina:nth-of-type(2) {
+  top: -9px;
+  right: -9px;
+}
+
+.esquina:nth-of-type(3) {
+  bottom: -9px;
+  left: -9px;
+}
+
+.esquina:nth-of-type(4) {
+  bottom: -9px;
+  right: -9px;
 }

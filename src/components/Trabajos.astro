@@ -2,9 +2,10 @@
 import { casos } from '../data/casos.json';
 import { clientes } from '../data/clientes.json';
 import { creadores } from '../data/creadores.json';
-import { posts } from '../data/diseno.json';
+import { posts, portadas } from '../data/diseno.json';
 import { textosDe, type Idioma } from '../lib/i18n';
 import { optimizar } from '../lib/imagenes';
+import { svgIcono, type Icono } from '../lib/iconos';
 
 interface Props {
   lang: Idioma;
@@ -12,31 +13,40 @@ interface Props {
 
 const t = textosDe(Astro.props.lang).trabajos;
 const nombreDe = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? id;
+const POR_FILA = 4;
 
-// Todas las piezas en tarjetas iguales (4:5). Los videos de casos son "video" (o "motion" si su título lo dice),
-// los reels de creadores son "motion" y los posts son "diseno"
-const piezas = await Promise.all([
-  ...casos.flatMap((c) =>
-    c.videos.map(async (v) => ({
-      tipo: /motion/i.test(v.titulo) ? 'motion' : 'video',
-      nombre: `${nombreDe(c.cliente)}: ${v.titulo}`,
-      mini: await optimizar(v.poster, 360),
-      grande: await optimizar(v.poster, 720),
-      video: v.video,
-    })),
-  ),
-  ...creadores.map(async (c) => ({ tipo: 'motion', nombre: c.handle, mini: await optimizar(c.poster, 360), grande: await optimizar(c.poster, 720), video: c.video })),
-  ...posts.map(async (p) => ({
-    tipo: 'diseno',
-    nombre: `${nombreDe(p.cliente)}: ${p.titulo}`,
-    mini: await optimizar(p.imagenes[0], 360),
-    grande: await optimizar(p.imagenes[0], 1000),
-    video: '',
+type Pieza = { nombre: string; poster: string; video: string };
+const videos = casos.flatMap((c) => c.videos.map((v) => ({ nombre: `${nombreDe(c.cliente)}: ${v.titulo}`, poster: v.poster, video: v.video })));
+const esMotion = (p: Pieza) => /motion/i.test(p.nombre);
+
+// Filas de cuatro, sin mezclar: una de edición, una de motion y una por cliente con sus diseños.
+// Si a un cliente le faltan posts, se completa con sus portadas.
+const disenoDe = (id: string): Pieza[] => [
+  ...posts.filter((p) => p.cliente === id).flatMap((p) => p.imagenes.map((imagen) => ({ nombre: `${nombreDe(id)}: ${p.titulo}`, poster: imagen, video: '' }))),
+  ...portadas.filter((p) => p.cliente === id).map((p) => ({ nombre: `${nombreDe(id)}: ${p.titulo}`, poster: p.imagen, video: '' })),
+];
+const grupos: { tipo: 'video' | 'motion' | 'diseno'; titulo: string; detalle: string; icono: Icono; color: string; piezas: Pieza[] }[] = [
+  { tipo: 'video', titulo: t.grupos.video, detalle: t.reels, icono: 'video', color: '', piezas: videos.filter((v) => !esMotion(v)) },
+  {
+    tipo: 'motion',
+    titulo: t.grupos.motion,
+    detalle: t.reels,
+    icono: 'motion',
+    color: 'lila',
+    piezas: [...videos.filter(esMotion), ...creadores.map((c) => ({ nombre: c.handle, poster: c.poster, video: c.video }))],
+  },
+  ...clientes
+    .map((c) => ({ tipo: 'diseno' as const, titulo: c.nombre, detalle: t.grupos.diseno, icono: 'diseno' as Icono, color: 'oscuro', piezas: disenoDe(c.id) }))
+    .filter((g) => g.piezas.length >= POR_FILA),
+];
+const filas = await Promise.all(
+  grupos.map(async (g) => ({
+    ...g,
+    piezas: await Promise.all(
+      g.piezas.slice(0, POR_FILA).map(async (p) => ({ ...p, mini: await optimizar(p.poster, 360), grande: await optimizar(p.poster, p.video ? 720 : 1000) })),
+    ),
   })),
-]);
-// Intercala los tipos para que "Todo" se vea variado
-const porTipo = ['video', 'motion', 'diseno'].map((tipo) => piezas.filter((p) => p.tipo === tipo));
-const orden = Array.from({ length: Math.max(...porTipo.map((l) => l.length)) }, (_, i) => porTipo.map((l) => l[i])).flat().filter(Boolean);
+);
 const pestanas = Object.entries(t.pestanas) as [string, string][];
 ---
 
@@ -49,31 +59,53 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
   <div class="pestanas" role="group" aria-label={t.filtros}>
     {
       pestanas.map(([clave, texto], i) => (
-        <button type="button" class="pestana" data-filtro={clave} aria-pressed={i === 0 ? 'true' : 'false'}>
-          {texto}
-        </button>
+        <>
+          {i > 0 && <i class="separador" aria-hidden="true" />}
+          <button type="button" class="pestana" data-filtro={clave} aria-pressed={i === 0 ? 'true' : 'false'}>
+            {texto}
+          </button>
+        </>
       ))
     }
   </div>
 
-  <ul class="rejilla">
+  <div class="filas">
     {
-      orden.map((p) => (
-        <li class="tarjeta" data-tipo={p.tipo}>
-          <button type="button" data-grande={p.grande} data-video={p.video} aria-label={p.nombre}>
-            <img src={p.mini} alt="" loading="lazy" decoding="async" />
-            {p.video && (
-              <span class="reproducir" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
-                </svg>
-              </span>
-            )}
-          </button>
-        </li>
+      filas.map((g) => (
+        <section class="grupo" data-tipo={g.tipo} aria-label={g.titulo}>
+          <header class="grupo-nombre">
+            <span class:list={['cuadrito', g.color]} aria-hidden="true">
+              <Fragment set:html={svgIcono(g.icono)} />
+            </span>
+            <span>
+              <strong>{g.titulo}</strong>
+              <small>{g.detalle}</small>
+            </span>
+          </header>
+          <ul>
+            {g.piezas.map((p) => (
+              <li class="tarjeta">
+                <button type="button" data-grande={p.grande} data-video={p.video} aria-label={p.nombre}>
+                  <img src={p.mini} alt="" loading="lazy" decoding="async" />
+                  {p.video && (
+                    <span class="reproducir" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
+                      </svg>
+                    </span>
+                  )}
+                </button>
+                <i class="esquina" />
+                <i class="esquina" />
+                <i class="esquina" />
+                <i class="esquina" />
+              </li>
+            ))}
+          </ul>
+        </section>
       ))
     }
-  </ul>
+  </div>
 
   {/* Visor: muestra la pieza en grande, el video con sus controles y sonido */}
   <dialog class="visor-trabajo" aria-label={t.etiqueta}>
@@ -86,7 +118,7 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
 </section>
 
 <script>
-  // Pestañas que reordenan la rejilla en cascada con saltito, y un visor para ver cada pieza
+  // Pestañas que muestran solo las filas de un tipo (en cascada con saltito) y un visor para ver cada pieza
   import { salto } from '../scripts/escena';
 
   document.addEventListener('astro:page-load', () => {
@@ -94,26 +126,28 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
     if (!seccion) return;
     const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const pestanas = [...seccion.querySelectorAll<HTMLButtonElement>('.pestana')];
-    const tarjetas = [...seccion.querySelectorAll<HTMLElement>('.tarjeta')];
+    const grupos = [...seccion.querySelectorAll<HTMLElement>('.grupo')];
     let relojes: number[] = [];
 
     const filtrar = (filtro: string) => {
       relojes.forEach(clearTimeout);
       relojes = [];
       pestanas.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filtro === filtro)));
-      const visibles = tarjetas.filter((c) => filtro === 'todo' || c.dataset.tipo === filtro);
-      tarjetas.forEach((c) => (c.hidden = !visibles.includes(c)));
+      const visibles = grupos.filter((g) => filtro === 'todo' || g.dataset.tipo === filtro);
+      grupos.forEach((g) => (g.hidden = !visibles.includes(g)));
       if (reducir) return;
-      // Cada tarjeta aparece un instante después que la anterior, con corte seco
-      visibles.forEach((c, i) => {
-        c.classList.add('oculta');
-        relojes.push(
-          window.setTimeout(() => {
-            c.classList.remove('oculta');
-            salto(c);
-          }, 60 + i * 55),
-        );
-      });
+      // Cada tarjeta aparece un instante después que la anterior, fila por fila, con corte seco
+      visibles
+        .flatMap((g) => [...g.querySelectorAll<HTMLElement>('.tarjeta')])
+        .forEach((c, i) => {
+          c.classList.add('oculta');
+          relojes.push(
+            window.setTimeout(() => {
+              c.classList.remove('oculta');
+              salto(c);
+            }, 60 + i * 45),
+          );
+        });
     };
     pestanas.forEach((b) => b.addEventListener('click', () => filtrar(b.dataset.filtro!)));
 
@@ -153,45 +187,96 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
     text-align: center;
   }
 
+  /* Pestañas separadas por cuadritos, como las del inicio */
   .pestanas {
-    display: inline-flex;
-    gap: 0.25rem;
-    margin-top: 1.5rem;
-    padding: 0.25rem;
-    border: 1px solid var(--linea);
-    border-radius: 12px;
-    background: var(--superficie);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.9rem;
+    margin-top: 1.25rem;
   }
 
   .pestana {
-    padding: 0.4rem 0.9rem;
+    padding: 0.25rem 0;
     border: 0;
-    border-radius: 9px;
     background: none;
     color: var(--gris);
     font: inherit;
-    font-size: 0.8125rem;
-    font-weight: 500;
+    font-size: 0.9375rem;
     cursor: pointer;
   }
 
   .pestana[aria-pressed='true'] {
-    background: var(--texto);
-    color: var(--superficie);
+    color: var(--texto);
+    font-weight: 600;
+  }
+
+  .pestana[aria-pressed='true']::before {
+    content: '[';
+  }
+
+  .pestana[aria-pressed='true']::after {
+    content: ']';
   }
 
   .pestana:focus-visible {
     outline: 2px solid var(--acento);
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
 
-  /* Rejilla de tarjetas iguales, con espacio para las esquinas de marco */
-  .rejilla {
+  .separador {
+    width: 5px;
+    height: 5px;
+    background: var(--gris);
+  }
+
+  /* Filas: nombre del grupo con su cuadrito a la izquierda y cuatro tarjetas iguales */
+  .filas {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, 40%), 1fr));
-    gap: 1.75rem;
-    max-width: 58rem;
+    gap: 2rem;
+    max-width: var(--contenido);
     margin: 2rem auto 0;
+    text-align: left;
+  }
+
+  .grupo {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .grupo[hidden] {
+    display: none;
+  }
+
+  .grupo-nombre {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .grupo-nombre .cuadrito {
+    width: 2.75rem;
+  }
+
+  .grupo-nombre strong {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  .grupo-nombre small {
+    color: var(--gris);
+    font-size: 0.8125rem;
+  }
+
+  .grupo ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
@@ -212,7 +297,7 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
     padding: 0;
     overflow: hidden;
     border: 0;
-    border-radius: 8px;
+    border-radius: 4px;
     background: var(--superficie);
     cursor: pointer;
   }
@@ -234,35 +319,21 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
     bottom: 0.5rem;
     display: grid;
     place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.6rem;
+    height: 1.6rem;
     border-radius: 50%;
     background: rgb(255 255 255 / 0.9);
     color: var(--negro);
   }
 
   .reproducir svg {
-    width: 0.85rem;
-    height: 0.85rem;
+    width: 0.8rem;
+    height: 0.8rem;
   }
 
-  /* Esquinas de marco al pasar el mouse, separadas de la imagen */
-  .tarjeta::before,
-  .tarjeta::after {
-    content: '';
-    position: absolute;
-    inset: -9px;
-    background:
-      linear-gradient(var(--texto), var(--texto)) top left / 6px 6px no-repeat,
-      linear-gradient(var(--texto), var(--texto)) top right / 6px 6px no-repeat,
-      linear-gradient(var(--texto), var(--texto)) bottom left / 6px 6px no-repeat,
-      linear-gradient(var(--texto), var(--texto)) bottom right / 6px 6px no-repeat;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .tarjeta::after {
-    display: none;
+  /* Las esquinas de selección solo aparecen al pasar el mouse */
+  .tarjeta .esquina {
+    visibility: hidden;
   }
 
   .visor-trabajo {
@@ -320,8 +391,8 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .tarjeta:hover::before {
-      opacity: 1;
+    .tarjeta:hover .esquina {
+      visibility: visible;
     }
 
     .pestana[aria-pressed='false']:hover {
@@ -329,9 +400,33 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
     }
   }
 
-  @media (max-width: 560px) {
-    .rejilla {
-      gap: 1.25rem;
+  /* En celular el nombre del grupo va arriba, en una línea con su cuadrito */
+  @media (max-width: 720px) {
+    .grupo {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .grupo-nombre {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .grupo-nombre .cuadrito {
+      width: 2.25rem;
+    }
+
+    .grupo ul {
+      gap: 0.75rem;
+    }
+
+    .pestanas {
+      gap: 0.6rem;
+    }
+
+    .pestana {
+      font-size: 0.875rem;
     }
   }
 </style>

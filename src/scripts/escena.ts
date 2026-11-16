@@ -86,3 +86,40 @@ export function moverCursor(cursor: HTMLElement, pos: Punto, clic = false) {
   cursor.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
   cursor.classList.toggle('clic', clic);
 }
+
+/**
+ * Escena que no detiene el scroll: mientras la sección está en pantalla, pintar(p) corre sola de 0 a 1
+ * en `duracion` ms, espera `pausa` ms con el resultado y vuelve a empezar. Con "reducir movimiento" pinta el final.
+ */
+export function reproducirEnBucle(seccion: HTMLElement, pintar: (p: number) => void, duracion = 9000, pausa = 2500): () => void {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    seccion.classList.add('estatica');
+    pintar(1);
+    return () => {};
+  }
+  pintar(0);
+  let cuadro = 0;
+  let inicio = 0;
+  let pausado = 0;
+  const paso = (ahora: number) => {
+    if (!inicio) inicio = ahora - pausado;
+    const t = (ahora - inicio) % (duracion + pausa);
+    pintar(Math.min(1, t / duracion));
+    cuadro = requestAnimationFrame(paso);
+  };
+  const vista = new IntersectionObserver(([entrada]) => {
+    if (entrada.isIntersecting && !cuadro) {
+      cuadro = requestAnimationFrame(paso);
+    } else if (!entrada.isIntersecting && cuadro) {
+      cancelAnimationFrame(cuadro);
+      pausado = performance.now() - inicio;
+      inicio = 0;
+      cuadro = 0;
+    }
+  });
+  vista.observe(seccion);
+  return () => {
+    vista.disconnect();
+    cancelAnimationFrame(cuadro);
+  };
+}
