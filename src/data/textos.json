@@ -65,7 +65,7 @@
     "proceso": {
       "etiqueta": "Proceso",
       "titulo": {
-        "antes": "Tres pasos, un solo",
+        "antes": "Cuatro pasos, un solo",
         "destacado": "sistema",
         "despues": ""
       }
@@ -132,7 +132,8 @@
         "Motion",
         "Diseño"
       ],
-      "categoria": "Categoría de trabajos"
+      "categoria": "Categoría de trabajos",
+      "creadores": "Creadores"
     },
     "trabajos": {
       "etiqueta": "Trabajos",
@@ -223,7 +224,7 @@
     "proceso": {
       "etiqueta": "Process",
       "titulo": {
-        "antes": "Three steps, one",
+        "antes": "Four steps, one",
         "destacado": "system",
         "despues": ""
       }
@@ -290,7 +291,8 @@
         "Motion",
         "Design"
       ],
-      "categoria": "Work category"
+      "categoria": "Work category",
+      "creadores": "Creators"
     },
     "trabajos": {
       "etiqueta": "Work",

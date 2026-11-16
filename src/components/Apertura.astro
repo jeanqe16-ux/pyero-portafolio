@@ -1,6 +1,7 @@
 ---
 import site from '../data/site.json';
 import { casos } from '../data/casos.json';
+import { clientes } from '../data/clientes.json';
 import { creadores } from '../data/creadores.json';
 import { servicios } from '../data/servicios.json';
 import { posts } from '../data/diseno.json';
@@ -16,19 +17,42 @@ const textos = textosDe(lang);
 const t = textos.hero;
 const a = textos.apertura;
 
-// Trabajo real por categoría (las mismas tres de las pestañas). Los videos no se mezclan con los posts:
-// si a video o motion le faltan piezas, se completa con los otros videos.
-const CARTAS = 8;
-const videos = casos.flatMap((c) => c.videos);
-const edicion = videos.filter((v) => !/motion/i.test(v.titulo)).map((v) => v.poster);
-const motion = [...creadores.map((c) => c.poster), ...videos.filter((v) => /motion/i.test(v.titulo)).map((v) => v.poster)];
-const fuentes = [
-  [...edicion, ...motion],
-  [...motion, ...edicion],
-  posts.map((p) => p.imagenes[0]),
+// Trabajo real por categoría (las mismas tres de las pestañas), agrupado por marca y sin repetir piezas entre
+// categorías: cada una muestra solo lo que tiene. Antes de cada marca va un cuadrito con su logo.
+const MAX_POR_MARCA = 3;
+const esMotion = (titulo: string) => /motion/i.test(titulo);
+const COLORES: Record<string, string> = {
+  cero: 'var(--acento)',
+  'clinica-dental-imagen': '#9d86f5',
+  'clinica-zarate': 'var(--texto)',
+  creadores: '#f6a46c',
+};
+type Grupo = { id: string; nombre: string; logo: string; piezas: string[] };
+const marca = (id: string, piezas: string[]): Grupo => {
+  const c = clientes.find((cl) => cl.id === id);
+  return { id, nombre: c?.nombre ?? id, logo: c?.logo ?? '', piezas };
+};
+const deCasos = (filtro: (titulo: string) => boolean) =>
+  casos.map((c) => marca(c.cliente, c.videos.filter((v) => filtro(v.titulo)).map((v) => v.poster)));
+const fuentes: Grupo[][] = [
+  deCasos((titulo) => !esMotion(titulo)),
+  [...deCasos(esMotion), { id: 'creadores', nombre: a.creadores, logo: '', piezas: creadores.map((c) => c.poster) }],
+  clientes.map((c) => marca(c.id, posts.filter((p) => p.cliente === c.id).flatMap((p) => p.imagenes))),
 ];
-// Fila: todas son piezas reales del mismo tamaño y cada una lleva sus esquinas de selección
-const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.slice(0, CARTAS).map((src) => optimizar(src, 300)))));
+// Medidas de cada fila para que entre completa en pantalla: cartas de 0.8 de ancho por alto y cuadritos de 0.62
+const medidas = (grupos: { piezas: string[] }[]) => {
+  const cartas = grupos.reduce((n, g) => n + g.piezas.length, 0);
+  return `--huecos:${cartas + grupos.length - 1};--factor:${(cartas * 0.8 + grupos.length * 0.62).toFixed(2)}`;
+};
+const categorias = await Promise.all(
+  fuentes.map((grupos) =>
+    Promise.all(
+      grupos
+        .filter((g) => g.piezas.length)
+        .map(async (g) => ({ ...g, piezas: await Promise.all(g.piezas.slice(0, MAX_POR_MARCA).map((src) => optimizar(src, 300))) })),
+    ),
+  ),
+);
 ---
 
 <section class="apertura" aria-labelledby="apertura-titulo">
@@ -102,19 +126,32 @@ const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.sl
     </div>
   </div>
 
-  <div class="fila" role="img" aria-label={a.trabajos} data-categorias={JSON.stringify(categorias)}>
-    {
-      categorias[0].map((src, n) => (
-        <figure class="carta" data-n={n}>
-          <img src={src} alt="" loading="eager" decoding="async" fetchpriority="low" />
-          <i class="esquina" />
-          <i class="esquina" />
-          <i class="esquina" />
-          <i class="esquina" />
-        </figure>
-      ))
-    }
-  </div>
+  {/* Una fila por categoría; solo se ve la elegida. Las piezas reales llevan esquinas; los cuadritos de marca no */}
+  {
+    categorias.map((grupos, n) => (
+      <div class="fila" role="img" aria-label={`${a.trabajos}: ${a.categorias[n]}`} hidden={n > 0} style={medidas(grupos)}>
+        {grupos.map((g) => (
+          <>
+            <span class="marca" aria-hidden="true">
+              <span class="cuadrito" style={`--c:${COLORES[g.id] ?? 'var(--acento)'}`}>
+                {g.logo ? <span class="logo" style={`--logo:url('${g.logo}')`} /> : <span class="arroba">@</span>}
+              </span>
+              <span class="marca-nombre">{g.nombre}</span>
+            </span>
+            {g.piezas.map((src) => (
+              <figure class="carta">
+                <img src={src} alt="" loading={n === 0 ? 'eager' : 'lazy'} decoding="async" fetchpriority="low" />
+                <i class="esquina" />
+                <i class="esquina" />
+                <i class="esquina" />
+                <i class="esquina" />
+              </figure>
+            ))}
+          </>
+        ))}
+      </div>
+    ))
+  }
 </section>
 
 <script>
@@ -129,8 +166,8 @@ const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.sl
     limpiar?.();
     const seccion = document.querySelector<HTMLElement>('.apertura');
     const form = seccion?.querySelector<HTMLFormElement>('.prompt');
-    const fila = seccion?.querySelector<HTMLElement>('.fila');
-    if (!seccion || !form || !fila) return;
+    const filas = [...(seccion?.querySelectorAll<HTMLElement>('.fila') ?? [])];
+    if (!seccion || !form || !filas.length) return;
 
     const campo = form.querySelector('textarea')!;
     const ejemplo = form.querySelector<HTMLElement>('.ejemplo-texto')!;
@@ -138,8 +175,6 @@ const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.sl
     const enviar = form.querySelector<HTMLElement>('.enviar')!;
     const pestanas = [...seccion.querySelectorAll<HTMLButtonElement>('.pestana')];
     const pedidos: string[] = JSON.parse(form.dataset.pedidos || '[]');
-    const categorias: string[][] = JSON.parse(fila.dataset.categorias || '[]');
-    const piezas = [...fila.children] as HTMLElement[];
     const relojes: number[] = [];
     const esperar = (ms: number) => new Promise<void>((r) => relojes.push(window.setTimeout(r, ms)));
     let vivo = true;
@@ -154,19 +189,21 @@ const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.sl
     };
     form.addEventListener('submit', alEnviar);
 
-    // Cambia de categoría: cada carta pasa a su pieza nueva de izquierda a derecha, con corte seco y saltito
+    // Cambia de categoría: se muestra su fila y cada pieza aparece de izquierda a derecha, con corte seco y saltito
     const elegir = (n: number) => {
       if (n === categoria) return;
       categoria = n;
       pestanas.forEach((b, i) => b.setAttribute('aria-pressed', String(i === n)));
-      categorias[n].forEach((src) => (new Image().src = src));
+      filas.forEach((f, i) => (f.hidden = i !== n));
+      if (reducir) return;
+      const piezas = [...filas[n].children] as HTMLElement[];
       piezas.forEach((pieza, i) => {
+        pieza.classList.add('oculta');
         relojes.push(
           window.setTimeout(() => {
-            const img = pieza.querySelector('img')!;
-            img.src = categorias[n][Number(pieza.dataset.n) % categorias[n].length];
+            pieza.classList.remove('oculta');
             salto(pieza);
-          }, reducir ? 0 : i * 80),
+          }, 40 + i * 70),
         );
       });
     };
@@ -522,20 +559,60 @@ const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.sl
 
   /* Fila de trabajos: piezas reales del mismo tamaño, cada una con sus esquinas de selección.
      Centrada y más ancha que la pantalla: sale por los dos bordes */
+  /* Fila de la categoría elegida: entra completa en pantalla; si tiene muchas piezas, se achica */
   .fila {
-    --alto: clamp(120px, 14vw, 184px);
+    --gap: 26px;
+    --alto: min(clamp(120px, 14vw, 184px), calc((100vw - 4rem - var(--gap) * var(--huecos)) / var(--factor)));
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 26px;
+    gap: var(--gap);
+    padding-inline: 2rem;
     margin-top: clamp(1.75rem, 4svh, 2.5rem);
     padding-block: 10px;
   }
 
-  .carta {
+  .fila[hidden] {
+    display: none;
+  }
+
+  .carta,
+  .marca {
     position: relative;
     flex: none;
     margin: 0;
+  }
+
+  .oculta {
+    visibility: hidden;
+  }
+
+  /* Cuadrito de marca: más chico que las piezas, alineado arriba, con el logo en blanco y el nombre debajo */
+  .marca {
+    display: grid;
+    gap: 0.45rem;
+    width: calc(var(--alto) * 0.62);
+    text-align: left;
+  }
+
+  .logo {
+    width: 68%;
+    height: 50%;
+    background: #fff;
+    -webkit-mask: var(--logo) center / contain no-repeat;
+    mask: var(--logo) center / contain no-repeat;
+  }
+
+  .arroba {
+    font-size: calc(var(--alto) * 0.24);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .marca-nombre {
+    color: var(--gris);
+    font-size: 0.75rem;
+    line-height: 1.3;
   }
 
   .carta {
@@ -574,9 +651,14 @@ const categorias = await Promise.all(fuentes.map((lista) => Promise.all(lista.sl
   }
 
   @media (max-width: 560px) {
+    /* En celular la fila no se achica: se desliza de lado */
     .fila {
+      --gap: 22px;
       --alto: 104px;
-      gap: 22px;
+      justify-content: safe center;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-inline: 1.25rem;
     }
 
     .prompt .cursor-pyero {

@@ -345,6 +345,7 @@ content:
               - { name: cursor, label: Nombre del cursor, type: string }
               - { name: categorias, label: Pestañas de categoría (video, motion, diseño), type: string, list: true }
               - { name: categoria, label: Descripción de las pestañas, type: string }
+              - { name: creadores, label: Nombre del grupo de creadores en la fila, type: string }
           - name: trabajos
             label: Trabajos
             type: object
