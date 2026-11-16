@@ -208,6 +208,12 @@ const categorias = await Promise.all(
     campo.addEventListener('input', actualizar);
     campo.addEventListener('focus', actualizar);
     campo.addEventListener('blur', actualizar);
+    campo.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
 
     // Lleva el cursor justo encima del botón de enviar, sea cual sea el tamaño de pantalla
     const alBoton = () => {

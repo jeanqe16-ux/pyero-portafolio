@@ -58,8 +58,7 @@ function explosion() {
   lienzo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:95;pointer-events:none';
   document.documentElement.append(lienzo);
   const ctx = lienzo.getContext('2d')!;
-  // En modo oscuro los pixeles negros no se verían: pasan a blanco
-  const colores = document.documentElement.dataset.tema === 'oscuro' ? PALETA.map((c) => (c === '#0a0a0a' ? '#ffffff' : c)) : PALETA;
+  const colores = PALETA;
 
   const pixeles = Array.from({ length: 160 }, () => {
     const angulo = Math.random() * Math.PI * 2;

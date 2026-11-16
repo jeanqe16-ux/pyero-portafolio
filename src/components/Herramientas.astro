@@ -59,11 +59,6 @@ import { herramientas } from '../data/herramientas.json';
     transition: border-color 0.2s ease;
   }
 
-  /* Una marca de color negro (CapCut) no se vería en oscuro: ahí pasa a blanco */
-  :global([data-tema='oscuro']) .herramienta.negra {
-    --marca: #fff;
-  }
-
   .herramienta::before {
     content: '';
     position: absolute;

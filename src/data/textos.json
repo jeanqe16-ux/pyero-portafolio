@@ -7,10 +7,11 @@
       "contacto": "Contacto",
       "cta": "Hablemos",
       "idioma": "Cambiar idioma",
-      "trabajos": "Trabajos"
+      "trabajos": "Trabajos",
+      "saltar": "Saltar al contenido"
     },
     "hero": {
-      "estado": "Disponible para nuevos proyectos",
+      "estado": "Disponibilidad según agenda",
       "titulo": {
         "a": "¿Publicas y",
         "b": "nadie",
@@ -18,17 +19,7 @@
         "c": "Hagamos que tu marca",
         "d": "destaque."
       },
-      "bajada": "Edición de video, motion graphics y diseño que detienen el scroll y hacen que tu marca se recuerde.",
-      "cta": "Quiero resultados así",
-      "secundario": "Ver casos",
-      "proximamente": "Próximamente",
-      "reels": "Reels de trabajos recientes",
-      "sonidoActivar": "Activar sonido",
-      "sonidoSilenciar": "Silenciar"
-    },
-    "prueba": {
-      "etiqueta": "Mi trabajo en cifras",
-      "pendiente": "[X]"
+      "bajada": "Edición de video, motion graphics y diseño que detienen el scroll y hacen que tu marca se recuerde."
     },
     "franja": {
       "etiqueta": "Marcas y creadores con los que he trabajado"
@@ -49,18 +40,7 @@
       "piezas": "Piezas de"
     },
     "servicios": {
-      "etiqueta": "Servicios",
-      "titulo": {
-        "antes": "Tres formas de",
-        "destacado": "mover",
-        "despues": "tu marca"
-      },
-      "subtitulo": "Todo parte de entender tu marca. Después, hacemos que se mueva.",
-      "idealPara": "Ideal para:",
-      "proximamente": "Próximamente",
-      "ctaProyectos": "Ver casos",
-      "ctaCotizar": "Cotizar mi proyecto",
-      "pase": "Muestra de posts diseñados para redes"
+      "etiqueta": "Servicios"
     },
     "proceso": {
       "etiqueta": "Proceso",
@@ -99,13 +79,6 @@
     },
     "pie": "Todos los derechos reservados.",
     "whatsapp": "Chatear por WhatsApp",
-    "pixeles": [
-      "IA",
-      "TECH",
-      "MOTION",
-      "EDIT",
-      "VISUAL"
-    ],
     "perdida": {
       "codigo": "Error 404",
       "titulo": "Este frame se perdió en el render",
@@ -167,10 +140,11 @@
       "contacto": "Contact",
       "cta": "Let's talk",
       "idioma": "Switch language",
-      "trabajos": "Work"
+      "trabajos": "Work",
+      "saltar": "Skip to content"
     },
     "hero": {
-      "estado": "Available for new projects",
+      "estado": "Availability by schedule",
       "titulo": {
         "a": "You post and",
         "b": "nobody",
@@ -178,17 +152,7 @@
         "c": "Let's make your brand",
         "d": "stand out."
       },
-      "bajada": "Video editing, motion graphics and design that stop the scroll and make your brand memorable.",
-      "cta": "I want results like these",
-      "secundario": "See cases",
-      "proximamente": "Coming soon",
-      "reels": "Reels of recent work",
-      "sonidoActivar": "Turn sound on",
-      "sonidoSilenciar": "Mute"
-    },
-    "prueba": {
-      "etiqueta": "My work in numbers",
-      "pendiente": "[X]"
+      "bajada": "Video editing, motion graphics and design that stop the scroll and make your brand memorable."
     },
     "franja": {
       "etiqueta": "Brands and creators I have worked with"
@@ -209,18 +173,7 @@
       "piezas": "Pieces for"
     },
     "servicios": {
-      "etiqueta": "Services",
-      "titulo": {
-        "antes": "Three ways to",
-        "destacado": "move",
-        "despues": "your brand"
-      },
-      "subtitulo": "It all starts with understanding your brand. Then we make it move.",
-      "idealPara": "Ideal for:",
-      "proximamente": "Coming soon",
-      "ctaProyectos": "See cases",
-      "ctaCotizar": "Get a quote",
-      "pase": "Sample of posts designed for social media"
+      "etiqueta": "Services"
     },
     "proceso": {
       "etiqueta": "Process",
@@ -259,13 +212,6 @@
     },
     "pie": "All rights reserved.",
     "whatsapp": "Chat on WhatsApp",
-    "pixeles": [
-      "AI",
-      "TECH",
-      "MOTION",
-      "EDIT",
-      "VISUAL"
-    ],
     "perdida": {
       "codigo": "Error 404",
       "titulo": "This frame got lost in the render",

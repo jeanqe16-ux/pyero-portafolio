@@ -3,7 +3,7 @@
   --acento: #fb8e1f;
   --acento-suave: #fdaf50;
   /* Naranja oscuro para texto pequeño sobre fondos claros (cumple WCAG AA) */
-  --acento-texto: #b45309;
+  --acento-texto: #a0470a;
   /* Negro fijo: no cambia con el tema (texto sobre naranja, fondo de videos, franja de logos) */
   --negro: #0a0a0a;
   /* Lienzo crema con grano, como un lanzamiento de producto; las tarjetas van en un blanco roto encima */
@@ -22,15 +22,6 @@
   --contenido: 72rem;
   /* Alto del menú flotante más su separación del borde superior */
   --alto-nav: 5rem;
-}
-
-/* Fuente bit del nombre, autoalojada (solo latín, negrita) */
-@font-face {
-  font-family: Silkscreen;
-  src: url('/fonts/silkscreen-700.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
 }
 
 *,
@@ -135,6 +126,30 @@ h2 em {
   max-width: var(--ancho);
   margin: 0 auto;
   padding: clamp(3rem, 5.5vw, 4.5rem) 1.5rem;
+}
+
+/* Al ir a un ancla, la sección no queda escondida bajo el menú flotante */
+[id] {
+  scroll-margin-top: calc(var(--alto-nav) + 0.5rem);
+}
+
+/* Enlace para saltar al contenido: solo se ve al enfocarlo con el teclado */
+.saltar {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 20;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  background: var(--texto);
+  color: var(--fondo);
+  font-size: 0.875rem;
+  font-weight: 600;
+  translate: 0 -200%;
+}
+
+.saltar:focus-visible {
+  translate: 0 0;
 }
 
 /* Botones */

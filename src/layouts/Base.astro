@@ -13,13 +13,11 @@ interface Props {
   lang: Idioma;
   titulo?: string;
   descripcion?: string;
-  /** Imagen principal del primer pantallazo, para precargarla */
-  precarga?: { srcset: string; sizes: string };
   /** Para páginas que no deben aparecer en buscadores, como la 404 */
   noindex?: boolean;
 }
 
-const { lang, precarga, noindex = false } = Astro.props;
+const { lang, noindex = false } = Astro.props;
 const { titulo = tr(site.seo, 'titulo', lang), descripcion = tr(site.seo, 'descripcion', lang) } = Astro.props;
 const textos = textosDe(lang);
 const inicio = ruta(lang);
@@ -112,11 +110,6 @@ const datosEstructurados = {
     <meta name="theme-color" content="#edebe6" />
 
     <link rel="preload" href={fuenteInter} as="font" type="font/woff2" crossorigin />
-    {
-      precarga?.srcset && (
-        <link rel="preload" as="image" type="image/avif" imagesrcset={precarga.srcset} imagesizes={precarga.sizes} fetchpriority="high" />
-      )
-    }
     <ClientRouter />
     <script type="application/ld+json" set:html={JSON.stringify(datosEstructurados)} />
     <script is:inline>
@@ -138,6 +131,7 @@ const datosEstructurados = {
       </defs>
     </svg>
 
+    <a class="saltar" href="#contenido">{textos.nav.saltar}</a>
     <header class="nav">
       <div class="nav-interior">
         <a class="marca" href={inicio}>{site.marca}<span>{site.marcaSufijo}</span></a>
@@ -156,7 +150,7 @@ const datosEstructurados = {
       </div>
     </header>
 
-    <main>
+    <main id="contenido">
       <slot />
     </main>
 
