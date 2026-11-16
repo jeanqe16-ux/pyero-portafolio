@@ -7,7 +7,7 @@
       "contacto": "Contacto",
       "cta": "Hablemos",
       "idioma": "Cambiar idioma",
-      "tema": "Cambiar entre modo claro y oscuro"
+      "trabajos": "Trabajos"
     },
     "hero": {
       "estado": "Disponible para nuevos proyectos",
@@ -131,17 +131,76 @@
     },
     "escenaVideo": {
       "etiqueta": "Edición de video",
-      "titulo": "Ritmo, subtítulos y color pensados para que nadie pase de largo.",
+      "titulo": "Cortes, color y música que retienen hasta el final.",
       "subtitulo": "Esto sí detiene el scroll",
       "pistas": {
         "video": "Video",
         "texto": "Texto",
-        "audio": "Audio"
+        "audio": "Música"
       },
       "color": "Color",
       "exportar": "Exportar",
       "listo": "Listo para publicar",
-      "monitor": "Vista previa del reel en edición"
+      "monitor": "Vista previa del reel en edición",
+      "cursores": {
+        "corte": "Pyero · Corte",
+        "color": "Pyero · Color",
+        "musica": "Pyero · Música"
+      },
+      "musica": "Pista de música"
+    },
+    "escenaMotion": {
+      "etiqueta": "Motion graphics",
+      "titulo": "Textos y logos que se mueven con intención.",
+      "capas": {
+        "texto": "Texto",
+        "forma": "Forma",
+        "logo": "Logo"
+      },
+      "curva": "Curva",
+      "render": "Render",
+      "listo": "Animación lista",
+      "cursores": {
+        "keys": "Pyero · Keyframes",
+        "curva": "Pyero · Curva"
+      },
+      "marca": "Tu marca",
+      "lema": "en movimiento",
+      "monitor": "Vista previa de una animación de marca"
+    },
+    "escenaDiseno": {
+      "etiqueta": "Diseño para redes",
+      "titulo": "Posts con una línea visual que se reconoce sin ver el logo.",
+      "paleta": "Paleta",
+      "titular": "Tu mensaje aquí",
+      "publicar": "Publicar",
+      "listo": "Serie lista",
+      "cursores": {
+        "layout": "Pyero · Layout",
+        "tipo": "Pyero · Tipografía",
+        "color": "Pyero · Color"
+      },
+      "lienzo": "Serie de posts en diseño"
+    },
+    "trabajos": {
+      "etiqueta": "Trabajos",
+      "titulo": "Una muestra de lo que entrego cada semana.",
+      "pestanas": {
+        "todo": "Todo",
+        "video": "Video",
+        "motion": "Motion",
+        "diseno": "Diseño"
+      },
+      "cerrar": "Cerrar",
+      "filtros": "Filtrar trabajos"
+    },
+    "cifras": {
+      "titulo": "Resultados que se pueden contar.",
+      "panel": "Resumen de trabajo"
+    },
+    "clientes": {
+      "titulo": "Marcas y creadores que ya se mueven.",
+      "tuMarca": "Tu marca"
     }
   },
   "en": {
@@ -152,7 +211,7 @@
       "contacto": "Contact",
       "cta": "Let's talk",
       "idioma": "Switch language",
-      "tema": "Switch between light and dark mode"
+      "trabajos": "Work"
     },
     "hero": {
       "estado": "Available for new projects",
@@ -276,17 +335,76 @@
     },
     "escenaVideo": {
       "etiqueta": "Video editing",
-      "titulo": "Pacing, captions and color built so nobody scrolls past.",
+      "titulo": "Cuts, color and music that hold attention to the end.",
       "subtitulo": "This one stops the scroll",
       "pistas": {
         "video": "Video",
         "texto": "Text",
-        "audio": "Audio"
+        "audio": "Music"
       },
       "color": "Color",
       "exportar": "Export",
       "listo": "Ready to post",
-      "monitor": "Preview of the reel being edited"
+      "monitor": "Preview of the reel being edited",
+      "cursores": {
+        "corte": "Pyero · Cut",
+        "color": "Pyero · Color",
+        "musica": "Pyero · Music"
+      },
+      "musica": "Music track"
+    },
+    "escenaMotion": {
+      "etiqueta": "Motion graphics",
+      "titulo": "Text and logos that move with intent.",
+      "capas": {
+        "texto": "Text",
+        "forma": "Shape",
+        "logo": "Logo"
+      },
+      "curva": "Curve",
+      "render": "Render",
+      "listo": "Animation ready",
+      "cursores": {
+        "keys": "Pyero · Keyframes",
+        "curva": "Pyero · Curve"
+      },
+      "marca": "Your brand",
+      "lema": "in motion",
+      "monitor": "Preview of a brand animation"
+    },
+    "escenaDiseno": {
+      "etiqueta": "Social media design",
+      "titulo": "Posts with a visual line people recognize without seeing the logo.",
+      "paleta": "Palette",
+      "titular": "Your message here",
+      "publicar": "Publish",
+      "listo": "Series ready",
+      "cursores": {
+        "layout": "Pyero · Layout",
+        "tipo": "Pyero · Type",
+        "color": "Pyero · Color"
+      },
+      "lienzo": "Post series being designed"
+    },
+    "trabajos": {
+      "etiqueta": "Work",
+      "titulo": "A sample of what I deliver every week.",
+      "pestanas": {
+        "todo": "All",
+        "video": "Video",
+        "motion": "Motion",
+        "diseno": "Design"
+      },
+      "cerrar": "Close",
+      "filtros": "Filter work"
+    },
+    "cifras": {
+      "titulo": "Results you can count.",
+      "panel": "Work summary"
+    },
+    "clientes": {
+      "titulo": "Brands and creators already in motion.",
+      "tuMarca": "Your brand"
     }
   }
 }

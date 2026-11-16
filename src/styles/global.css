@@ -17,10 +17,6 @@
   --orbe-lila: #cdbbff;
   /* Bloques invertidos, como el cierre: negros en claro, gris oscuro en oscuro */
   --inverso: #0a0a0a;
-  /* Textos .pixel: contorno de las letras vacías y cómo se funde la máscara con el fondo */
-  --contorno: #d4d4d4;
-  --mascara: #000;
-  --mezcla: screen;
   --ancho: 1180px;
   /* Alto del menú flotante más su separación del borde superior */
   --alto-nav: 5rem;
@@ -199,6 +195,7 @@ h2 em {
   height: 0;
 }
 
+/* Menú compacto: solo ocupa lo que necesita, centrado arriba */
 .nav-interior {
   position: absolute;
   top: 0.75rem;
@@ -206,9 +203,10 @@ h2 em {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  width: min(var(--ancho), calc(100% - 1.5rem));
-  padding: 0.6rem 0.75rem 0.6rem 1.25rem;
+  gap: 1.25rem;
+  width: max-content;
+  max-width: calc(100% - 1.5rem);
+  padding: 0.35rem 0.4rem 0.35rem 1rem;
   border: 1px solid color-mix(in srgb, var(--texto) 9%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--fondo) 58%, transparent);
@@ -218,7 +216,7 @@ h2 em {
 }
 
 .marca {
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: -0.03em;
 }
@@ -229,15 +227,20 @@ h2 em {
 
 .nav-links {
   display: flex;
-  gap: 2rem;
-  font-size: 0.9375rem;
+  gap: 1.25rem;
+  font-size: 0.8125rem;
   color: var(--gris);
 }
 
 .nav-acciones {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.4rem;
+}
+
+.nav .boton-chico {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8125rem;
 }
 
 .idioma {
@@ -250,7 +253,7 @@ h2 em {
 }
 
 .idioma span {
-  padding: 0.35rem 0.6rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 999px;
   color: var(--gris);
 }
@@ -296,7 +299,7 @@ h2 em {
 }
 
 /* Entrada al hacer scroll: solo si el script marcó <html class="animar"> */
-.animar main > :not(.hero, .apertura, .escena-video) {
+.animar main > :not(.apertura, .escena-scroll) {
   opacity: 0;
   transform: translateY(12px);
   transition:
@@ -304,70 +307,9 @@ h2 em {
     transform 0.6s ease;
 }
 
-.animar main > .visible:not(.hero, .apertura, .escena-video) {
+.animar main > .visible:not(.apertura, .escena-scroll) {
   opacity: 1;
   transform: none;
-}
-
-/* Texto que se rellena con pixeles: un lienzo de colores, una máscara que solo lo deja ver dentro de las letras y el texto encima */
-.pixel {
-  --lleno: 0;
-  position: relative;
-  display: inline-block;
-  /* El interletrado negativo deja la última letra fuera de la caja; el relleno la vuelve a incluir */
-  padding-inline: 0.08em;
-  isolation: isolate;
-
-  /* Recorta 2 px a los lados para que no asomen pixeles por el borde de la máscara; arriba y abajo deja pasar el resplandor */
-  clip-path: inset(-3rem 2px);
-  white-space: nowrap;
-}
-
-.pixel-contorno {
-  position: relative;
-  margin: 0;
-  /* Resplandor leve que crece con el relleno */
-  text-shadow: 0 0 22px rgb(251 142 31 / calc(var(--lleno) * 0.28));
-}
-
-.pixel-lienzo,
-.pixel-mascara {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-}
-
-/* El lienzo solo aparece cuando el script de pixeles está en marcha. La máscara se pinta desde el inicio:
-   si apareciera recién al cargar el script, el navegador la contaría como el elemento más grande y retrasaría el LCP */
-/* En el estilo crema el relleno de pixeles queda apagado: el texto se ve normal */
-.pixel-lienzo,
-.pixel.activo .pixel-lienzo,
-.pixel-mascara {
-  display: none;
-}
-
-.pixel-lienzo {
-  width: 100%;
-  height: 100%;
-}
-
-/* La máscara tapa con el color de la página y sus letras dejan ver el lienzo.
-   En claro: letras negras sobre blanco en modo screen. En oscuro: letras blancas sobre el fondo oscuro en modo darken */
-.pixel-mascara {
-  padding-inline: inherit;
-  background: var(--fondo);
-  color: var(--mascara);
-  mix-blend-mode: var(--mezcla);
-}
-
-/* Pixeles de fondo: lienzo fijo detrás de todo el contenido */
-.fondo-pixeles {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
 }
 
 /* Gradiente de Instagram compartido por todos los iconos de redes */
@@ -432,24 +374,14 @@ h2 em {
     display: none;
   }
 
-  /* Con el selector de idioma el encabezado va más justo en pantallas chicas */
   .nav-interior {
-    gap: 0.4rem;
-    padding: 0.5rem 0.5rem 0.5rem 0.9rem;
+    gap: 0.75rem;
   }
 
   .nav-acciones {
     gap: 0.5rem;
   }
 
-  .marca {
-    font-size: 1rem;
-  }
-
-  .nav .boton-chico {
-    padding: 0.55rem 0.85rem;
-    font-size: 0.8125rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -463,5 +395,153 @@ h2 em {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== Piezas comunes del estilo "film": escenas, paneles de interfaz, cursores y saltito ===== */
+
+/* Escena ligada al scroll: la sección mide varias pantallas y su interior queda fijo */
+.escena-scroll {
+  position: relative;
+  height: var(--largo, 320vh);
+}
+
+.escena-fija {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100svh;
+  padding: calc(var(--alto-nav) + 0.25rem) 1.5rem 1.5rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.escena-scroll.estatica {
+  height: auto;
+}
+
+.escena-scroll.estatica .escena-fija {
+  position: relative;
+  height: auto;
+  min-height: 100svh;
+}
+
+.escena-scroll.estatica .cursor-pyero {
+  display: none;
+}
+
+/* Cabecera chica y limpia de cada escena o sección */
+.cabecera-chica {
+  text-align: center;
+}
+
+.cabecera-chica .paso {
+  color: var(--acento-texto);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.cabecera-chica h2 {
+  max-width: 30ch;
+  margin: 0.35rem auto 0;
+  font-size: clamp(1.15rem, 1.7vw, 1.45rem);
+  font-weight: 520;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+/* Orbe de color desenfocado detrás de una escena */
+.orbe-fondo {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  z-index: -1;
+  width: min(50rem, 110vw);
+  aspect-ratio: 1.6;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side at 35% 50%, var(--orbe-lila), transparent),
+    radial-gradient(closest-side at 65% 55%, var(--orbe-durazno), transparent);
+  filter: blur(60px);
+  opacity: 0.5;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+/* Panel de interfaz: mismo borde, radio y sombra en toda la web */
+.panel {
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+  background: var(--superficie);
+  box-shadow: 0 18px 40px -30px rgb(60 40 20 / 0.45);
+}
+
+/* Cursor con nombre, estilo herramienta colaborativa. --c cambia el color según la tarea */
+.cursor-pyero {
+  --c: var(--acento);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.cursor-pyero svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--c);
+  stroke: var(--superficie);
+  stroke-width: 1.2;
+  transition: scale 0.12s ease;
+}
+
+.cursor-pyero span {
+  margin-top: 12px;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px 6px 6px 2px;
+  background: var(--c);
+  color: var(--negro);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cursor-pyero.clic svg {
+  scale: 0.8;
+}
+
+.cursor-pyero.color {
+  --c: #b39cff;
+}
+
+.cursor-pyero.musica {
+  --c: #6cc4a8;
+}
+
+/* Saltito: corte seco que se corre unos píxeles y se asienta */
+.salto {
+  animation: salto 0.3s step-end;
+}
+
+@keyframes salto {
+  0% {
+    translate: -6px 0;
+  }
+  50% {
+    translate: 3px 0;
+  }
+  80% {
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .salto {
+    animation: none;
   }
 }

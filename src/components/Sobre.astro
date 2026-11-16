@@ -19,18 +19,18 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
   <div class="foto">
     {
       foto ? (
-        <Imagen src={foto} alt={t.fotoAlt} anchos={[360, 540, 720, 900]} sizes="(max-width: 820px) min(calc(100vw - 3rem), 340px), 480px" />
+        <Imagen src={foto} alt={t.fotoAlt} anchos={[360, 540, 720]} sizes="(max-width: 820px) min(calc(100vw - 3rem), 280px), 300px" />
       ) : (
         <span aria-hidden="true">{site.marca.charAt(0)}</span>
       )
     }
   </div>
   <div>
-    <p class="etiqueta">{t.etiqueta}</p>
-    <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
+    <p class="paso">{t.etiqueta}</p>
+    <h2>{[t.titulo.antes, t.titulo.destacado, t.titulo.despues].filter(Boolean).join(' ')}</h2>
     {t.parrafos.map((p) => <p class="texto">{p}</p>)}
 
-    <p class="etiqueta herramientas-titulo">{t.herramientas}</p>
+    <p class="paso herramientas-titulo">{t.herramientas}</p>
     <Herramientas />
 
     <div class="acciones">
@@ -41,27 +41,27 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
 </section>
 
 <style>
+  /* Sobre mí compacto: foto chica en 4:5 y texto al lado, del mismo ancho que los casos */
   .sobre {
     display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
-    gap: clamp(2rem, 6vw, 5rem);
+    grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
     align-items: center;
-    border-top: 1px solid var(--linea);
+    max-width: 52rem;
+    margin-inline: auto;
   }
 
   .foto {
     display: grid;
     place-items: center;
-    aspect-ratio: 3 / 4;
-    border-radius: 28px;
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
     overflow: hidden;
     background: linear-gradient(160deg, var(--acento-suave), var(--acento));
     color: rgb(255 255 255 / 0.9);
-    font-size: clamp(5rem, 14vw, 10rem);
+    font-size: clamp(4rem, 10vw, 7rem);
     font-weight: 600;
     letter-spacing: -0.05em;
-    transform: rotate(-2deg);
-    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .foto :global(img) {
@@ -70,20 +70,33 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
     object-fit: cover;
   }
 
+  .paso {
+    color: var(--acento-texto);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
   h2 {
-    margin-bottom: 1rem;
+    margin: 0.35rem 0 0.75rem;
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-weight: 560;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
   }
 
   .texto {
-    font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+    max-width: 46ch;
+    color: var(--gris);
+    font-size: 1rem;
+    line-height: 1.55;
   }
 
   .texto + .texto {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
   }
 
   .herramientas-titulo {
-    margin: 1.75rem 0 0.75rem;
+    margin: 1.5rem 0 0.6rem;
   }
 
   .acciones {
@@ -91,7 +104,7 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
     flex-wrap: wrap;
     align-items: center;
     gap: 0.75rem 1.5rem;
-    margin-top: 1.75rem;
+    margin-top: 1.5rem;
   }
 
   .enlace {
@@ -105,24 +118,20 @@ const foto = ['jpg', 'jpeg', 'webp', 'png'].map((ext) => `/media/yo.${ext}`).fin
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .foto:hover {
-      transform: rotate(0deg);
-    }
-
     .enlace:hover {
       text-decoration-color: var(--acento);
     }
   }
 
   /* En móvil la foto va arriba y el texto debajo */
-  @media (max-width: 820px) {
+  @media (max-width: 720px) {
     .sobre {
       grid-template-columns: 1fr;
     }
 
     .foto {
       width: 100%;
-      max-width: 340px;
+      max-width: 280px;
     }
   }
 </style>

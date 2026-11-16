@@ -112,7 +112,6 @@ const datosEstructurados = {
     <meta name="theme-color" content="#edebe6" />
 
     <link rel="preload" href={fuenteInter} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin />
     {
       precarga?.srcset && (
         <link rel="preload" as="image" type="image/avif" imagesrcset={precarga.srcset} imagesizes={precarga.sizes} fetchpriority="high" />
@@ -143,13 +142,11 @@ const datosEstructurados = {
       <div class="nav-interior">
         <a class="marca" href={inicio}>{site.marca}<span>{site.marcaSufijo}</span></a>
         <nav class="nav-links" aria-label="Principal">
-          <a href={`${inicio}#casos`}>{textos.nav.casos}</a>
-          <a href={`${inicio}#servicios`}>{textos.nav.servicios}</a>
+          <a href={`${inicio}#edicion`}>{textos.nav.servicios}</a>
+          <a href={`${inicio}#trabajos`}>{textos.nav.trabajos}</a>
           <a href={`${inicio}#sobre-mi`}>{textos.nav.sobre}</a>
-          <a href={`${inicio}#contacto`}>{textos.nav.contacto}</a>
         </nav>
         <div class="nav-acciones">
-          <Redes />
           <a class="idioma" href={ruta(otroIdioma)} hreflang={otroIdioma} aria-label={textos.nav.idioma}>
             <span class:list={{ activo: lang === 'es' }}>ES</span>
             <span class:list={{ activo: lang === 'en' }}>EN</span>
@@ -184,13 +181,13 @@ const datosEstructurados = {
       type Modulo = { iniciar: () => void };
       const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // GSAP y los detalles de interacción se cargan cuando el usuario empieza a interactuar o cuando el navegador queda libre
+      // Los detalles de interacción se cargan cuando el usuario empieza a interactuar o cuando el navegador queda libre
       const eventos = ['scroll', 'pointerdown', 'touchstart', 'keydown'];
       let modulos: Promise<Modulo[]> | null = null;
       const cargar = () => {
         if (modulos) return;
         eventos.forEach((evento) => window.removeEventListener(evento, cargar));
-        modulos = Promise.all([import('../scripts/pixeles'), import('../scripts/interacciones')]);
+        modulos = Promise.all([import('../scripts/interacciones')]);
         modulos.then((lista) => lista.forEach((modulo) => modulo.iniciar()));
       };
 
@@ -215,7 +212,7 @@ const datosEstructurados = {
               }),
             { rootMargin: '0px 0px -8% 0px' },
           );
-          document.querySelectorAll('main > :not(.hero, .apertura, .escena-video)').forEach((seccion) => observador.observe(seccion));
+          document.querySelectorAll('main > :not(.apertura, .escena-scroll)').forEach((seccion) => observador.observe(seccion));
         }
         // Si los módulos diferidos ya estaban cargados, se reinician sobre la página nueva
         if (!primera) modulos?.then((lista) => lista.forEach((modulo) => modulo.iniciar()));

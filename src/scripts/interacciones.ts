@@ -1,4 +1,4 @@
-// Detalles de interacción: botones magnéticos, títulos que se decodifican y el easter egg.
+// Detalles de interacción: botones magnéticos y el easter egg.
 // Se carga de forma diferida desde Base.astro y nunca con "reducir movimiento".
 const PALETA = ['#fb8e1f', '#fb8e1f', '#fdaf50', '#ffd166', '#ff7a59', '#0a0a0a'];
 const conMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -47,41 +47,6 @@ if (conMouse) {
   };
   window.addEventListener('scroll', remedir, { passive: true });
   window.addEventListener('resize', remedir);
-}
-
-/* Títulos de sección: caracteres aleatorios que se resuelven en 0.8 s al entrar en pantalla, una sola vez */
-const SIMBOLOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&<>/';
-const alAzar = (letra: string) => {
-  const simbolo = SIMBOLOS[Math.floor(Math.random() * SIMBOLOS.length)];
-  // Las minúsculas se reemplazan por minúsculas para que el ancho del texto casi no cambie
-  return letra === letra.toLowerCase() && letra !== letra.toUpperCase() ? simbolo.toLowerCase() : simbolo;
-};
-
-function decodificar(titulo: HTMLElement) {
-  const nodos: Text[] = [];
-  const recorrido = document.createTreeWalker(titulo, NodeFilter.SHOW_TEXT);
-  while (recorrido.nextNode()) nodos.push(recorrido.currentNode as Text);
-  const originales = nodos.map((nodo) => nodo.data);
-  const total = originales.reduce((suma, texto) => suma + texto.length, 0);
-  if (!total) return;
-
-  // Mientras dura el efecto, los lectores de pantalla leen el texto real y el alto queda fijo
-  titulo.setAttribute('aria-label', titulo.textContent!.replace(/\s+/g, ' ').trim());
-  titulo.style.minHeight = `${titulo.offsetHeight}px`;
-  const inicio = performance.now();
-
-  const paso = (ahora: number) => {
-    const avance = Math.min(1, (ahora - inicio) / 800);
-    let n = 0;
-    nodos.forEach((nodo, i) => {
-      nodo.data = [...originales[i]].map((letra) => (n++ / total < avance || /\s/.test(letra) ? letra : alAzar(letra))).join('');
-    });
-    if (avance < 1 && titulo.isConnected) return requestAnimationFrame(paso);
-    nodos.forEach((nodo, i) => (nodo.data = originales[i]));
-    titulo.removeAttribute('aria-label');
-    titulo.style.minHeight = '';
-  };
-  requestAnimationFrame(paso);
 }
 
 /* Easter egg: al escribir "pyero" estalla una nube de pixeles desde el centro */
@@ -142,20 +107,8 @@ window.addEventListener('keydown', (e) => {
 });
 
 /* Se llama al cargar el módulo y de nuevo después de cada cambio de página */
-let observador: IntersectionObserver | null = null;
 export function iniciar() {
   imanes = conMouse ? [...document.querySelectorAll<HTMLElement>('.boton')].map((el) => ({ el, x: 0, y: 0, radio: 0, activo: false })) : [];
   medirImanes();
 
-  observador?.disconnect();
-  observador = new IntersectionObserver(
-    (entradas) =>
-      entradas.forEach(({ target, isIntersecting }) => {
-        if (!isIntersecting) return;
-        observador!.unobserve(target);
-        decodificar(target as HTMLElement);
-      }),
-    { threshold: 0.6 },
-  );
-  document.querySelectorAll<HTMLElement>('main h2').forEach((titulo) => observador!.observe(titulo));
 }

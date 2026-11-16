@@ -2,14 +2,15 @@
 import Base from '../layouts/Base.astro';
 import Apertura from './Apertura.astro';
 import EscenaVideo from './EscenaVideo.astro';
-import Reels from './Reels.astro';
-import Prueba from './Prueba.astro';
-import Franja from './Franja.astro';
+import EscenaMotion from './EscenaMotion.astro';
+import EscenaDiseno from './EscenaDiseno.astro';
+import Trabajos from './Trabajos.astro';
+import Cifras from './Cifras.astro';
 import Casos from './Casos.astro';
-import Servicios from './Servicios.astro';
-import Proceso from './Proceso.astro';
+import Nodos from './Nodos.astro';
+import Clientes from './Clientes.astro';
 import Sobre from './Sobre.astro';
-import Contacto from './Contacto.astro';
+import Cierre from './Cierre.astro';
 import type { Idioma } from '../lib/i18n';
 
 interface Props {
@@ -17,18 +18,18 @@ interface Props {
 }
 
 const { lang } = Astro.props;
-
 ---
 
 <Base lang={lang}>
   <Apertura lang={lang} />
   <EscenaVideo lang={lang} />
-  <Reels lang={lang} />
-  <Prueba lang={lang} />
-  <Franja lang={lang} />
+  <EscenaMotion lang={lang} />
+  <EscenaDiseno lang={lang} />
+  <Trabajos lang={lang} />
+  <Cifras lang={lang} />
   <Casos lang={lang} />
-  <Servicios lang={lang} />
-  <Proceso lang={lang} />
+  <Nodos lang={lang} />
+  <Clientes lang={lang} />
   <Sobre lang={lang} />
-  <Contacto lang={lang} />
+  <Cierre lang={lang} />
 </Base>

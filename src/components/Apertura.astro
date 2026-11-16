@@ -1,7 +1,7 @@
 ---
 import site from '../data/site.json';
 import { servicios } from '../data/servicios.json';
-import { posts, portadas } from '../data/diseno.json';
+import { posts } from '../data/diseno.json';
 import { textosDe, tr, type Idioma } from '../lib/i18n';
 import { optimizar } from '../lib/imagenes';
 import { reelsDe } from '../lib/reels';
@@ -15,21 +15,13 @@ const textos = textosDe(lang);
 const t = textos.hero;
 const a = textos.apertura;
 
-// Trabajo real para la fila de tarjetas, agrupado por formato: cada hueco solo recibe piezas de su mismo formato
-const pool = {
-  v: await Promise.all(reelsDe(lang).filter((r) => r.poster).map(async (r) => ({ src: await optimizar(r.poster, 240), alt: r.nombre }))),
-  c: await Promise.all(posts.map(async (p) => ({ src: await optimizar(p.imagenes[0], 360), alt: p.titulo }))),
-  a: await Promise.all(portadas.map(async (p) => ({ src: await optimizar(p.imagen, 640), alt: p.titulo }))),
-};
-
-// Orden de los huecos, de izquierda a derecha: vertical (reel), cuadrado (post) y ancho (portada)
-const huecos = ['v', 'c', 'a', 'v', 'c', 'c', 'a', 'v', 'c', 'a', 'c', 'v'] as const;
-const cuenta = { v: 0, c: 0, a: 0 };
-const fila = huecos.map((tipo) => {
-  const lista = pool[tipo];
-  const pieza = lista[cuenta[tipo]++ % lista.length];
-  return { tipo, ...pieza };
-});
+// Trabajo real para la fila: reels y posts intercalados, todos en el mismo formato 4:5
+const deReels = reelsDe(lang).filter((r) => r.poster).map((r) => r.poster);
+const dePosts = posts.map((p) => p.imagenes[0]);
+const intercaladas = Array.from({ length: Math.max(deReels.length, dePosts.length) }, (_, i) => [deReels[i], dePosts[i]]).flat().filter(Boolean);
+const pool = await Promise.all([...new Set(intercaladas)].map((src) => optimizar(src, 280)));
+const VISIBLES = 7;
+const fila = pool.slice(0, VISIBLES);
 ---
 
 <section class="apertura" aria-labelledby="apertura-titulo">
@@ -42,7 +34,7 @@ const fila = huecos.map((tipo) => {
     </h1>
     <p class="bajada">{t.bajada}</p>
 
-    {/* Caja tipo prompt: muestra pedidos de ejemplo y, si el visitante escribe, abre WhatsApp con su pedido */}
+    {/* Caja tipo app de IA: muestra pedidos de ejemplo y, si el visitante escribe, abre WhatsApp con su pedido */}
     <form
       class="prompt"
       action={`https://wa.me/${site.whatsapp}`}
@@ -55,42 +47,56 @@ const fila = huecos.map((tipo) => {
     >
       <label class="solo-lector" for="pedido">{a.etiquetaPrompt}</label>
       <div class="prompt-campo">
-        <textarea id="pedido" name="text" rows="2" maxlength="280" placeholder={a.pedidos[0]}></textarea>
+        <textarea id="pedido" name="text" rows="3" maxlength="280" placeholder={a.pedidos[0]}></textarea>
         <span class="ejemplo" aria-hidden="true"><span class="ejemplo-texto"></span><i class="caret"></i></span>
       </div>
       <div class="prompt-pie">
-        <div class="servicios" role="group" aria-label={a.servicios}>
-          {
-            servicios.map((s) => (
-              <button type="button" class="servicio" aria-pressed="false" data-valor={tr(s, 'titulo', lang)}>
-                {tr(s, 'titulo', lang)}
-              </button>
-            ))
-          }
-        </div>
-        <button type="submit" class="enviar" aria-label={a.enviar} title={a.enviar}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M7 17 17 7M9 7h8v8"></path>
-          </svg>
-        </button>
+        {/* Controles de una app de IA: decorativos */}
+        <span class="control" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+        </span>
+        <span class="derecha">
+          <span class="modelo" aria-hidden="true">
+            {a.cursor}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"></path></svg>
+          </span>
+          <span class="control" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              ><rect x="9" y="3" width="6" height="12" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg
+            >
+          </span>
+          <button type="submit" class="enviar" aria-label={a.enviar} title={a.enviar}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17 17 7M9 7h8v8"></path>
+            </svg>
+          </button>
+        </span>
       </div>
 
       {/* Cursor de ejemplo: escribe el pedido y lo envía; solo es decoración */}
-      <div class="cursor" aria-hidden="true">
+      <div class="cursor-pyero" aria-hidden="true">
         <svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>
         <span>{a.cursor}</span>
       </div>
     </form>
 
-    <a class="ver" href="#casos">{t.secundario}</a>
+    <div class="servicios" role="group" aria-label={a.servicios}>
+      {
+        servicios.map((s) => (
+          <button type="button" class="servicio" aria-pressed="false" data-valor={tr(s, 'titulo', lang)}>
+            {tr(s, 'titulo', lang)}
+          </button>
+        ))
+      }
+    </div>
   </div>
 
-  {/* Fila de trabajos con esquinas de marco seleccionado; las piezas se cambian en cascada */}
+  {/* Fila de trabajos con esquinas de marco seleccionado, separadas de la imagen; se cambian en cascada */}
   <div class="fila" role="img" aria-label={a.trabajos} data-pool={JSON.stringify(pool)}>
     {
-      fila.map((pieza, i) => (
-        <figure class:list={['marco', pieza.tipo]} data-tipo={pieza.tipo}>
-          <img src={pieza.src} alt="" loading={i < 7 ? 'eager' : 'lazy'} decoding="async" fetchpriority="low" />
+      fila.map((src, i) => (
+        <figure class="marco">
+          <img src={src} alt="" loading={i < 5 ? 'eager' : 'lazy'} decoding="async" fetchpriority="low" />
           <i></i><i></i><i></i><i></i>
         </figure>
       ))
@@ -100,20 +106,23 @@ const fila = huecos.map((tipo) => {
 
 <script>
   // Hero: un cursor escribe pedidos de cliente en la caja, los "envía" y la fila de trabajos se renueva en cascada
+  import { salto } from '../scripts/escena';
+
   const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let limpiar: (() => void) | null = null;
 
   document.addEventListener('astro:page-load', () => {
     limpiar?.();
-    const form = document.querySelector<HTMLFormElement>('.apertura .prompt');
-    const fila = document.querySelector<HTMLElement>('.apertura .fila');
-    if (!form || !fila) return;
+    const seccion = document.querySelector<HTMLElement>('.apertura');
+    const form = seccion?.querySelector<HTMLFormElement>('.prompt');
+    const fila = seccion?.querySelector<HTMLElement>('.fila');
+    if (!seccion || !form || !fila) return;
 
     const campo = form.querySelector('textarea')!;
     const ejemplo = form.querySelector<HTMLElement>('.ejemplo-texto')!;
-    const cursor = form.querySelector<HTMLElement>('.cursor')!;
+    const cursor = form.querySelector<HTMLElement>('.cursor-pyero')!;
     const enviar = form.querySelector<HTMLElement>('.enviar')!;
-    const chips = [...form.querySelectorAll<HTMLButtonElement>('.servicio')];
+    const chips = [...seccion.querySelectorAll<HTMLButtonElement>('.servicio')];
     const pedidos: string[] = JSON.parse(form.dataset.pedidos || '[]');
     const relojes: number[] = [];
     const esperar = (ms: number) => new Promise<void>((r) => relojes.push(window.setTimeout(r, ms)));
@@ -125,8 +134,7 @@ const fila = huecos.map((tipo) => {
       const pedido = campo.value.trim() || ejemplo.textContent || pedidos[0];
       const elegidos = chips.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.dataset.valor);
       const lineas = [form.dataset.mensaje, pedido, elegidos.length ? `${form.dataset.servicio}: ${elegidos.join(', ')}` : ''];
-      const texto = encodeURIComponent(lineas.filter(Boolean).join('\n'));
-      window.open(`https://wa.me/${form.dataset.numero}?text=${texto}`, '_blank', 'noopener');
+      window.open(`https://wa.me/${form.dataset.numero}?text=${encodeURIComponent(lineas.filter(Boolean).join('\n'))}`, '_blank', 'noopener');
     };
     form.addEventListener('submit', alEnviar);
     chips.forEach((c) => c.addEventListener('click', () => c.setAttribute('aria-pressed', String(c.getAttribute('aria-pressed') !== 'true'))));
@@ -137,28 +145,22 @@ const fila = huecos.map((tipo) => {
     campo.addEventListener('focus', actualizar);
     campo.addEventListener('blur', actualizar);
 
-    // Fila: cada hueco pasa a la siguiente pieza de su formato, de izquierda a derecha, con corte seco y un saltito
-    const pool: Record<string, { src: string }[]> = JSON.parse(fila.dataset.pool || '{}');
+    // Fila: cada tarjeta pasa a la siguiente pieza, de izquierda a derecha, con corte seco y un saltito
+    const pool: string[] = JSON.parse(fila.dataset.pool || '[]');
     const marcos = [...fila.querySelectorAll<HTMLElement>('.marco')];
-    const indice: Record<string, number> = { v: 0, c: 0, a: 0 };
-    marcos.forEach((m) => (indice[m.dataset.tipo!] += 1));
+    let siguiente = marcos.length;
     const renovar = () => {
       marcos.forEach((marco, i) => {
-        const tipo = marco.dataset.tipo!;
-        const lista = pool[tipo];
-        const siguiente = lista[indice[tipo]++ % lista.length];
-        const previa = new Image();
-        previa.src = siguiente.src;
+        const src = pool[siguiente++ % pool.length];
+        new Image().src = src;
         relojes.push(
           window.setTimeout(() => {
             marco.classList.add('vacio');
             relojes.push(
               window.setTimeout(() => {
-                marco.querySelector('img')!.src = siguiente.src;
+                marco.querySelector('img')!.src = src;
                 marco.classList.remove('vacio');
-                marco.classList.remove('salto');
-                void marco.offsetWidth;
-                marco.classList.add('salto');
+                salto(marco.querySelector('img')!);
               }, 130),
             );
           }, i * 95),
@@ -166,7 +168,13 @@ const fila = huecos.map((tipo) => {
       });
     };
 
-    // Escribe letra por letra con un ritmo algo irregular, como una persona
+    // Lleva el cursor justo encima del botón de enviar, sea cual sea el tamaño de pantalla
+    const alBoton = () => {
+      const c = cursor.getBoundingClientRect();
+      const b = enviar.getBoundingClientRect();
+      cursor.style.translate = `${b.left + b.width * 0.55 - c.left}px ${b.top + b.height * 0.55 - c.top}px`;
+    };
+
     const escribir = async (texto: string) => {
       for (let i = 1; i <= texto.length && vivo; i++) {
         ejemplo.textContent = texto.slice(0, i);
@@ -185,8 +193,7 @@ const fila = huecos.map((tipo) => {
         await escribir(pedidos[n]);
         await esperar(500);
         if (!vivo) return;
-        // El cursor llega al botón, hace clic y la fila se renueva
-        cursor.classList.add('llega');
+        alBoton();
         await esperar(750);
         cursor.classList.add('clic');
         enviar.classList.add('pulsado');
@@ -196,7 +203,7 @@ const fila = huecos.map((tipo) => {
         cursor.classList.remove('clic');
         enviar.classList.remove('pulsado');
         await esperar(1300);
-        cursor.classList.remove('llega');
+        cursor.style.translate = '';
         form.classList.remove('enviado');
         await esperar(500);
         await borrar();
@@ -206,29 +213,28 @@ const fila = huecos.map((tipo) => {
 
     if (reducir) {
       ejemplo.textContent = pedidos[0];
-    } else {
-      // Solo corre mientras el hero está en pantalla
-      let corriendo = false;
-      const vista = new IntersectionObserver(([entrada]) => {
-        if (entrada.isIntersecting && !corriendo) {
-          corriendo = true;
-          vivo = true;
-          ciclo();
-        } else if (!entrada.isIntersecting && corriendo) {
-          corriendo = false;
-          vivo = false;
-        }
-      });
-      vista.observe(form);
-      limpiar = () => {
-        vivo = false;
-        vista.disconnect();
-        relojes.forEach(clearTimeout);
-        form.removeEventListener('submit', alEnviar);
-      };
+      limpiar = () => form.removeEventListener('submit', alEnviar);
       return;
     }
-    limpiar = () => form.removeEventListener('submit', alEnviar);
+    // Solo corre mientras el hero está en pantalla
+    let corriendo = false;
+    const vista = new IntersectionObserver(([entrada]) => {
+      if (entrada.isIntersecting && !corriendo) {
+        corriendo = true;
+        vivo = true;
+        ciclo();
+      } else if (!entrada.isIntersecting && corriendo) {
+        corriendo = false;
+        vivo = false;
+      }
+    });
+    vista.observe(form);
+    limpiar = () => {
+      vivo = false;
+      vista.disconnect();
+      relojes.forEach(clearTimeout);
+      form.removeEventListener('submit', alEnviar);
+    };
   });
 </script>
 
@@ -236,11 +242,10 @@ const fila = huecos.map((tipo) => {
   .apertura {
     position: relative;
     display: grid;
-    /* minmax(0, 1fr): la fila de trabajos es más ancha que la pantalla y no debe ensanchar la columna del texto */
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 1fr auto;
-    min-height: max(100svh, 46rem);
-    padding-top: calc(var(--alto-nav) + clamp(1.5rem, 6svh, 4rem));
+    min-height: max(100svh, 44rem);
+    padding-top: calc(var(--alto-nav) + clamp(1.25rem, 5svh, 3.5rem));
     overflow: hidden;
     isolation: isolate;
     text-align: center;
@@ -298,10 +303,10 @@ const fila = huecos.map((tipo) => {
   }
 
   h1 {
-    font-size: clamp(2rem, 4.4vw, 3.75rem);
+    font-size: clamp(1.65rem, 3.1vw, 2.65rem);
     font-weight: 560;
-    letter-spacing: -0.05em;
-    line-height: 1;
+    letter-spacing: -0.045em;
+    line-height: 1.08;
   }
 
   h1 span {
@@ -309,48 +314,49 @@ const fila = huecos.map((tipo) => {
   }
 
   .bajada {
-    max-width: 46ch;
-    margin-top: 1.25rem;
+    max-width: 44ch;
+    margin-top: 0.9rem;
     color: var(--gris);
-    font-size: clamp(1rem, 1.3vw, 1.125rem);
-    line-height: 1.45;
+    font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+    line-height: 1.5;
   }
 
-  /* Caja de prompt */
+  /* Caja tipo app de IA: la pieza protagonista del hero */
   .prompt {
     position: relative;
-    width: min(36rem, 100%);
-    margin-top: clamp(1.75rem, 4svh, 2.5rem);
-    padding: 1rem 1rem 0.75rem 1.25rem;
+    width: min(42rem, 100%);
+    margin-top: clamp(1.5rem, 4svh, 2.25rem);
+    padding: 1.2rem 1rem 0.85rem 1.35rem;
     border: 1px solid var(--linea);
-    border-radius: 18px;
+    border-radius: 22px;
     background: var(--superficie);
-    box-shadow: 0 18px 40px -28px rgb(60 40 20 / 0.45);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.8) inset,
+      0 28px 60px -34px rgb(60 40 20 / 0.55);
     text-align: left;
     transition: box-shadow 0.4s ease;
   }
 
   .prompt.enviado {
     box-shadow:
-      0 18px 40px -28px rgb(60 40 20 / 0.45),
-      0 0 0 4px rgb(251 142 31 / 0.18);
+      0 28px 60px -34px rgb(60 40 20 / 0.55),
+      0 0 0 4px rgb(251 142 31 / 0.2);
   }
 
   .prompt-campo {
     position: relative;
-    min-height: 3.2rem;
   }
 
   textarea {
     display: block;
     width: 100%;
-    min-height: 3.2rem;
+    min-height: 4.6rem;
     padding: 0;
     border: 0;
     background: none;
     color: var(--texto);
     font: inherit;
-    font-size: 1rem;
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
     line-height: 1.5;
     resize: none;
     outline: none;
@@ -365,7 +371,7 @@ const fila = huecos.map((tipo) => {
     position: absolute;
     inset: 0;
     color: var(--gris);
-    font-size: 1rem;
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
     line-height: 1.5;
     pointer-events: none;
   }
@@ -394,46 +400,54 @@ const fila = huecos.map((tipo) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
+    margin-top: 0.4rem;
   }
 
-  .servicios {
+  .derecha {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     gap: 0.35rem;
   }
 
-  .servicio {
-    padding: 0.35rem 0.7rem;
-    border: 1px solid var(--linea);
-    border-radius: 999px;
-    background: var(--fondo);
+  .control {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 10px;
     color: var(--gris);
-    font: inherit;
-    font-size: 0.8125rem;
-    cursor: pointer;
-    transition:
-      background 0.2s ease,
-      color 0.2s ease,
-      border-color 0.2s ease;
   }
 
-  .servicio[aria-pressed='true'] {
-    border-color: var(--texto);
-    background: var(--texto);
-    color: var(--superficie);
+  .control svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .modelo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0 0.4rem;
+    color: var(--texto);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .modelo svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--gris);
   }
 
   .enviar {
     display: grid;
     flex: none;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.4rem;
+    height: 2.4rem;
     padding: 0;
     border: 0;
-    border-radius: 10px;
+    border-radius: 11px;
     background: var(--acento);
     color: var(--negro);
     cursor: pointer;
@@ -449,95 +463,73 @@ const fila = huecos.map((tipo) => {
     transform: scale(0.88);
   }
 
-  /* Cursor con nombre, estilo herramienta colaborativa. Descansa fuera de la caja y viaja al botón de enviar */
-  .cursor {
-    position: absolute;
-    right: -4.5rem;
-    bottom: -3.25rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 2px;
-    pointer-events: none;
+  /* El cursor descansa fuera de la caja y viaja al botón de enviar */
+  .prompt .cursor-pyero {
+    top: auto;
+    left: auto;
+    right: -4rem;
+    bottom: -2.75rem;
     transition: translate 0.75s cubic-bezier(0.65, 0, 0.25, 1);
   }
 
-  .cursor svg {
-    width: 16px;
-    height: 16px;
-    fill: var(--acento);
-    stroke: var(--superficie);
-    stroke-width: 1.2;
-    transition: scale 0.12s ease;
+  /* Servicios: opciones debajo de la caja */
+  .servicios {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
   }
 
-  .cursor span {
-    margin-top: 12px;
-    padding: 0.15rem 0.45rem;
-    border-radius: 6px 6px 6px 2px;
-    background: var(--acento);
-    color: var(--negro);
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
-  .cursor.llega {
-    translate: -3.6rem -2.05rem;
-  }
-
-  .cursor.clic svg {
-    scale: 0.8;
-  }
-
-  .ver {
-    margin-top: 1.25rem;
-    padding: 0.4rem 0;
+  .servicio {
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--superficie) 70%, transparent);
     color: var(--texto);
-    font-size: 0.9375rem;
-    font-weight: 500;
-    text-decoration: underline;
-    text-decoration-color: var(--linea);
-    text-underline-offset: 0.3em;
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
   }
 
-  /* Fila de trabajos: una sola altura, el ancho sale del formato; se sale por los dos bordes de la pantalla */
+  .servicio[aria-pressed='true'] {
+    border-color: var(--texto);
+    background: var(--texto);
+    color: var(--superficie);
+  }
+
+  /* Fila de trabajos: tarjetas iguales en 4:5, centradas, sin ocupar todo el ancho */
   .fila {
-    --alto: clamp(108px, 13vw, 172px);
+    --ancho-tarjeta: clamp(76px, 9.5vw, 124px);
     display: flex;
     justify-content: center;
-    min-width: 0;
-    gap: clamp(10px, 1.2vw, 16px);
-    margin-top: clamp(2rem, 5svh, 3.5rem);
-    padding-bottom: clamp(1.5rem, 4svh, 2.5rem);
+    gap: clamp(18px, 2.2vw, 30px);
+    margin-top: clamp(2rem, 5svh, 3.25rem);
+    padding: 12px 1.5rem clamp(1.75rem, 4svh, 2.75rem);
   }
 
   .marco {
     position: relative;
     flex: none;
-    height: var(--alto);
+    width: var(--ancho-tarjeta);
+    aspect-ratio: 4 / 5;
     margin: 0;
-  }
-
-  .marco.v {
-    aspect-ratio: 9 / 16;
-  }
-
-  .marco.c {
-    aspect-ratio: 1;
-  }
-
-  .marco.a {
-    aspect-ratio: 16 / 9;
   }
 
   .marco img {
     display: block;
     width: 100%;
     height: 100%;
+    border-radius: 6px;
     object-fit: cover;
     background: var(--superficie);
   }
 
-  /* Esquinas de marco seleccionado */
+  /* Esquinas de marco seleccionado, separadas de la imagen */
   .marco i {
     position: absolute;
     width: 6px;
@@ -546,44 +538,28 @@ const fila = huecos.map((tipo) => {
   }
 
   .marco i:nth-of-type(1) {
-    top: -3px;
-    left: -3px;
+    top: -10px;
+    left: -10px;
   }
 
   .marco i:nth-of-type(2) {
-    top: -3px;
-    right: -3px;
+    top: -10px;
+    right: -10px;
   }
 
   .marco i:nth-of-type(3) {
-    bottom: -3px;
-    left: -3px;
+    bottom: -10px;
+    left: -10px;
   }
 
   .marco i:nth-of-type(4) {
-    bottom: -3px;
-    right: -3px;
+    bottom: -10px;
+    right: -10px;
   }
 
-  /* Corte seco: el hueco queda vacío un instante y la pieza nueva entra con un saltito de pocos píxeles */
+  /* Corte seco: la tarjeta queda vacía un instante */
   .marco.vacio img {
     visibility: hidden;
-  }
-
-  .marco.salto img {
-    animation: salto 0.32s step-end;
-  }
-
-  @keyframes salto {
-    0% {
-      translate: -7px 0;
-    }
-    45% {
-      translate: 3px 0;
-    }
-    75% {
-      translate: 0 0;
-    }
   }
 
   .solo-lector {
@@ -598,44 +574,37 @@ const fila = huecos.map((tipo) => {
   @media (hover: hover) and (pointer: fine) {
     .servicio[aria-pressed='false']:hover {
       border-color: var(--texto);
-      color: var(--texto);
     }
 
     .enviar:hover {
       background: var(--texto);
       color: var(--superficie);
     }
+  }
 
-    .ver:hover {
-      text-decoration-color: var(--acento);
+  @media (max-width: 900px) {
+    .marco:nth-child(n + 6) {
+      display: none;
     }
   }
 
-  @media (max-width: 640px) {
-    /* En celular los servicios van en una sola fila que se desliza */
-    .servicios {
-      flex-wrap: nowrap;
-      margin-right: -0.25rem;
-      overflow-x: auto;
-      scrollbar-width: none;
-      mask-image: linear-gradient(to right, #000 85%, transparent);
+  @media (max-width: 560px) {
+    .marco:nth-child(n + 5) {
+      display: none;
     }
 
-    .servicio {
-      flex: none;
+    .fila {
+      --ancho-tarjeta: 64px;
+      gap: 20px;
     }
 
-    .servicio {
-      font-size: 0.75rem;
-    }
-
-    .cursor {
+    .prompt .cursor-pyero {
       right: -0.5rem;
-      bottom: -2.75rem;
+      bottom: -2.5rem;
     }
 
-    .cursor.llega {
-      translate: -0.4rem -1.6rem;
+    .modelo {
+      display: none;
     }
   }
 
@@ -645,7 +614,7 @@ const fila = huecos.map((tipo) => {
       animation: none;
     }
 
-    .cursor {
+    .prompt .cursor-pyero {
       display: none;
     }
   }

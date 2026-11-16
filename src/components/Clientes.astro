@@ -1,0 +1,171 @@
+---
+import { clientes } from '../data/clientes.json';
+import { creadores } from '../data/creadores.json';
+import { textosDe, type Idioma } from '../lib/i18n';
+
+interface Props {
+  lang: Idioma;
+}
+
+const textos = textosDe(Astro.props.lang);
+const t = textos.clientes;
+// Cada mosaico se tapa con una rejilla de 4x4 celdas que se van retirando en orden aleatorio pero fijo
+const CELDAS = 16;
+const orden = (semilla: number) => Array.from({ length: CELDAS }, (_, i) => ((i * 7 + semilla * 5) % CELDAS) * 40 + semilla * 90);
+const fichas = [
+  ...clientes.map((c) => ({ tipo: 'logo', nombre: c.nombre, logo: c.logo, id: c.id })),
+  ...creadores.map((c) => ({ tipo: 'creador', nombre: c.handle, logo: '', id: '' })),
+];
+---
+
+<section class="seccion clientes" aria-labelledby="clientes-titulo">
+  <header class="cabecera-chica">
+    <p class="paso">{textos.franja.etiqueta}</p>
+    <h2 id="clientes-titulo">{t.titulo}</h2>
+  </header>
+
+  <ul class="mosaico">
+    {
+      fichas.map((f, n) => (
+        <li class="ficha">
+          {f.tipo === 'logo' ? (
+            <a href={`#caso-${f.id}`} class="logo" style={`--logo:url('${f.logo}')`} aria-label={f.nombre} />
+          ) : (
+            <span class="handle">{f.nombre}</span>
+          )}
+          <span class="tapa" aria-hidden="true">
+            {orden(n).map((d) => (
+              <i style={`--d:${d}ms`} />
+            ))}
+          </span>
+        </li>
+      ))
+    }
+    <li class="ficha tu-marca">
+      <a href="#contacto">{t.tuMarca}</a>
+      <span class="tapa" aria-hidden="true">
+        {orden(fichas.length).map((d) => (
+          <i style={`--d:${d}ms`} />
+        ))}
+      </span>
+    </li>
+  </ul>
+</section>
+
+<script>
+  // Al entrar en pantalla, las celdas que tapan cada ficha se retiran en escalón, como un mosaico
+  document.addEventListener('astro:page-load', () => {
+    const mosaico = document.querySelector<HTMLElement>('.clientes .mosaico');
+    if (!mosaico) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      mosaico.classList.add('revelado');
+      return;
+    }
+    const observador = new IntersectionObserver(
+      ([entrada]) => {
+        if (!entrada.isIntersecting) return;
+        observador.disconnect();
+        mosaico.classList.add('revelado');
+      },
+      { threshold: 0.35 },
+    );
+    observador.observe(mosaico);
+  });
+</script>
+
+<style>
+  .clientes {
+    text-align: center;
+  }
+
+  .mosaico {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    max-width: 50rem;
+    margin: 2rem auto 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ficha {
+    position: relative;
+    display: grid;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--linea);
+    border-radius: 12px;
+    background: var(--superficie);
+  }
+
+  .ficha > a,
+  .handle {
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+  }
+
+  /* Los logos son PNG blancos: se pintan con máscara para teñirlos del color del texto */
+  .logo {
+    background: var(--texto);
+    -webkit-mask: var(--logo) center / 62% 52% no-repeat;
+    mask: var(--logo) center / 62% 52% no-repeat;
+  }
+
+  .handle {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .tu-marca {
+    border-style: dashed;
+    background: transparent;
+  }
+
+  .tu-marca a {
+    color: var(--acento-texto);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  /* Tapa de 4x4 celdas del color del fondo */
+  .tapa {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    pointer-events: none;
+  }
+
+  .tapa i {
+    background: var(--linea);
+  }
+
+  .revelado .tapa i {
+    visibility: hidden;
+    transition: visibility 0s step-end var(--d);
+  }
+
+  .ficha a:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: -4px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .logo:hover {
+      background: var(--acento);
+    }
+
+    .tu-marca:hover {
+      border-color: var(--acento);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .mosaico {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

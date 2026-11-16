@@ -1,0 +1,343 @@
+---
+import { posts } from '../data/diseno.json';
+import { textosDe, type Idioma } from '../lib/i18n';
+import { optimizar } from '../lib/imagenes';
+
+interface Props {
+  lang: Idioma;
+}
+
+const t = textosDe(Astro.props.lang).escenaDiseno;
+// Tres posts reales: su foto sirve de base mientras se diseña y al final aparece la pieza terminada
+const piezas = await Promise.all(posts.slice(0, 3).map(async (p) => ({ src: await optimizar(p.imagenes[0], 420), titulo: p.titulo })));
+const colores = ['var(--acento)', 'var(--orbe-lila)', 'var(--texto)'];
+const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>';
+---
+
+<section class="escena-scroll escena-diseno" id="diseno" aria-labelledby="escena-diseno-titulo">
+  <div class="escena-fija">
+    <div class="orbe-fondo" aria-hidden="true"></div>
+    <header class="cabecera-chica">
+      <p class="paso">{t.etiqueta}</p>
+      <h2 id="escena-diseno-titulo">{t.titulo}</h2>
+    </header>
+
+    <div class="escenario">
+      <div class="mesa" role="img" aria-label={t.lienzo}>
+        {
+          piezas.map((p, i) => (
+            <figure class="tablero" style={`--color:${colores[i]}`}>
+              <span class="guias" />
+              <span class="foto" style={`background-image:url('${p.src}')`} />
+              <span class="titular">{t.titular}</span>
+              <img class="final" src={p.src} alt="" loading="lazy" decoding="async" />
+              <i />
+              <i />
+              <i />
+              <i />
+            </figure>
+          ))
+        }
+      </div>
+
+      <div class="panel barra-herramientas" aria-hidden="true">
+        <span class="paleta">
+          <span class="rotulo">{t.paleta}</span>
+          {colores.map((c) => <span class="muestra" style={`--color:${c}`} />)}
+        </span>
+        <span class="exportar">
+          <span class="exportar-texto">{t.publicar}</span>
+          <span class="listo-texto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+            {t.listo}
+          </span>
+        </span>
+      </div>
+
+      <div class="cursor-pyero layout" aria-hidden="true"><Fragment set:html={flecha} /><span>{t.cursores.layout}</span></div>
+      <div class="cursor-pyero tipo" aria-hidden="true"><Fragment set:html={flecha} /><span>{t.cursores.tipo}</span></div>
+      <div class="cursor-pyero color" aria-hidden="true"><Fragment set:html={flecha} /><span>{t.cursores.color}</span></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Tres cursores arman una serie de posts: layout, tipografía y color; al final aparecen las piezas reales
+  import { montarEscena, moverCursor, punto, recorrido, salto, type Punto } from '../scripts/escena';
+
+  let limpiar: (() => void) | null = null;
+
+  document.addEventListener('astro:page-load', () => {
+    limpiar?.();
+    limpiar = null;
+    const escena = document.querySelector<HTMLElement>('.escena-diseno');
+    if (!escena) return;
+
+    const q = <T extends HTMLElement>(s: string) => escena.querySelector<T>(s)!;
+    const escenario = q('.escenario');
+    const tableros = [...escena.querySelectorAll<HTMLElement>('.tablero')];
+    const muestras = [...escena.querySelectorAll<HTMLElement>('.muestra')];
+    const exportar = q('.exportar');
+    const [cLayout, cTipo, cColor] = [q('.cursor-pyero.layout'), q('.cursor-pyero.tipo'), q('.cursor-pyero.color')];
+    // Umbral de cada paso, tablero por tablero
+    const pasos = { foto: [0.1, 0.16, 0.22], titular: [0.32, 0.38, 0.44], color: [0.54, 0.6, 0.66], final: [0.76, 0.79, 0.82] };
+    const estado = tableros.map(() => ({ foto: false, titular: false, color: false, final: false }));
+
+    const pintar = (p: number) => {
+      const fuera: Punto = { x: escenario.clientWidth + 60, y: escenario.clientHeight * 0.9 };
+      tableros.forEach((tablero, i) => {
+        (Object.keys(pasos) as (keyof typeof pasos)[]).forEach((paso) => {
+          const activo = p >= pasos[paso][i];
+          if (activo === estado[i][paso]) return;
+          estado[i][paso] = activo;
+          tablero.classList.toggle(`con-${paso}`, activo);
+          if (activo) salto(paso === 'final' ? tablero.querySelector('.final')! : tablero);
+        });
+      });
+
+      const centro = (i: number, fy = 0.5) => punto(escenario, tableros[i], 0.5, fy);
+      const clic = (lista: number[]) => lista.some((a) => p > a - 0.015 && p < a + 0.01);
+      moverCursor(cLayout, recorrido(p, pasos.foto.map((a, i) => [a - 0.02, a + 0.01, centro(i, 0.35)] as [number, number, Punto]), fuera), clic(pasos.foto));
+      moverCursor(cTipo, recorrido(p, pasos.titular.map((a, i) => [a - 0.02, a + 0.01, centro(i, 0.78)] as [number, number, Punto]), fuera), clic(pasos.titular));
+      // El cursor de color toma cada muestra de la paleta y la suelta en su tablero
+      const paradasColor: [number, number, Punto][] = pasos.color.flatMap((a, i) => [
+        [a - 0.045, a - 0.03, punto(escenario, muestras[i])] as [number, number, Punto],
+        [a - 0.01, a + 0.005, centro(i, 0.2)] as [number, number, Punto],
+      ]);
+      moverCursor(cColor, recorrido(p, paradasColor, fuera), clic(pasos.color.map((a) => a - 0.035)) || clic(pasos.color));
+
+      escena.classList.toggle('exportado', p > 0.9);
+      exportar.classList.toggle('pulsado', p > 0.87 && p < 0.9);
+    };
+
+    limpiar = montarEscena(escena, pintar);
+  });
+</script>
+
+<style>
+  .escena-diseno {
+    --largo: 320vh;
+  }
+
+  .escenario {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(0.75rem, 2.5svh, 1.5rem);
+    min-height: 0;
+    margin-top: clamp(0.75rem, 2.5svh, 1.25rem);
+  }
+
+  /* Tres tableros iguales en 4:5 */
+  .mesa {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    height: clamp(11rem, 44svh, 20rem);
+    padding: 12px;
+  }
+
+  .tablero {
+    position: relative;
+    height: 100%;
+    aspect-ratio: 1;
+    margin: 0;
+    border-radius: 8px;
+    background: var(--superficie);
+    box-shadow: 0 24px 50px -34px rgb(40 25 10 / 0.6);
+    container-type: size;
+  }
+
+  .tablero.con-color {
+    background: var(--color);
+  }
+
+  /* Esquinas de marco seleccionado, separadas del tablero como en el hero */
+  .tablero > i {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--texto);
+  }
+
+  .tablero > i:nth-of-type(1) {
+    top: -10px;
+    left: -10px;
+  }
+
+  .tablero > i:nth-of-type(2) {
+    top: -10px;
+    right: -10px;
+  }
+
+  .tablero > i:nth-of-type(3) {
+    bottom: -10px;
+    left: -10px;
+  }
+
+  .tablero > i:nth-of-type(4) {
+    bottom: -10px;
+    right: -10px;
+  }
+
+  /* Guías de maquetación: se ven mientras el tablero está vacío */
+  .guias {
+    position: absolute;
+    inset: 8%;
+    border: 1px dashed color-mix(in srgb, var(--gris) 45%, transparent);
+    border-radius: 4px;
+  }
+
+  .con-foto .guias {
+    visibility: hidden;
+  }
+
+  .foto {
+    position: absolute;
+    inset: 8% 8% 34%;
+    border-radius: 4px;
+    background-position: center;
+    background-size: cover;
+    filter: grayscale(1) contrast(0.9);
+    visibility: hidden;
+  }
+
+  .con-foto .foto {
+    visibility: visible;
+  }
+
+  .con-color .foto {
+    filter: none;
+  }
+
+  .titular {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 9%;
+    font-size: 9cqh;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    visibility: hidden;
+  }
+
+  .con-titular .titular {
+    visibility: visible;
+  }
+
+  .con-color .titular {
+    color: var(--negro);
+  }
+
+  .tablero:nth-child(3).con-color .titular {
+    color: var(--superficie);
+  }
+
+  /* Pieza real terminada */
+  .final {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+    visibility: hidden;
+  }
+
+  .con-final .final {
+    visibility: visible;
+  }
+
+  /* Barra inferior: paleta y publicar */
+  .barra-herramientas {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: min(26rem, 100%);
+    padding: 0.55rem 0.6rem 0.55rem 0.9rem;
+    font-size: 0.75rem;
+  }
+
+  .paleta {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .rotulo {
+    margin-right: 0.25rem;
+    color: var(--gris);
+    font-weight: 600;
+  }
+
+  .muestra {
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 2px solid var(--superficie);
+    border-radius: 50%;
+    background: var(--color);
+    box-shadow: 0 0 0 1px var(--linea);
+  }
+
+  .exportar {
+    display: inline-grid;
+    justify-items: center;
+    padding: 0.28rem 0.7rem;
+    border-radius: 8px;
+    background: var(--texto);
+    color: var(--superficie);
+    font-weight: 600;
+    transition: scale 0.12s ease;
+  }
+
+  .exportar > span {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .exportar svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .listo-texto,
+  .exportado .exportar-texto {
+    visibility: hidden;
+  }
+
+  .exportado .listo-texto {
+    visibility: visible;
+  }
+
+  .exportado .exportar {
+    background: var(--acento);
+    color: var(--negro);
+  }
+
+  .exportar.pulsado {
+    scale: 0.92;
+  }
+
+
+
+  @media (max-width: 640px) {
+    .mesa {
+      gap: 1rem;
+      height: auto;
+      width: 100%;
+    }
+
+    .tablero {
+      flex: 1;
+      height: auto;
+      max-width: 30%;
+    }
+  }
+</style>

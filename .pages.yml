@@ -236,7 +236,7 @@ content:
               - { name: contacto, label: Contacto, type: string }
               - { name: cta, label: Botón, type: string }
               - { name: idioma, label: Descripción del selector de idioma, type: string }
-              - { name: tema, label: Descripción del botón de modo claro u oscuro, type: string }
+              - { name: trabajos, label: Trabajos, type: string }
           - name: hero
             label: Inicio
             type: object
@@ -332,6 +332,115 @@ content:
               - { name: texto, label: Texto, type: text }
               - { name: cta, label: Botón de WhatsApp, type: string }
               - { name: redes, label: Texto junto a las redes, type: string }
+          - name: apertura
+            label: Caja de pedido del inicio
+            type: object
+            fields:
+              - { name: etiquetaPrompt, label: Descripción de la caja para lectores de pantalla, type: string }
+              - { name: pedidos, label: Pedidos de ejemplo que se escriben solos, type: string, list: true }
+              - { name: enviar, label: Botón de enviar, type: string }
+              - { name: mensaje, label: Inicio del mensaje de WhatsApp, type: string }
+              - { name: servicio, label: Palabra Servicio en el mensaje, type: string }
+              - { name: servicios, label: Descripción del grupo de servicios, type: string }
+              - { name: trabajos, label: Descripción de la fila de trabajos, type: string }
+              - { name: cursor, label: Nombre del cursor, type: string }
+          - name: escenaVideo
+            label: Escena de edición de video
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: string }
+              - { name: subtitulo, label: Subtítulo dentro del video, type: string }
+              - name: pistas
+                label: Nombres de las pistas
+                type: object
+                fields:
+                  - { name: video, label: Video, type: string }
+                  - { name: texto, label: Texto, type: string }
+                  - { name: audio, label: Música, type: string }
+              - name: cursores
+                label: Nombres de los cursores
+                type: object
+                fields:
+                  - { name: corte, label: Corte, type: string }
+                  - { name: color, label: Color, type: string }
+                  - { name: musica, label: Música, type: string }
+              - { name: color, label: Panel de color, type: string }
+              - { name: musica, label: Bloque de música, type: string }
+              - { name: exportar, label: Botón Exportar, type: string }
+              - { name: listo, label: Texto al terminar, type: string }
+              - { name: monitor, label: Descripción del monitor, type: string }
+          - name: escenaMotion
+            label: Escena de motion graphics
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: string }
+              - name: capas
+                label: Nombres de las capas
+                type: object
+                fields:
+                  - { name: texto, label: Texto, type: string }
+                  - { name: forma, label: Forma, type: string }
+                  - { name: logo, label: Logo, type: string }
+              - name: cursores
+                label: Nombres de los cursores
+                type: object
+                fields:
+                  - { name: keys, label: Keyframes, type: string }
+                  - { name: curva, label: Curva, type: string }
+              - { name: curva, label: Panel de curva, type: string }
+              - { name: render, label: Botón Render, type: string }
+              - { name: listo, label: Texto al terminar, type: string }
+              - { name: marca, label: Texto grande del lienzo, type: string }
+              - { name: lema, label: Texto chico del lienzo, type: string }
+              - { name: monitor, label: Descripción del lienzo, type: string }
+          - name: escenaDiseno
+            label: Escena de diseño
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: string }
+              - name: cursores
+                label: Nombres de los cursores
+                type: object
+                fields:
+                  - { name: layout, label: Layout, type: string }
+                  - { name: tipo, label: Tipografía, type: string }
+                  - { name: color, label: Color, type: string }
+              - { name: paleta, label: Texto Paleta, type: string }
+              - { name: titular, label: Titular de ejemplo en los posts, type: string }
+              - { name: publicar, label: Botón Publicar, type: string }
+              - { name: listo, label: Texto al terminar, type: string }
+              - { name: lienzo, label: Descripción de los tableros, type: string }
+          - name: trabajos
+            label: Trabajos
+            type: object
+            fields:
+              - { name: etiqueta, label: Etiqueta, type: string }
+              - { name: titulo, label: Titular, type: string }
+              - name: pestanas
+                label: Pestañas
+                type: object
+                fields:
+                  - { name: todo, label: Todo, type: string }
+                  - { name: video, label: Video, type: string }
+                  - { name: motion, label: Motion, type: string }
+                  - { name: diseno, label: Diseño, type: string }
+              - { name: cerrar, label: Botón cerrar del visor, type: string }
+              - { name: filtros, label: Descripción de las pestañas, type: string }
+          - name: cifras
+            label: Panel de cifras
+            type: object
+            fields:
+              - { name: titulo, label: Titular, type: string }
+              - { name: panel, label: Título del panel, type: string }
+          - name: clientes
+            label: Marcas y creadores
+            type: object
+            fields:
+              - { name: titulo, label: Titular, type: string }
+              - { name: tuMarca, label: Texto de la ficha vacía, type: string }
           - name: perdida
             label: Página 404
             type: object

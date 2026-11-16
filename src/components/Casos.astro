@@ -39,9 +39,11 @@ const piezasDe = (caso: (typeof casos)[number]) =>
 const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await piezasDe(caso) })));
 ---
 
-<section class="seccion" id="casos">
-  <p class="etiqueta">{t.etiqueta}</p>
-  <h2>{t.titulo.antes}{' '}<em>{t.titulo.destacado}</em>{t.titulo.despues && ` ${t.titulo.despues}`}</h2>
+<section class="seccion casos" id="casos">
+  <header class="cabecera-chica">
+    <p class="paso">{t.etiqueta}</p>
+    <h2>{[t.titulo.antes, t.titulo.destacado, t.titulo.despues].filter(Boolean).join(' ')}.</h2>
+  </header>
 
   {
     lista.map(({ caso, piezas }, i) => {
@@ -164,16 +166,18 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
 </script>
 
 <style>
+  /* Casos compactos: cada uno es un panel de ancho contenido */
   .caso {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(1.5rem, 4vw, 3.5rem);
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
     align-items: center;
-    margin-top: clamp(2.5rem, 5vw, 4rem);
+    max-width: 52rem;
+    margin: clamp(1.75rem, 3.5vw, 2.5rem) auto 0;
     scroll-margin-top: 6rem;
   }
 
-  h2 + .caso {
+  .cabecera-chica + .caso {
     margin-top: 2rem;
   }
 
@@ -185,9 +189,11 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
   .visor {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.75rem;
-    padding: clamp(1rem, 2.4vw, 1.75rem);
-    border-radius: 28px;
+    gap: 0.6rem;
+    max-width: 22rem;
+    padding: 0.75rem;
+    border: 1px solid var(--linea);
+    border-radius: 14px;
     background: var(--superficie);
   }
 
@@ -205,8 +211,7 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
     max-width: 100%;
     max-height: 100%;
     min-height: 0;
-    border-radius: 20px;
-    box-shadow: 0 26px 44px -30px rgb(0 0 0 / 0.55);
+    border-radius: 8px;
   }
 
   .escena video {
@@ -236,11 +241,11 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
   .miniaturas button {
     position: relative;
     display: block;
-    width: clamp(3rem, 5vw, 3.75rem);
-    aspect-ratio: 1 / 1;
+    width: 2.75rem;
+    aspect-ratio: 4 / 5;
     padding: 0;
     border: 2px solid transparent;
-    border-radius: 12px;
+    border-radius: 6px;
     overflow: hidden;
     background: var(--negro);
     color: #fff;
@@ -285,16 +290,16 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
   }
 
   h3 {
-    font-size: clamp(1.75rem, 3.6vw, 2.75rem);
-    font-weight: 600;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
+    font-size: clamp(1.25rem, 2vw, 1.6rem);
+    font-weight: 560;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
   }
 
   dl {
     display: grid;
-    gap: 1rem;
-    margin: 1.25rem 0 0;
+    gap: 0.75rem;
+    margin: 1rem 0 0;
   }
 
   dt {
@@ -306,14 +311,16 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
 
   dd {
     margin: 0;
-    max-width: 44ch;
-    font-size: 1.0625rem;
+    max-width: 46ch;
+    font-size: 0.9375rem;
+    line-height: 1.5;
   }
 
   .resultado {
-    padding: 0.9rem 1.25rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--linea);
     border-left: 3px solid var(--acento);
-    border-radius: 0 16px 16px 0;
+    border-radius: 4px 10px 10px 4px;
     background: var(--superficie);
   }
 
@@ -341,6 +348,8 @@ const lista = await Promise.all(casos.map(async (caso) => ({ caso, piezas: await
     /* Las miniaturas pasan a una fila deslizable bajo el espacio principal */
     .visor {
       grid-template-columns: minmax(0, 1fr);
+      width: 100%;
+      margin-inline: auto;
     }
 
     .miniaturas {

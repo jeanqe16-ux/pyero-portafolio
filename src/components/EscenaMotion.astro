@@ -1,0 +1,511 @@
+---
+import { textosDe, type Idioma } from '../lib/i18n';
+
+interface Props {
+  lang: Idioma;
+}
+
+const t = textosDe(Astro.props.lang).escenaMotion;
+const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>';
+// Capas de la línea de tiempo y dónde cae cada keyframe (en % del largo)
+const capas = [
+  { nombre: t.capas.forma, claves: [4, 46] },
+  { nombre: t.capas.logo, claves: [26, 66] },
+  { nombre: t.capas.texto, claves: [46, 92] },
+];
+---
+
+<section class="escena-scroll escena-motion" id="motion" aria-labelledby="escena-motion-titulo">
+  <div class="escena-fija">
+    <div class="orbe-fondo" aria-hidden="true"></div>
+    <header class="cabecera-chica">
+      <p class="paso">{t.etiqueta}</p>
+      <h2 id="escena-motion-titulo">{t.titulo}</h2>
+    </header>
+
+    <div class="escenario">
+      <div class="lienzo-envoltura">
+        {/* Lienzo cuadrado: una pieza de marca hecha de formas y texto que se anima según el cabezal */}
+        <figure class="lienzo" aria-label={t.monitor}>
+          <span class="forma circulo"></span>
+          <span class="forma cuadro"></span>
+          <span class="marca-texto">
+            <span class="linea-1"><span>{t.marca}</span></span>
+            <span class="linea-2"><span>{t.lema}</span></span>
+          </span>
+          <span class="seleccion" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        </figure>
+
+        {/* Editor de curva: el cursor arrastra la manija y el movimiento pasa de lineal a suave */}
+        <div class="panel panel-curva" aria-hidden="true">
+          <span class="panel-titulo">{t.curva}</span>
+          <svg viewBox="0 0 100 100" class="grafica">
+            <path class="guia" d="M0 100 L100 0"></path>
+            <path class="trazo" d="M0 100 C 33 67, 67 33, 100 0"></path>
+            <line class="brazo" x1="0" y1="100" x2="33" y2="67"></line>
+            <circle class="manija" cx="33" cy="67" r="5"></circle>
+          </svg>
+        </div>
+      </div>
+
+      <div class="panel linea" aria-hidden="true">
+        <div class="linea-cabecera">
+          <span class="tiempo">00:00</span>
+          <span class="exportar">
+            <span class="exportar-texto">{t.render}</span>
+            <span class="listo-texto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+              {t.listo}
+            </span>
+          </span>
+        </div>
+        <div class="pistas">
+          {
+            capas.map((c) => (
+              <>
+                <span class="rotulo">{c.nombre}</span>
+                <div class="pista">
+                  <span class="barra-capa" style={`left:${c.claves[0]}%;width:${c.claves[1] - c.claves[0]}%`} />
+                  {c.claves.map((x) => (
+                    <span class="clave" style={`left:${x}%`} />
+                  ))}
+                </div>
+              </>
+            ))
+          }
+          <span class="cabezal"></span>
+        </div>
+      </div>
+
+      <div class="cursor-pyero keys" aria-hidden="true"><Fragment set:html={flecha} /><span>{t.cursores.keys}</span></div>
+      <div class="cursor-pyero color curva" aria-hidden="true"><Fragment set:html={flecha} /><span>{t.cursores.curva}</span></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Un cursor pone los keyframes, otro suaviza la curva y luego la animación corre con el cabezal
+  import { montarEscena, moverCursor, punto, recorrido, suave, tramo, type Punto } from '../scripts/escena';
+
+  let limpiar: (() => void) | null = null;
+  const salida = (x: number) => 1 - Math.pow(1 - x, 3);
+
+  document.addEventListener('astro:page-load', () => {
+    limpiar?.();
+    limpiar = null;
+    const escena = document.querySelector<HTMLElement>('.escena-motion');
+    if (!escena) return;
+
+    const q = <T extends Element>(s: string) => escena.querySelector<T>(s)!;
+    const escenario = q<HTMLElement>('.escenario');
+    const pista = q<HTMLElement>('.pista');
+    const cabezal = q<HTMLElement>('.cabezal');
+    const tiempo = q<HTMLElement>('.tiempo');
+    const exportar = q<HTMLElement>('.exportar');
+    const circulo = q<HTMLElement>('.circulo');
+    const cuadro = q<HTMLElement>('.cuadro');
+    const linea1 = q<HTMLElement>('.linea-1 span');
+    const linea2 = q<HTMLElement>('.linea-2 span');
+    const seleccion = q<HTMLElement>('.seleccion');
+    const trazo = q<SVGPathElement>('.trazo');
+    const brazo = q<SVGLineElement>('.brazo');
+    const manija = q<SVGCircleElement>('.manija');
+    const claves = [...escena.querySelectorAll<HTMLElement>('.clave')];
+    const objetivos = [circulo, circulo, cuadro, cuadro, linea1, linea1];
+    const cKeys = q<HTMLElement>('.cursor-pyero.keys');
+    const cCurva = q<HTMLElement>('.cursor-pyero.curva');
+
+    // Estado de cada forma según el tiempo t (0 a 1) del cabezal; k mezcla movimiento lineal (0) y suave (1)
+    const animar = (t: number, k: number) => {
+      const e = (a: number, b: number) => {
+        const x = tramo(t, a, b);
+        return x + (salida(x) - x) * k;
+      };
+      const c = e(0.04, 0.46);
+      circulo.style.transform = `translate(${(1 - c) * -160}%, 0) scale(${0.3 + 0.7 * c})`;
+      const d = e(0.26, 0.66);
+      cuadro.style.transform = `rotate(${(1 - d) * -120}deg) scale(${d})`;
+      linea1.style.transform = `translateY(${(1 - e(0.46, 0.8)) * 110}%)`;
+      linea2.style.transform = `translateY(${(1 - e(0.6, 0.92)) * 110}%)`;
+    };
+
+    const pintar = (p: number) => {
+      const fuera: Punto = { x: escenario.clientWidth + 60, y: escenario.clientHeight * 0.9 };
+
+      // 1. Keyframes: el cursor marca dos claves por capa; el lienzo muestra la pieza terminada y la capa elegida
+      const marcadas = Math.floor(tramo(p, 0.06, 0.36) * claves.length + 0.0001);
+      claves.forEach((c, i) => c.classList.toggle('puesta', i < marcadas || p >= 0.36));
+      const enCurso = Math.min(marcadas, claves.length - 1);
+      const paradas: [number, number, Punto][] = claves.map((c, i) => {
+        const a = 0.06 + (i / claves.length) * 0.3;
+        return [a, a + 0.03, punto(escenario, c, 0.5, 0.5)];
+      });
+      moverCursor(cKeys, recorrido(p, paradas, fuera), paradas.some(([a]) => p > a + 0.02 && p < a + 0.045));
+      const editando = p > 0.02 && p < 0.38;
+      seleccion.style.visibility = editando ? 'visible' : 'hidden';
+      if (editando) {
+        const caja = objetivos[enCurso].getBoundingClientRect();
+        const lienzo = seleccion.parentElement!.getBoundingClientRect();
+        Object.assign(seleccion.style, {
+          left: `${caja.left - lienzo.left - 8}px`,
+          top: `${caja.top - lienzo.top - 8}px`,
+          width: `${caja.width + 16}px`,
+          height: `${caja.height + 16}px`,
+        });
+      }
+
+      // 2. Curva: la manija pasa de la diagonal a una salida suave
+      const k = suave(tramo(p, 0.44, 0.56));
+      const hx = 33 - 33 * k;
+      const hy = 67 - 67 * k;
+      trazo.setAttribute('d', `M0 100 C ${hx} ${hy}, ${67 - 7 * k} ${33 - 33 * k}, 100 0`);
+      brazo.setAttribute('x2', String(hx));
+      brazo.setAttribute('y2', String(hy));
+      manija.setAttribute('cx', String(hx));
+      manija.setAttribute('cy', String(hy));
+      moverCursor(cCurva, recorrido(p, [[0.42, 0.58, punto(escenario, manija, 0.5, 0.5)]], fuera), p > 0.43 && p < 0.57);
+
+      // 3. Reproducción: el cabezal corre y la pieza se anima con la curva elegida
+      const t = tramo(p, 0.6, 0.88);
+      cabezal.style.left = `${pista.offsetLeft + t * pista.offsetWidth}px`;
+      tiempo.textContent = `00:0${Math.min(5, Math.floor(t * 6))}`;
+      animar(p < 0.6 ? 1 : t, k);
+      escena.classList.toggle('reproduciendo', p >= 0.6);
+
+      // 4. Render
+      escena.classList.toggle('exportado', p > 0.93);
+      exportar.classList.toggle('pulsado', p > 0.9 && p < 0.93);
+    };
+
+    limpiar = montarEscena(escena, pintar);
+  });
+</script>
+
+<style>
+  .escena-motion {
+    --largo: 320vh;
+  }
+
+  .escenario {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    justify-items: center;
+    gap: clamp(0.75rem, 2.5svh, 1.5rem);
+    min-height: 0;
+    margin-top: clamp(0.75rem, 2.5svh, 1.25rem);
+  }
+
+  .lienzo-envoltura {
+    position: relative;
+    height: 100%;
+    min-height: 0;
+    max-height: 24rem;
+  }
+
+  /* Lienzo cuadrado, mismo radio y sombra que el monitor de video */
+  .lienzo {
+    position: relative;
+    height: 100%;
+    aspect-ratio: 1;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--superficie);
+    box-shadow: 0 30px 60px -36px rgb(40 25 10 / 0.6);
+    container-type: size;
+  }
+
+  .forma {
+    position: absolute;
+    will-change: transform;
+  }
+
+  .circulo {
+    left: 14%;
+    top: 16%;
+    width: 30cqh;
+    height: 30cqh;
+    border-radius: 50%;
+    background: var(--acento);
+  }
+
+  .cuadro {
+    right: 16%;
+    top: 22%;
+    width: 22cqh;
+    height: 22cqh;
+    border-radius: 18%;
+    background: var(--orbe-lila);
+  }
+
+  .marca-texto {
+    position: absolute;
+    left: 14%;
+    bottom: 14%;
+    display: grid;
+    font-weight: 560;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .marca-texto > span {
+    overflow: hidden;
+  }
+
+  .marca-texto > span > span {
+    display: block;
+    will-change: transform;
+  }
+
+  .linea-1 {
+    font-size: 11cqh;
+  }
+
+  .linea-2 {
+    color: var(--gris);
+    font-size: 7cqh;
+  }
+
+  /* Caja de selección de la capa que se está editando */
+  .seleccion {
+    position: absolute;
+    border: 1px solid var(--acento);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .seleccion i {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--acento);
+    background: var(--superficie);
+  }
+
+  .seleccion i:nth-child(1) {
+    top: -4px;
+    left: -4px;
+  }
+
+  .seleccion i:nth-child(2) {
+    top: -4px;
+    right: -4px;
+  }
+
+  .seleccion i:nth-child(3) {
+    bottom: -4px;
+    left: -4px;
+  }
+
+  .seleccion i:nth-child(4) {
+    bottom: -4px;
+    right: -4px;
+  }
+
+  /* Editor de curva */
+  .panel-curva {
+    position: absolute;
+    left: calc(100% + 1.25rem);
+    top: 30%;
+    width: 9.5rem;
+    padding: 0.65rem 0.8rem 0.8rem;
+  }
+
+  .panel-titulo {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--gris);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .grafica {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .guia {
+    fill: none;
+    stroke: var(--linea);
+    stroke-dasharray: 3 3;
+  }
+
+  .trazo {
+    fill: none;
+    stroke: #b39cff;
+    stroke-width: 2.5;
+  }
+
+  .brazo {
+    stroke: var(--gris);
+    stroke-width: 1;
+  }
+
+  .manija {
+    fill: var(--superficie);
+    stroke: #b39cff;
+    stroke-width: 2;
+  }
+
+  /* Línea de tiempo: mismas medidas que la escena de video */
+  .linea {
+    width: min(50rem, 100%);
+    padding: 0.7rem 0.9rem 0.85rem;
+  }
+
+  .linea-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.55rem;
+    font-size: 0.75rem;
+  }
+
+  .tiempo {
+    color: var(--gris);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .exportar {
+    display: inline-grid;
+    justify-items: center;
+    padding: 0.28rem 0.7rem;
+    border-radius: 8px;
+    background: var(--texto);
+    color: var(--superficie);
+    font-weight: 600;
+    transition: scale 0.12s ease;
+  }
+
+  .exportar > span {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .exportar svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .listo-texto,
+  .exportado .exportar-texto {
+    visibility: hidden;
+  }
+
+  .exportado .listo-texto {
+    visibility: visible;
+  }
+
+  .exportado .exportar {
+    background: var(--acento);
+    color: var(--negro);
+  }
+
+  .exportar.pulsado {
+    scale: 0.92;
+  }
+
+  .pistas {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+  }
+
+  .rotulo {
+    color: var(--gris);
+    font-size: 0.6875rem;
+  }
+
+  .pista {
+    position: relative;
+    height: 1.5rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--linea) 55%, transparent);
+  }
+
+  .barra-capa {
+    position: absolute;
+    top: 25%;
+    bottom: 25%;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--acento) 30%, var(--superficie));
+  }
+
+  /* Keyframe: rombo vacío hasta que el cursor lo pone */
+  .clave {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid color-mix(in srgb, var(--gris) 50%, transparent);
+    background: var(--superficie);
+    translate: -50% -50%;
+    rotate: 45deg;
+  }
+
+  .clave.puesta {
+    border-color: var(--texto);
+    background: var(--texto);
+  }
+
+  .cabezal {
+    position: absolute;
+    top: -0.35rem;
+    bottom: -0.25rem;
+    left: 0;
+    width: 2px;
+    background: var(--acento);
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .cabezal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 12px;
+    height: 10px;
+    border-radius: 2px 2px 6px 6px;
+    background: var(--acento);
+  }
+
+  .reproduciendo .cabezal {
+    visibility: visible;
+  }
+
+  .estatica .lienzo-envoltura {
+    height: min(50svh, 24rem);
+  }
+
+  .estatica .cabezal,
+  .estatica .seleccion {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .panel-curva {
+      left: auto;
+      right: -3.5rem;
+      top: auto;
+      bottom: 8%;
+      width: 7.5rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .linea {
+      padding: 0.6rem;
+    }
+
+    .lienzo-envoltura {
+      max-height: 17rem;
+    }
+  }
+</style>
