@@ -21,22 +21,16 @@ const a = textos.apertura;
 // categorías: cada una muestra solo lo que tiene. Antes de cada marca va un cuadrito con su logo.
 const MAX_POR_MARCA = 3;
 const esMotion = (titulo: string) => /motion/i.test(titulo);
-const COLORES: Record<string, string> = {
-  cero: 'var(--acento)',
-  'clinica-dental-imagen': '#9d86f5',
-  'clinica-zarate': 'var(--texto)',
-  creadores: '#f6a46c',
-};
-type Grupo = { id: string; nombre: string; logo: string; piezas: string[] };
+type Grupo = { id: string; nombre: string; logo: string; color: string; piezas: string[] };
 const marca = (id: string, piezas: string[]): Grupo => {
   const c = clientes.find((cl) => cl.id === id);
-  return { id, nombre: c?.nombre ?? id, logo: c?.logo ?? '', piezas };
+  return { id, nombre: c?.nombre ?? id, logo: c?.logo ?? '', color: c?.color ?? 'var(--acento)', piezas };
 };
 const deCasos = (filtro: (titulo: string) => boolean) =>
   casos.map((c) => marca(c.cliente, c.videos.filter((v) => filtro(v.titulo)).map((v) => v.poster)));
 const fuentes: Grupo[][] = [
   deCasos((titulo) => !esMotion(titulo)),
-  [...deCasos(esMotion), { id: 'creadores', nombre: a.creadores, logo: '', piezas: creadores.map((c) => c.poster) }],
+  [...deCasos(esMotion), { id: 'creadores', nombre: a.creadores, logo: '', color: 'var(--acento)', piezas: creadores.map((c) => c.poster) }],
   clientes.map((c) => marca(c.id, posts.filter((p) => p.cliente === c.id).flatMap((p) => p.imagenes))),
 ];
 // Medidas de cada fila para que entre completa en pantalla: cartas de 0.8 de ancho por alto y cuadritos de 0.62
@@ -132,9 +126,9 @@ const categorias = await Promise.all(
       <div class="fila" role="img" aria-label={`${a.trabajos}: ${a.categorias[n]}`} hidden={n > 0} style={medidas(grupos)}>
         {grupos.map((g) => (
           <>
-            <span class="marca" aria-hidden="true">
-              <span class="cuadrito" style={`--c:${COLORES[g.id] ?? 'var(--acento)'}`}>
-                {g.logo ? <span class="logo" style={`--logo:url('${g.logo}')`} /> : <span class="arroba">@</span>}
+            <span class="ficha-marca" aria-hidden="true">
+              <span class="cuadrito" style={`--c:${g.color}`}>
+                {g.logo ? <img class="logo" src={g.logo} alt="" loading="eager" decoding="async" /> : <span class="arroba">@</span>}
               </span>
               <span class="marca-nombre">{g.nombre}</span>
             </span>
@@ -577,7 +571,7 @@ const categorias = await Promise.all(
   }
 
   .carta,
-  .marca {
+  .ficha-marca {
     position: relative;
     flex: none;
     margin: 0;
@@ -587,20 +581,19 @@ const categorias = await Promise.all(
     visibility: hidden;
   }
 
-  /* Cuadrito de marca: más chico que las piezas, alineado arriba, con el logo en blanco y el nombre debajo */
-  .marca {
+  /* Cuadrito de marca: más chico que las piezas, alineado arriba, con el logo sobre el color de la marca y el nombre debajo */
+  .ficha-marca {
     display: grid;
     gap: 0.45rem;
     width: calc(var(--alto) * 0.62);
     text-align: left;
   }
 
+  /* Logo en sus colores sobre el color de su marca, sin deformarse */
   .logo {
-    width: 68%;
-    height: 50%;
-    background: #fff;
-    -webkit-mask: var(--logo) center / contain no-repeat;
-    mask: var(--logo) center / contain no-repeat;
+    width: 70%;
+    height: 52%;
+    object-fit: contain;
   }
 
   .arroba {

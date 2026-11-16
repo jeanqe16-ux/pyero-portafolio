@@ -25,18 +25,18 @@ const disenoDe = (id: string): Pieza[] => [
   ...posts.filter((p) => p.cliente === id).flatMap((p) => p.imagenes.map((imagen) => ({ nombre: `${nombreDe(id)}: ${p.titulo}`, poster: imagen, video: '' }))),
   ...portadas.filter((p) => p.cliente === id).map((p) => ({ nombre: `${nombreDe(id)}: ${p.titulo}`, poster: p.imagen, video: '' })),
 ];
-const grupos: { tipo: 'video' | 'motion' | 'diseno'; titulo: string; detalle: string; icono: Icono; color: string; piezas: Pieza[] }[] = [
-  { tipo: 'video', titulo: t.grupos.video, detalle: t.reels, icono: 'video', color: '', piezas: videos.filter((v) => !esMotion(v)) },
+const grupos: { tipo: 'video' | 'motion' | 'diseno'; titulo: string; detalle: string; icono: Icono; color: string; logo?: string; piezas: Pieza[] }[] = [
+  { tipo: 'video', titulo: t.grupos.video, detalle: t.reels, icono: 'video', color: 'var(--acento)', piezas: videos.filter((v) => !esMotion(v)) },
   {
     tipo: 'motion',
     titulo: t.grupos.motion,
     detalle: t.reels,
     icono: 'motion',
-    color: 'lila',
+    color: '#9d86f5',
     piezas: [...videos.filter(esMotion), ...creadores.map((c) => ({ nombre: c.handle, poster: c.poster, video: c.video }))],
   },
   ...clientes
-    .map((c) => ({ tipo: 'diseno' as const, titulo: c.nombre, detalle: t.grupos.diseno, icono: 'diseno' as Icono, color: 'oscuro', piezas: disenoDe(c.id) }))
+    .map((c) => ({ tipo: 'diseno' as const, titulo: c.nombre, detalle: t.grupos.diseno, icono: 'diseno' as Icono, color: c.color, logo: c.logo, piezas: disenoDe(c.id) }))
     .filter((g) => g.piezas.length >= POR_FILA),
 ];
 const filas = await Promise.all(
@@ -74,8 +74,8 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
       filas.map((g) => (
         <section class="grupo" data-tipo={g.tipo} aria-label={g.titulo}>
           <header class="grupo-nombre">
-            <span class:list={['cuadrito', g.color]} aria-hidden="true">
-              <Fragment set:html={svgIcono(g.icono)} />
+            <span class="cuadrito" style={`--c:${g.color}`} aria-hidden="true">
+              {g.logo ? <img class="logo" src={g.logo} alt="" loading="lazy" decoding="async" /> : <Fragment set:html={svgIcono(g.icono)} />}
             </span>
             <span>
               <strong>{g.titulo}</strong>
@@ -255,6 +255,12 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
     gap: 0.6rem;
   }
 
+  .grupo-nombre .logo {
+    width: 74%;
+    height: 56%;
+    object-fit: contain;
+  }
+
   .grupo-nombre .cuadrito {
     width: 2.75rem;
   }
@@ -404,7 +410,13 @@ const pestanas = Object.entries(t.pestanas) as [string, string][];
       gap: 0.75rem;
     }
 
-    .grupo-nombre .cuadrito {
+    .grupo-nombre .logo {
+    width: 74%;
+    height: 56%;
+    object-fit: contain;
+  }
+
+  .grupo-nombre .cuadrito {
       width: 2.25rem;
     }
 

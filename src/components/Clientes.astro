@@ -23,9 +23,9 @@ const orden = (semilla: number) => Array.from({ length: CELDAS }, (_, i) => ((i 
   <ul class="mosaico">
     {
       clientes.map((c, n) => (
-        <li class="ficha">
+        <li class="ficha cuadrito" style={`--c:${c.color}`}>
           <a href={`#caso-${c.id}`} aria-label={c.nombre}>
-            <span class="logo" style={`--logo:url('${c.logo}')`} />
+            <img class="logo" src={c.logo} alt="" loading="lazy" decoding="async" />
           </a>
           <span class="tapa" aria-hidden="true">
             {orden(n).map((d) => (
@@ -93,9 +93,6 @@ const orden = (semilla: number) => Array.from({ length: CELDAS }, (_, i) => ((i 
     position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    border: 1px solid var(--linea);
-    border-radius: 4px;
-    background: var(--superficie);
   }
 
   .ficha a {
@@ -103,14 +100,14 @@ const orden = (semilla: number) => Array.from({ length: CELDAS }, (_, i) => ((i 
     inset: 0;
   }
 
-  /* Los logos son PNG blancos: se pintan con máscara, sin deformarse (contain), dentro de una caja fija igual para todos */
+  /* Logo en sus colores, sin deformarse (contain), dentro de una caja fija igual para todos */
   .logo {
     position: absolute;
     inset: 26% 18%;
-    background: var(--texto);
-    -webkit-mask: var(--logo) center / contain no-repeat;
-    mask: var(--logo) center / contain no-repeat;
-    transition: background-color 0.2s ease;
+    width: 64%;
+    height: 48%;
+    object-fit: contain;
+    transition: scale 0.25s ease;
   }
 
   /* Tapa de 4x4 celdas */
@@ -171,7 +168,7 @@ const orden = (semilla: number) => Array.from({ length: CELDAS }, (_, i) => ((i 
 
   @media (hover: hover) and (pointer: fine) {
     .ficha a:hover .logo {
-      background: var(--acento);
+      scale: 1.06;
     }
   }
 

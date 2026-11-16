@@ -533,13 +533,6 @@ h2 em {
   height: 42%;
 }
 
-.cuadrito.lila {
-  --c: #9d86f5;
-}
-
-.cuadrito.oscuro {
-  --c: var(--texto);
-}
 
 
 /* Esquinas de marco seleccionado alrededor de una pieza (cuatro <i class="esquina">) */

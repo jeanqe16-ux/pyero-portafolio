@@ -104,7 +104,7 @@ content:
               - { name: poster, label: Portada, type: image }
 
   - name: clientes
-    label: Clientes y logos de la franja
+    label: Clientes y logos
     type: file
     path: src/data/clientes.json
     fields:
@@ -115,7 +115,8 @@ content:
         fields:
           - { name: id, label: 'Identificador (igual al de su carpeta en media)', type: string, required: true }
           - { name: nombre, label: Nombre, type: string, required: true }
-          - { name: logo, label: 'Logo (PNG transparente, se muestra en blanco)', type: image, options: { media: publico } }
+          - { name: logo, label: 'Logo (PNG transparente en sus colores, claro para ir sobre el color de la marca)', type: image, options: { media: publico } }
+          - { name: color, label: 'Color de la marca (fondo de su cuadro, en hexadecimal)', type: string }
 
   - name: creadores
     label: Creadores
@@ -312,6 +313,7 @@ content:
             fields:
               - { name: etiqueta, label: Etiqueta, type: string }
               - { name: titulo, label: Titular, type: object, fields: *titular }
+              - { name: ubicacion, label: Ubicación, type: string }
               - { name: parrafos, label: Párrafos, type: text, list: true }
               - { name: herramientas, label: Título de herramientas, type: string }
               - { name: fotoAlt, label: Descripción de la foto, type: string }
