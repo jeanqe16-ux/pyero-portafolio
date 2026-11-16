@@ -1,0 +1,652 @@
+---
+import site from '../data/site.json';
+import { servicios } from '../data/servicios.json';
+import { posts, portadas } from '../data/diseno.json';
+import { textosDe, tr, type Idioma } from '../lib/i18n';
+import { optimizar } from '../lib/imagenes';
+import { reelsDe } from '../lib/reels';
+
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+const textos = textosDe(lang);
+const t = textos.hero;
+const a = textos.apertura;
+
+// Trabajo real para la fila de tarjetas, agrupado por formato: cada hueco solo recibe piezas de su mismo formato
+const pool = {
+  v: await Promise.all(reelsDe(lang).filter((r) => r.poster).map(async (r) => ({ src: await optimizar(r.poster, 240), alt: r.nombre }))),
+  c: await Promise.all(posts.map(async (p) => ({ src: await optimizar(p.imagenes[0], 360), alt: p.titulo }))),
+  a: await Promise.all(portadas.map(async (p) => ({ src: await optimizar(p.imagen, 640), alt: p.titulo }))),
+};
+
+// Orden de los huecos, de izquierda a derecha: vertical (reel), cuadrado (post) y ancho (portada)
+const huecos = ['v', 'c', 'a', 'v', 'c', 'c', 'a', 'v', 'c', 'a', 'c', 'v'] as const;
+const cuenta = { v: 0, c: 0, a: 0 };
+const fila = huecos.map((tipo) => {
+  const lista = pool[tipo];
+  const pieza = lista[cuenta[tipo]++ % lista.length];
+  return { tipo, ...pieza };
+});
+---
+
+<section class="apertura" aria-labelledby="apertura-titulo">
+  <div class="orbe" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <div class="apertura-texto">
+    <h1 id="apertura-titulo">
+      <span>{t.titulo.a} {t.titulo.b}{t.titulo.b2 && ` ${t.titulo.b2}`}</span>
+      <span>{t.titulo.c} {t.titulo.d}</span>
+    </h1>
+    <p class="bajada">{t.bajada}</p>
+
+    {/* Caja tipo prompt: muestra pedidos de ejemplo y, si el visitante escribe, abre WhatsApp con su pedido */}
+    <form
+      class="prompt"
+      action={`https://wa.me/${site.whatsapp}`}
+      method="get"
+      target="_blank"
+      data-numero={site.whatsapp}
+      data-mensaje={a.mensaje}
+      data-servicio={a.servicio}
+      data-pedidos={JSON.stringify(a.pedidos)}
+    >
+      <label class="solo-lector" for="pedido">{a.etiquetaPrompt}</label>
+      <div class="prompt-campo">
+        <textarea id="pedido" name="text" rows="2" maxlength="280" placeholder={a.pedidos[0]}></textarea>
+        <span class="ejemplo" aria-hidden="true"><span class="ejemplo-texto"></span><i class="caret"></i></span>
+      </div>
+      <div class="prompt-pie">
+        <div class="servicios" role="group" aria-label={a.servicios}>
+          {
+            servicios.map((s) => (
+              <button type="button" class="servicio" aria-pressed="false" data-valor={tr(s, 'titulo', lang)}>
+                {tr(s, 'titulo', lang)}
+              </button>
+            ))
+          }
+        </div>
+        <button type="submit" class="enviar" aria-label={a.enviar} title={a.enviar}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17 17 7M9 7h8v8"></path>
+          </svg>
+        </button>
+      </div>
+
+      {/* Cursor de ejemplo: escribe el pedido y lo envía; solo es decoración */}
+      <div class="cursor" aria-hidden="true">
+        <svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>
+        <span>{a.cursor}</span>
+      </div>
+    </form>
+
+    <a class="ver" href="#casos">{t.secundario}</a>
+  </div>
+
+  {/* Fila de trabajos con esquinas de marco seleccionado; las piezas se cambian en cascada */}
+  <div class="fila" role="img" aria-label={a.trabajos} data-pool={JSON.stringify(pool)}>
+    {
+      fila.map((pieza, i) => (
+        <figure class:list={['marco', pieza.tipo]} data-tipo={pieza.tipo}>
+          <img src={pieza.src} alt="" loading={i < 7 ? 'eager' : 'lazy'} decoding="async" fetchpriority="low" />
+          <i></i><i></i><i></i><i></i>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  // Hero: un cursor escribe pedidos de cliente en la caja, los "envía" y la fila de trabajos se renueva en cascada
+  const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let limpiar: (() => void) | null = null;
+
+  document.addEventListener('astro:page-load', () => {
+    limpiar?.();
+    const form = document.querySelector<HTMLFormElement>('.apertura .prompt');
+    const fila = document.querySelector<HTMLElement>('.apertura .fila');
+    if (!form || !fila) return;
+
+    const campo = form.querySelector('textarea')!;
+    const ejemplo = form.querySelector<HTMLElement>('.ejemplo-texto')!;
+    const cursor = form.querySelector<HTMLElement>('.cursor')!;
+    const enviar = form.querySelector<HTMLElement>('.enviar')!;
+    const chips = [...form.querySelectorAll<HTMLButtonElement>('.servicio')];
+    const pedidos: string[] = JSON.parse(form.dataset.pedidos || '[]');
+    const relojes: number[] = [];
+    const esperar = (ms: number) => new Promise<void>((r) => relojes.push(window.setTimeout(r, ms)));
+    let vivo = true;
+
+    // Envío real: arma el mensaje con el pedido (o el ejemplo visible) y los servicios elegidos
+    const alEnviar = (e: SubmitEvent) => {
+      e.preventDefault();
+      const pedido = campo.value.trim() || ejemplo.textContent || pedidos[0];
+      const elegidos = chips.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.dataset.valor);
+      const lineas = [form.dataset.mensaje, pedido, elegidos.length ? `${form.dataset.servicio}: ${elegidos.join(', ')}` : ''];
+      const texto = encodeURIComponent(lineas.filter(Boolean).join('\n'));
+      window.open(`https://wa.me/${form.dataset.numero}?text=${texto}`, '_blank', 'noopener');
+    };
+    form.addEventListener('submit', alEnviar);
+    chips.forEach((c) => c.addEventListener('click', () => c.setAttribute('aria-pressed', String(c.getAttribute('aria-pressed') !== 'true'))));
+
+    // Mientras el visitante escribe, el ejemplo se oculta
+    const actualizar = () => form.classList.toggle('con-texto', campo.value.length > 0 || document.activeElement === campo);
+    campo.addEventListener('input', actualizar);
+    campo.addEventListener('focus', actualizar);
+    campo.addEventListener('blur', actualizar);
+
+    // Fila: cada hueco pasa a la siguiente pieza de su formato, de izquierda a derecha, con corte seco y un saltito
+    const pool: Record<string, { src: string }[]> = JSON.parse(fila.dataset.pool || '{}');
+    const marcos = [...fila.querySelectorAll<HTMLElement>('.marco')];
+    const indice: Record<string, number> = { v: 0, c: 0, a: 0 };
+    marcos.forEach((m) => (indice[m.dataset.tipo!] += 1));
+    const renovar = () => {
+      marcos.forEach((marco, i) => {
+        const tipo = marco.dataset.tipo!;
+        const lista = pool[tipo];
+        const siguiente = lista[indice[tipo]++ % lista.length];
+        const previa = new Image();
+        previa.src = siguiente.src;
+        relojes.push(
+          window.setTimeout(() => {
+            marco.classList.add('vacio');
+            relojes.push(
+              window.setTimeout(() => {
+                marco.querySelector('img')!.src = siguiente.src;
+                marco.classList.remove('vacio');
+                marco.classList.remove('salto');
+                void marco.offsetWidth;
+                marco.classList.add('salto');
+              }, 130),
+            );
+          }, i * 95),
+        );
+      });
+    };
+
+    // Escribe letra por letra con un ritmo algo irregular, como una persona
+    const escribir = async (texto: string) => {
+      for (let i = 1; i <= texto.length && vivo; i++) {
+        ejemplo.textContent = texto.slice(0, i);
+        await esperar(38 + Math.random() * 55);
+      }
+    };
+    const borrar = async () => {
+      while (ejemplo.textContent && vivo) {
+        ejemplo.textContent = ejemplo.textContent.slice(0, -2);
+        await esperar(18);
+      }
+    };
+
+    const ciclo = async () => {
+      for (let n = 0; vivo; n = (n + 1) % pedidos.length) {
+        await escribir(pedidos[n]);
+        await esperar(500);
+        if (!vivo) return;
+        // El cursor llega al botón, hace clic y la fila se renueva
+        cursor.classList.add('llega');
+        await esperar(750);
+        cursor.classList.add('clic');
+        enviar.classList.add('pulsado');
+        form.classList.add('enviado');
+        renovar();
+        await esperar(220);
+        cursor.classList.remove('clic');
+        enviar.classList.remove('pulsado');
+        await esperar(1300);
+        cursor.classList.remove('llega');
+        form.classList.remove('enviado');
+        await esperar(500);
+        await borrar();
+        await esperar(350);
+      }
+    };
+
+    if (reducir) {
+      ejemplo.textContent = pedidos[0];
+    } else {
+      // Solo corre mientras el hero está en pantalla
+      let corriendo = false;
+      const vista = new IntersectionObserver(([entrada]) => {
+        if (entrada.isIntersecting && !corriendo) {
+          corriendo = true;
+          vivo = true;
+          ciclo();
+        } else if (!entrada.isIntersecting && corriendo) {
+          corriendo = false;
+          vivo = false;
+        }
+      });
+      vista.observe(form);
+      limpiar = () => {
+        vivo = false;
+        vista.disconnect();
+        relojes.forEach(clearTimeout);
+        form.removeEventListener('submit', alEnviar);
+      };
+      return;
+    }
+    limpiar = () => form.removeEventListener('submit', alEnviar);
+  });
+</script>
+
+<style>
+  .apertura {
+    position: relative;
+    display: grid;
+    /* minmax(0, 1fr): la fila de trabajos es más ancha que la pantalla y no debe ensanchar la columna del texto */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    min-height: max(100svh, 46rem);
+    padding-top: calc(var(--alto-nav) + clamp(1.5rem, 6svh, 4rem));
+    overflow: hidden;
+    isolation: isolate;
+    text-align: center;
+  }
+
+  /* Orbe: tres manchas de color muy desenfocadas detrás de la caja, que respiran despacio */
+  .orbe {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    z-index: -1;
+    width: min(62rem, 120vw);
+    aspect-ratio: 2 / 1;
+    translate: -50% -50%;
+    filter: blur(70px);
+    opacity: 0.75;
+    pointer-events: none;
+  }
+
+  .orbe i {
+    position: absolute;
+    border-radius: 50%;
+    animation: orbe 18s ease-in-out infinite alternate;
+  }
+
+  .orbe i:nth-child(1) {
+    inset: 18% 46% 22% 14%;
+    background: var(--orbe-durazno);
+  }
+
+  .orbe i:nth-child(2) {
+    inset: 26% 18% 16% 44%;
+    background: var(--orbe-lila);
+    animation-delay: -6s;
+  }
+
+  .orbe i:nth-child(3) {
+    inset: 40% 38% 20% 36%;
+    background: var(--acento);
+    opacity: 0.55;
+    animation-delay: -11s;
+  }
+
+  @keyframes orbe {
+    to {
+      transform: translate(6%, -8%) scale(1.12);
+    }
+  }
+
+  .apertura-texto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-inline: 1.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.4vw, 3.75rem);
+    font-weight: 560;
+    letter-spacing: -0.05em;
+    line-height: 1;
+  }
+
+  h1 span {
+    display: block;
+  }
+
+  .bajada {
+    max-width: 46ch;
+    margin-top: 1.25rem;
+    color: var(--gris);
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    line-height: 1.45;
+  }
+
+  /* Caja de prompt */
+  .prompt {
+    position: relative;
+    width: min(36rem, 100%);
+    margin-top: clamp(1.75rem, 4svh, 2.5rem);
+    padding: 1rem 1rem 0.75rem 1.25rem;
+    border: 1px solid var(--linea);
+    border-radius: 18px;
+    background: var(--superficie);
+    box-shadow: 0 18px 40px -28px rgb(60 40 20 / 0.45);
+    text-align: left;
+    transition: box-shadow 0.4s ease;
+  }
+
+  .prompt.enviado {
+    box-shadow:
+      0 18px 40px -28px rgb(60 40 20 / 0.45),
+      0 0 0 4px rgb(251 142 31 / 0.18);
+  }
+
+  .prompt-campo {
+    position: relative;
+    min-height: 3.2rem;
+  }
+
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 3.2rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--texto);
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+  }
+
+  /* El placeholder real queda oculto: lo reemplaza el ejemplo que se escribe solo */
+  textarea::placeholder {
+    color: transparent;
+  }
+
+  .ejemplo {
+    position: absolute;
+    inset: 0;
+    color: var(--gris);
+    font-size: 1rem;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+
+  .con-texto .ejemplo {
+    visibility: hidden;
+  }
+
+  .caret {
+    display: inline-block;
+    width: 1.5px;
+    height: 1.1em;
+    margin-left: 1px;
+    vertical-align: -0.15em;
+    background: var(--texto);
+    animation: caret 1s steps(1) infinite;
+  }
+
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .prompt-pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .servicios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .servicio {
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    background: var(--fondo);
+    color: var(--gris);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .servicio[aria-pressed='true'] {
+    border-color: var(--texto);
+    background: var(--texto);
+    color: var(--superficie);
+  }
+
+  .enviar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: var(--acento);
+    color: var(--negro);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .enviar svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .enviar.pulsado {
+    transform: scale(0.88);
+  }
+
+  /* Cursor con nombre, estilo herramienta colaborativa. Descansa fuera de la caja y viaja al botón de enviar */
+  .cursor {
+    position: absolute;
+    right: -4.5rem;
+    bottom: -3.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+    pointer-events: none;
+    transition: translate 0.75s cubic-bezier(0.65, 0, 0.25, 1);
+  }
+
+  .cursor svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--acento);
+    stroke: var(--superficie);
+    stroke-width: 1.2;
+    transition: scale 0.12s ease;
+  }
+
+  .cursor span {
+    margin-top: 12px;
+    padding: 0.15rem 0.45rem;
+    border-radius: 6px 6px 6px 2px;
+    background: var(--acento);
+    color: var(--negro);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .cursor.llega {
+    translate: -3.6rem -2.05rem;
+  }
+
+  .cursor.clic svg {
+    scale: 0.8;
+  }
+
+  .ver {
+    margin-top: 1.25rem;
+    padding: 0.4rem 0;
+    color: var(--texto);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--linea);
+    text-underline-offset: 0.3em;
+  }
+
+  /* Fila de trabajos: una sola altura, el ancho sale del formato; se sale por los dos bordes de la pantalla */
+  .fila {
+    --alto: clamp(108px, 13vw, 172px);
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+    gap: clamp(10px, 1.2vw, 16px);
+    margin-top: clamp(2rem, 5svh, 3.5rem);
+    padding-bottom: clamp(1.5rem, 4svh, 2.5rem);
+  }
+
+  .marco {
+    position: relative;
+    flex: none;
+    height: var(--alto);
+    margin: 0;
+  }
+
+  .marco.v {
+    aspect-ratio: 9 / 16;
+  }
+
+  .marco.c {
+    aspect-ratio: 1;
+  }
+
+  .marco.a {
+    aspect-ratio: 16 / 9;
+  }
+
+  .marco img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--superficie);
+  }
+
+  /* Esquinas de marco seleccionado */
+  .marco i {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--texto);
+  }
+
+  .marco i:nth-of-type(1) {
+    top: -3px;
+    left: -3px;
+  }
+
+  .marco i:nth-of-type(2) {
+    top: -3px;
+    right: -3px;
+  }
+
+  .marco i:nth-of-type(3) {
+    bottom: -3px;
+    left: -3px;
+  }
+
+  .marco i:nth-of-type(4) {
+    bottom: -3px;
+    right: -3px;
+  }
+
+  /* Corte seco: el hueco queda vacío un instante y la pieza nueva entra con un saltito de pocos píxeles */
+  .marco.vacio img {
+    visibility: hidden;
+  }
+
+  .marco.salto img {
+    animation: salto 0.32s step-end;
+  }
+
+  @keyframes salto {
+    0% {
+      translate: -7px 0;
+    }
+    45% {
+      translate: 3px 0;
+    }
+    75% {
+      translate: 0 0;
+    }
+  }
+
+  .solo-lector {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .servicio[aria-pressed='false']:hover {
+      border-color: var(--texto);
+      color: var(--texto);
+    }
+
+    .enviar:hover {
+      background: var(--texto);
+      color: var(--superficie);
+    }
+
+    .ver:hover {
+      text-decoration-color: var(--acento);
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* En celular los servicios van en una sola fila que se desliza */
+    .servicios {
+      flex-wrap: nowrap;
+      margin-right: -0.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      mask-image: linear-gradient(to right, #000 85%, transparent);
+    }
+
+    .servicio {
+      flex: none;
+    }
+
+    .servicio {
+      font-size: 0.75rem;
+    }
+
+    .cursor {
+      right: -0.5rem;
+      bottom: -2.75rem;
+    }
+
+    .cursor.llega {
+      translate: -0.4rem -1.6rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbe i,
+    .caret {
+      animation: none;
+    }
+
+    .cursor {
+      display: none;
+    }
+  }
+</style>

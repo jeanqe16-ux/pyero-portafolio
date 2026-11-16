@@ -112,6 +112,36 @@
       "juego": "Mini juego: mueve el mouse o el dedo para atrapar los pixeles naranjas que caen",
       "marcador": "Atrapados",
       "volver": "Volver al inicio"
+    },
+    "apertura": {
+      "etiquetaPrompt": "Cuéntame qué necesita tu marca",
+      "pedidos": [
+        "Necesito presencia en redes",
+        "Nadie ve mis videos",
+        "Mi marca se ve como todas las demás",
+        "No sé qué publicar esta semana",
+        "Quiero que mi marca se reconozca"
+      ],
+      "enviar": "Enviar por WhatsApp",
+      "mensaje": "Hola Jean, vi tu portafolio. Esto es lo que necesito:",
+      "servicio": "Servicio",
+      "servicios": "Qué necesitas",
+      "trabajos": "Trabajos recientes de edición, motion y diseño",
+      "cursor": "Pyero"
+    },
+    "escenaVideo": {
+      "etiqueta": "Edición de video",
+      "titulo": "Ritmo, subtítulos y color pensados para que nadie pase de largo.",
+      "subtitulo": "Esto sí detiene el scroll",
+      "pistas": {
+        "video": "Video",
+        "texto": "Texto",
+        "audio": "Audio"
+      },
+      "color": "Color",
+      "exportar": "Exportar",
+      "listo": "Listo para publicar",
+      "monitor": "Vista previa del reel en edición"
     }
   },
   "en": {
@@ -227,6 +257,36 @@
       "juego": "Mini game: move your mouse or finger to catch the falling orange pixels",
       "marcador": "Caught",
       "volver": "Back to home"
+    },
+    "apertura": {
+      "etiquetaPrompt": "Tell me what your brand needs",
+      "pedidos": [
+        "I need a presence on social media",
+        "Nobody watches my videos",
+        "My brand looks like everyone else",
+        "I do not know what to post this week",
+        "I want my brand to be recognized"
+      ],
+      "enviar": "Send on WhatsApp",
+      "mensaje": "Hi Jean, I saw your portfolio. This is what I need:",
+      "servicio": "Service",
+      "servicios": "What you need",
+      "trabajos": "Recent editing, motion and design work",
+      "cursor": "Pyero"
+    },
+    "escenaVideo": {
+      "etiqueta": "Video editing",
+      "titulo": "Pacing, captions and color built so nobody scrolls past.",
+      "subtitulo": "This one stops the scroll",
+      "pistas": {
+        "video": "Video",
+        "texto": "Text",
+        "audio": "Audio"
+      },
+      "color": "Color",
+      "exportar": "Export",
+      "listo": "Ready to post",
+      "monitor": "Preview of the reel being edited"
     }
   }
 }

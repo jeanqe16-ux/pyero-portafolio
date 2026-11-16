@@ -6,12 +6,15 @@
   --acento-texto: #b45309;
   /* Negro fijo: no cambia con el tema (texto sobre naranja, fondo de videos, franja de logos) */
   --negro: #0a0a0a;
-  /* Colores que cambian con el tema */
-  --fondo: #fff;
+  /* Lienzo crema con grano, como un lanzamiento de producto; las tarjetas van en un blanco roto encima */
+  --fondo: #edebe6;
   --texto: #0a0a0a;
-  --gris: #6b6b6b;
-  --linea: #ececec;
-  --superficie: #f5f5f4;
+  --gris: #6b675f;
+  --linea: #dcd8d0;
+  --superficie: #f8f7f4;
+  /* Orbes de degradado de las escenas */
+  --orbe-durazno: #ffc59e;
+  --orbe-lila: #cdbbff;
   /* Bloques invertidos, como el cierre: negros en claro, gris oscuro en oscuro */
   --inverso: #0a0a0a;
   /* Textos .pixel: contorno de las letras vacías y cómo se funde la máscara con el fondo */
@@ -21,35 +24,6 @@
   --ancho: 1180px;
   /* Alto del menú flotante más su separación del borde superior */
   --alto-nav: 5rem;
-}
-
-:root[data-tema='oscuro'] {
-  color-scheme: dark;
-  /* Sobre fondo oscuro el naranja claro ya tiene contraste de sobra */
-  --acento-texto: #fdaf50;
-  --fondo: #0e0e0e;
-  --texto: #fff;
-  --gris: #a8a8a8;
-  --linea: #2c2c2c;
-  --superficie: #1a1a1a;
-  --inverso: #1a1a1a;
-  --contorno: #3d3d3d;
-  --mascara: #fff;
-  --mezcla: darken;
-}
-
-/* Al cambiar de tema los colores pasan suavemente durante 0.3 s (la clase la pone y la quita el script del <head>) */
-@media (prefers-reduced-motion: no-preference) {
-  .cambiando-tema *,
-  .cambiando-tema *::before,
-  .cambiando-tema *::after {
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease,
-      border-color 0.3s ease,
-      fill 0.3s ease,
-      stroke 0.3s ease !important;
-  }
 }
 
 /* Fuente bit del nombre, autoalojada (solo latín, negrita) */
@@ -74,7 +48,9 @@ html {
 
 body {
   margin: 0;
-  background: var(--fondo);
+  background-color: var(--fondo);
+  /* Grano muy tenue sobre el crema, para que el fondo no se vea plano */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='.05'/%3E%3C/svg%3E");
   color: var(--texto);
   font-family: 'Inter Variable', Inter, system-ui, sans-serif;
   font-size: 16px;
@@ -284,40 +260,6 @@ h2 em {
   color: var(--fondo);
 }
 
-/* Botón de modo claro u oscuro: muestra la luna en claro y el sol en oscuro */
-.tema {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 2.25rem;
-  height: 2.25rem;
-  padding: 0;
-  border: 1px solid var(--linea);
-  border-radius: 50%;
-  background: none;
-  color: var(--texto);
-  cursor: pointer;
-}
-
-.tema svg {
-  width: 1.1rem;
-  height: 1.1rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.tema .sol,
-[data-tema='oscuro'] .tema .luna {
-  display: none;
-}
-
-[data-tema='oscuro'] .tema .sol {
-  display: block;
-}
-
 .pie {
   display: flex;
   flex-wrap: wrap;
@@ -354,7 +296,7 @@ h2 em {
 }
 
 /* Entrada al hacer scroll: solo si el script marcó <html class="animar"> */
-.animar main > :not(.hero) {
+.animar main > :not(.hero, .apertura, .escena-video) {
   opacity: 0;
   transform: translateY(12px);
   transition:
@@ -362,7 +304,7 @@ h2 em {
     transform 0.6s ease;
 }
 
-.animar main > .visible:not(.hero) {
+.animar main > .visible:not(.hero, .apertura, .escena-video) {
   opacity: 1;
   transform: none;
 }
@@ -375,8 +317,7 @@ h2 em {
   /* El interletrado negativo deja la última letra fuera de la caja; el relleno la vuelve a incluir */
   padding-inline: 0.08em;
   isolation: isolate;
-  /* Mismo color que la página: sin el lienzo, la máscara se funde con él y no se ve */
-  background: var(--fondo);
+
   /* Recorta 2 px a los lados para que no asomen pixeles por el borde de la máscara; arriba y abajo deja pasar el resplandor */
   clip-path: inset(-3rem 2px);
   white-space: nowrap;
@@ -398,12 +339,11 @@ h2 em {
 
 /* El lienzo solo aparece cuando el script de pixeles está en marcha. La máscara se pinta desde el inicio:
    si apareciera recién al cargar el script, el navegador la contaría como el elemento más grande y retrasaría el LCP */
-.pixel-lienzo {
+/* En el estilo crema el relleno de pixeles queda apagado: el texto se ve normal */
+.pixel-lienzo,
+.pixel.activo .pixel-lienzo,
+.pixel-mascara {
   display: none;
-}
-
-.pixel.activo .pixel-lienzo {
-  display: block;
 }
 
 .pixel-lienzo {
@@ -463,10 +403,6 @@ h2 em {
 
   .nav-links a:hover {
     color: var(--texto);
-  }
-
-  .tema:hover {
-    border-color: var(--texto);
   }
 
   .flotante:hover {

@@ -231,17 +231,21 @@ function proceso() {
 gsap.registerPlugin(ScrollTrigger);
 gsap.ticker.fps(60);
 
+// Contexto propio: al reiniciar solo se deshacen las animaciones de este módulo, no las de otras escenas
+let contexto: gsap.Context | null = null;
+
 /* Se llama al cargar el módulo y de nuevo después de cada cambio de página (Base.astro no lo carga con "reducir movimiento") */
 export function iniciar() {
   limpiezas.forEach((limpiar) => limpiar());
   limpiezas = [];
   repintados = [];
-  ScrollTrigger.getAll().forEach((disparador) => disparador.kill());
-  gsap.globalTimeline.getChildren().forEach((animacion) => animacion.kill());
-
-  fondo();
-  proceso();
-  document.fonts.ready.then(() => {
+  contexto?.revert();
+  contexto = gsap.context(() => {
+    fondo();
+    proceso();
+  });
+  const actual = contexto;
+  document.fonts.ready.then(() => actual.add(() => {
     const nombre = document.querySelector<HTMLElement>('.bit');
     if (nombre) rellenar(nombre, { trigger: nombre, start: 'clamp(top 62%)', end: 'top 12%' });
     // Las tres cifras se rellenan juntas al pasar su sección
@@ -250,5 +254,5 @@ export function iniciar() {
       .querySelectorAll<HTMLElement>('.cifra.pixel')
       .forEach((cifra) => rellenar(cifra, { trigger: prueba, start: 'clamp(top 92%)', end: 'top 48%' }));
     ScrollTrigger.refresh();
-  });
+  }));
 }

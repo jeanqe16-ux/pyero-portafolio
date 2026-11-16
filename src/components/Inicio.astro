@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import Hero from './Hero.astro';
+import Apertura from './Apertura.astro';
+import EscenaVideo from './EscenaVideo.astro';
 import Reels from './Reels.astro';
 import Prueba from './Prueba.astro';
 import Franja from './Franja.astro';
@@ -10,9 +11,6 @@ import Proceso from './Proceso.astro';
 import Sobre from './Sobre.astro';
 import Contacto from './Contacto.astro';
 import type { Idioma } from '../lib/i18n';
-import { conjunto } from '../lib/imagenes';
-import { ANCHOS_HERO, SIZES_HERO } from '../lib/hero';
-import site from '../data/site.json';
 
 interface Props {
   lang: Idioma;
@@ -20,12 +18,11 @@ interface Props {
 
 const { lang } = Astro.props;
 
-// La foto del hero es el elemento más grande del primer pantallazo: se precarga desde el <head> con el mismo srcset
-const precarga = { srcset: await conjunto(site.hero.imagen, ANCHOS_HERO, 'avif'), sizes: SIZES_HERO };
 ---
 
-<Base lang={lang} precarga={precarga}>
-  <Hero lang={lang} />
+<Base lang={lang}>
+  <Apertura lang={lang} />
+  <EscenaVideo lang={lang} />
   <Reels lang={lang} />
   <Prueba lang={lang} />
   <Franja lang={lang} />

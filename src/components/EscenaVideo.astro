@@ -1,0 +1,605 @@
+---
+import { textosDe, type Idioma } from '../lib/i18n';
+import { optimizar } from '../lib/imagenes';
+import { reelsDe } from '../lib/reels';
+
+interface Props {
+  lang: Idioma;
+}
+
+const { lang } = Astro.props;
+const t = textosDe(lang).escenaVideo;
+
+// Los clips de la línea de tiempo son tus reels reales; el monitor muestra el que está bajo el cabezal
+const reels = reelsDe(lang).filter((r) => r.poster);
+const clips = await Promise.all(
+  reels.map(async (r) => ({ nombre: r.nombre, monitor: await optimizar(r.poster, 520), miniatura: await optimizar(r.poster, 120) })),
+);
+// Anchos relativos de cada clip, para que la línea de tiempo no se vea mecánica
+const pesos = [19, 25, 18, 22, 16];
+const total = clips.reduce((s, _, i) => s + pesos[i % pesos.length], 0);
+const anchos = clips.map((_, i) => (pesos[i % pesos.length] / total) * 100);
+---
+
+<section class="escena-video" id="edicion" aria-labelledby="escena-video-titulo">
+  <div class="fija">
+    <div class="orbe" aria-hidden="true"></div>
+    <header>
+      <p class="paso">{t.etiqueta}</p>
+      <h2 id="escena-video-titulo">{t.titulo}</h2>
+    </header>
+
+    <div class="escenario">
+      {/* Monitor: el reel bajo el cabezal, con subtítulo y corrección de color que se aplican durante la escena */}
+      <figure class="monitor" aria-label={t.monitor}>
+        {clips.map((c, i) => <img src={c.monitor} alt="" class:list={{ actual: i === 0 }} loading="lazy" decoding="async" />)}
+        <figcaption class="subtitulo">{t.subtitulo}</figcaption>
+        <span class="chip-color">{t.color}</span>
+      </figure>
+
+      {/* Línea de tiempo */}
+      <div class="linea" aria-hidden="true">
+        <div class="linea-cabecera">
+          <span class="tiempo">00:00</span>
+          <span class="exportar">
+            <span class="exportar-texto">{t.exportar}</span>
+            <span class="listo-texto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+              {t.listo}
+            </span>
+          </span>
+        </div>
+        <div class="pistas">
+          <span class="rotulo">{t.pistas.video}</span>
+          <div class="pista video">
+            {
+              clips.map((c, i) => (
+                <span class:list={['clip', { cortable: i === 1 }]} style={`width:${anchos[i]}%;--mini:url('${c.miniatura}')`}>
+                  {i === 1 && <span class="mitad" />}
+                </span>
+              ))
+            }
+          </div>
+          <span class="rotulo">{t.pistas.texto}</span>
+          <div class="pista texto">
+            <span class="leyenda" style="left:30%;width:16%"></span>
+            <span class="leyenda" style="left:52%;width:20%"></span>
+          </div>
+          <span class="rotulo">{t.pistas.audio}</span>
+          <div class="pista audio">
+            {Array.from({ length: 64 }, (_, i) => <span style={`--h:${0.25 + Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.45)) * 0.75}`} />)}
+          </div>
+          <span class="cabezal"></span>
+        </div>
+      </div>
+
+      <div class="cursor" aria-hidden="true">
+        <svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>
+        <span>Pyero</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Escena ligada al scroll: el avance de la sección (0 a 1) decide dónde está el cabezal y qué edición ya ocurrió
+  let limpiar: (() => void) | null = null;
+
+  document.addEventListener('astro:page-load', () => {
+    limpiar?.();
+    limpiar = null;
+    const escena = document.querySelector<HTMLElement>('.escena-video');
+    if (!escena) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      escena.classList.add('estatica');
+      return;
+    }
+
+    const escenario = escena.querySelector<HTMLElement>('.escenario')!;
+    const pista = escena.querySelector<HTMLElement>('.pista.video')!;
+    const cabezal = escena.querySelector<HTMLElement>('.cabezal')!;
+    const tiempo = escena.querySelector<HTMLElement>('.tiempo')!;
+    const cursor = escena.querySelector<HTMLElement>('.cursor')!;
+    const corte = escena.querySelector<HTMLElement>('.cortable')!;
+    const leyenda = escena.querySelector<HTMLElement>('.leyenda')!;
+    const exportar = escena.querySelector<HTMLElement>('.exportar')!;
+    const chip = escena.querySelector<HTMLElement>('.chip-color')!;
+    const imagenes = [...escena.querySelectorAll<HTMLImageElement>('.monitor img')];
+    const clips = [...pista.querySelectorAll<HTMLElement>('.clip')];
+    const duracion = 34; // segundos que "dura" el reel en la línea de tiempo
+
+    // Posición de un elemento dentro del escenario, para llevar el cursor hasta él
+    const punto = (el: HTMLElement, fx = 0.5, fy = 0.5) => {
+      const e = escenario.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      return { x: r.left - e.left + r.width * fx, y: r.top - e.top + r.height * fy };
+    };
+    const tramo = (p: number, a: number, b: number) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+    const suave = (x: number) => x * x * (3 - 2 * x);
+    const mezclar = (a: { x: number; y: number }, b: { x: number; y: number }, k: number) => ({ x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k });
+
+    let actual = 0;
+    const pintar = (p: number) => {
+      // Cabezal: recorre la línea de tiempo entre el 12% y el 82% del avance
+      const avance = tramo(p, 0.12, 0.82);
+      cabezal.style.left = `${pista.offsetLeft + avance * pista.offsetWidth}px`;
+      const s = Math.round(avance * duracion);
+      tiempo.textContent = `00:${String(s).padStart(2, '0')}`;
+
+      // Monitor: corte seco al clip que está bajo el cabezal, con un saltito
+      const x = pista.getBoundingClientRect();
+      const cx = x.left + avance * x.width;
+      let indice = clips.findIndex((c) => c.getBoundingClientRect().right >= cx);
+      if (indice < 0) indice = clips.length - 1;
+      if (indice !== actual) {
+        imagenes[actual]?.classList.remove('actual');
+        const img = imagenes[indice];
+        img.classList.add('actual');
+        img.classList.remove('salto');
+        void img.offsetWidth;
+        img.classList.add('salto');
+        actual = indice;
+      }
+
+      // Ediciones que ya ocurrieron según el avance
+      escena.classList.toggle('cortado', p > 0.36);
+      escena.classList.toggle('con-leyenda', p > 0.5);
+      escena.classList.toggle('con-color', p > 0.64);
+      escena.classList.toggle('exportado', p > 0.9);
+      exportar.classList.toggle('pulsado', p > 0.87 && p < 0.9);
+
+      // Cursor: entra, corta el clip, arrastra el subtítulo, toca el color y exporta
+      const fuera = { x: escenario.clientWidth + 40, y: escenario.clientHeight * 0.95 };
+      const enCorte = punto(corte, 0.55, 0.5);
+      const enLeyenda = punto(leyenda, 0.5, 0.5);
+      const enColor = punto(chip, 0.5, 0.6);
+      const enExportar = punto(exportar, 0.5, 0.6);
+      let pos = fuera;
+      if (p < 0.3) pos = mezclar(fuera, enCorte, suave(tramo(p, 0.16, 0.3)));
+      else if (p < 0.4) pos = enCorte;
+      else if (p < 0.5) pos = mezclar(enCorte, enLeyenda, suave(tramo(p, 0.4, 0.5)));
+      else if (p < 0.56) pos = enLeyenda;
+      else if (p < 0.64) pos = mezclar(enLeyenda, enColor, suave(tramo(p, 0.56, 0.64)));
+      else if (p < 0.72) pos = enColor;
+      else if (p < 0.86) pos = mezclar(enColor, enExportar, suave(tramo(p, 0.72, 0.86)));
+      else pos = enExportar;
+      cursor.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+      cursor.classList.toggle('clic', (p > 0.34 && p < 0.38) || (p > 0.62 && p < 0.66) || (p > 0.87 && p < 0.9));
+      cursor.classList.toggle('cuchilla', p > 0.26 && p < 0.42);
+    };
+    pintar(0);
+
+    // GSAP se pide solo cuando la escena se acerca a la pantalla
+    let matar: (() => void) | null = null;
+    const cerca = new IntersectionObserver(
+      async ([entrada]) => {
+        if (!entrada.isIntersecting || matar) return;
+        cerca.disconnect();
+        const [{ gsap }, { ScrollTrigger }] = await Promise.all([import('gsap'), import('gsap/ScrollTrigger')]);
+        gsap.registerPlugin(ScrollTrigger);
+        const estado = { p: 0 };
+        const tween = gsap.to(estado, {
+          p: 1,
+          ease: 'none',
+          onUpdate: () => pintar(estado.p),
+          scrollTrigger: { trigger: escena, start: 'top top', end: 'bottom bottom', scrub: 0.5 },
+        });
+        matar = () => {
+          tween.scrollTrigger?.kill();
+          tween.kill();
+        };
+      },
+      { rootMargin: '120% 0px' },
+    );
+    cerca.observe(escena);
+    limpiar = () => {
+      cerca.disconnect();
+      matar?.();
+    };
+  });
+</script>
+
+<style>
+  /* La sección mide varias pantallas; su interior queda fijo mientras el scroll avanza la escena */
+  .escena-video {
+    position: relative;
+    height: 340vh;
+  }
+
+  .fija {
+    position: sticky;
+    top: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100svh;
+    padding: calc(var(--alto-nav) + 0.5rem) 1.5rem 1.5rem;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .orbe {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    z-index: -1;
+    width: min(50rem, 110vw);
+    aspect-ratio: 1.6;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background:
+      radial-gradient(closest-side at 35% 50%, var(--orbe-lila), transparent),
+      radial-gradient(closest-side at 65% 55%, var(--orbe-durazno), transparent);
+    filter: blur(60px);
+    opacity: 0.55;
+  }
+
+  header {
+    text-align: center;
+  }
+
+  .paso {
+    color: var(--acento-texto);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  h2 {
+    max-width: 26ch;
+    margin: 0.5rem auto 0;
+    font-size: clamp(1.4rem, 2.4vw, 2.1rem);
+    font-weight: 540;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+  }
+
+  .escenario {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    gap: clamp(0.75rem, 2.5svh, 1.5rem);
+    min-height: 0;
+    margin-top: clamp(0.75rem, 2.5svh, 1.5rem);
+  }
+
+  /* Monitor vertical de reel */
+  .monitor {
+    position: relative;
+    height: 100%;
+    max-height: 30rem;
+    min-height: 0;
+    aspect-ratio: 9 / 16;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--negro);
+    box-shadow: 0 30px 60px -36px rgb(40 25 10 / 0.6);
+  }
+
+  .monitor img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    visibility: hidden;
+    /* Antes de la corrección de color el material se ve lavado */
+    filter: saturate(0.35) contrast(0.88) brightness(1.08);
+    transition: filter 0.6s ease;
+  }
+
+  .monitor img.actual {
+    visibility: visible;
+  }
+
+  .con-color .monitor img {
+    filter: none;
+  }
+
+  .monitor img.salto {
+    animation: salto 0.3s step-end;
+  }
+
+  @keyframes salto {
+    0% {
+      translate: -6px 0;
+    }
+    50% {
+      translate: 3px 0;
+    }
+    80% {
+      translate: 0 0;
+    }
+  }
+
+  .subtitulo {
+    position: absolute;
+    left: 50%;
+    bottom: 18%;
+    width: max-content;
+    max-width: 86%;
+    padding: 0.3rem 0.55rem;
+    border-radius: 6px;
+    background: var(--superficie);
+    color: var(--negro);
+    font-size: clamp(0.75rem, 1.1vw, 0.9375rem);
+    font-weight: 600;
+    text-align: center;
+    translate: -50% 0;
+    opacity: 0;
+  }
+
+  .con-leyenda .subtitulo {
+    opacity: 1;
+    animation: salto 0.3s step-end;
+  }
+
+  .chip-color {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.8);
+    color: var(--gris);
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  .con-color .chip-color {
+    background: var(--acento);
+    color: var(--negro);
+  }
+
+  /* Línea de tiempo */
+  .linea {
+    width: min(54rem, 100%);
+    padding: 0.75rem 0.9rem 0.9rem;
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    background: var(--superficie);
+    box-shadow: 0 18px 40px -30px rgb(60 40 20 / 0.45);
+  }
+
+  .linea-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+    font-size: 0.8125rem;
+  }
+
+  .tiempo {
+    color: var(--gris);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .exportar {
+    display: inline-grid;
+    justify-items: center;
+    padding: 0.3rem 0.75rem;
+    border-radius: 8px;
+    background: var(--texto);
+    color: var(--superficie);
+    font-weight: 600;
+    transition: scale 0.12s ease;
+  }
+
+  .exportar > span {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .exportar svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .listo-texto {
+    visibility: hidden;
+  }
+
+  .exportado .exportar {
+    background: var(--acento);
+    color: var(--negro);
+  }
+
+  .exportado .exportar-texto {
+    visibility: hidden;
+  }
+
+  .exportado .listo-texto {
+    visibility: visible;
+  }
+
+  .exportar.pulsado {
+    scale: 0.92;
+  }
+
+  .pistas {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+  }
+
+  .rotulo {
+    color: var(--gris);
+    font-size: 0.75rem;
+  }
+
+  .pista {
+    position: relative;
+    display: flex;
+    height: 2.25rem;
+  }
+
+  .pista.texto,
+  .pista.audio {
+    height: 1.4rem;
+  }
+
+  .clip {
+    position: relative;
+    display: flex;
+    height: 100%;
+    border: 1px solid var(--superficie);
+    border-radius: 6px;
+    background: var(--mini) left center / auto 100% repeat-x;
+    transition: margin 0.25s step-end;
+  }
+
+  /* Corte: el clip se separa en dos con un hueco, como con la cuchilla */
+  .mitad {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    left: 46%;
+    width: 2px;
+    background: var(--acento);
+    opacity: 0;
+  }
+
+  .cortado .mitad {
+    opacity: 1;
+    width: 6px;
+    background: var(--superficie);
+  }
+
+  .leyenda {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 5px;
+    background: var(--orbe-lila);
+    visibility: hidden;
+  }
+
+  .con-leyenda .leyenda {
+    visibility: visible;
+    animation: salto 0.3s step-end;
+  }
+
+  .pista.audio {
+    align-items: center;
+    gap: 2px;
+  }
+
+  .pista.audio span {
+    flex: 1;
+    height: calc(var(--h) * 100%);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--acento) 55%, var(--superficie));
+  }
+
+  .cabezal {
+    position: absolute;
+    top: -0.35rem;
+    bottom: -0.25rem;
+    /* Empieza en la columna de las pistas, no en la de los rótulos */
+    left: 0;
+    width: 2px;
+    background: var(--acento);
+    pointer-events: none;
+  }
+
+  .cabezal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 12px;
+    height: 10px;
+    border-radius: 2px 2px 6px 6px;
+    background: var(--acento);
+  }
+
+  /* Cursor de la escena */
+  .cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .cursor svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--acento);
+    stroke: var(--superficie);
+    stroke-width: 1.2;
+    transition: scale 0.12s ease;
+  }
+
+  .cursor span {
+    margin-top: 12px;
+    padding: 0.15rem 0.45rem;
+    border-radius: 6px 6px 6px 2px;
+    background: var(--acento);
+    color: var(--negro);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .cursor.clic svg {
+    scale: 0.8;
+  }
+
+  /* Sin movimiento: la escena no queda fija y muestra el resultado final */
+  .escena-video.estatica {
+    height: auto;
+  }
+
+  .estatica .fija {
+    position: relative;
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .estatica .monitor {
+    height: min(60svh, 30rem);
+  }
+
+  .estatica .monitor img,
+  .estatica .chip-color {
+    filter: none;
+  }
+
+  .estatica .subtitulo,
+  .estatica .leyenda,
+  .estatica .listo-texto {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .estatica .exportar-texto,
+  .estatica .cursor {
+    visibility: hidden;
+  }
+
+  .estatica .cabezal {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .linea {
+      padding: 0.6rem;
+    }
+
+    .pista {
+      height: 1.9rem;
+    }
+
+    .monitor {
+      max-height: 22rem;
+    }
+  }
+</style>
