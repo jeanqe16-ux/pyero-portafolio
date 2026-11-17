@@ -347,12 +347,6 @@ content:
             fields:
               - { name: titulo, label: Titular, type: string }
               - { name: creadores, label: Rótulo de creadores, type: string }
-          - name: toma
-            label: Toma de video entre secciones
-            type: object
-            fields:
-              - { name: frase, label: Frase sobre el video, type: string }
-              - { name: descripcion, label: Descripción para lectores de pantalla, type: string }
           - name: perdida
             label: Página 404
             type: object
