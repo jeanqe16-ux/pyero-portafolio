@@ -142,10 +142,6 @@
     "clientes": {
       "titulo": "Marcas y creadores que ya se mueven.",
       "creadores": "Creadores"
-    },
-    "toma": {
-      "frase": "Esto sí detiene el scroll.",
-      "descripcion": "Fragmento de un reel editado, en silencio"
     }
   },
   "en": {
@@ -291,10 +287,6 @@
     "clientes": {
       "titulo": "Brands and creators already in motion.",
       "creadores": "Creators"
-    },
-    "toma": {
-      "frase": "This stops the scroll.",
-      "descripcion": "Clip from an edited reel, muted"
     }
   }
 }

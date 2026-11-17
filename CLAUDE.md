@@ -24,7 +24,7 @@ src/
     servicios.json   Título, texto e icono de cada servicio (pestañas del inicio y datos estructurados)
     herramientas.json  Nombre, sigla y colores de cada herramienta
   layouts/Base.astro   <head>, SEO, menú compacto, footer, WhatsApp flotante, animación de entrada
-  components/        Inicio (arma la página), Imagen (picture con srcset), Apertura, Trabajos, Toma, Casos, Nodos, Clientes, Sobre, Herramientas, Cierre, Redes
+  components/        Inicio (arma la página), Imagen (picture con srcset), Apertura, Trabajos, Casos, Nodos, Clientes, Sobre, Herramientas, Cierre, Redes
   pages/index.astro, pages/en/index.astro   Solo llaman a Inicio con su idioma
   pages/sitemap.xml.ts, pages/robots.txt.ts   Generados en el build a partir de la url del sitio
   pages/404.astro    Página 404 con mini juego de pixeles; una sola para ambos idiomas (pasa a inglés si la dirección empieza con /en/)
@@ -46,7 +46,7 @@ scripts/generar-og.mjs     Regenera og.png y og-en.png con el estilo del inicio 
 wrangler.jsonc       Despliegue en Cloudflare Workers: sirve ./dist como assets estáticos
 ```
 
-Estilo "film de lanzamiento" con estructura limpia como la web de Base44: lienzo crema con grano, orbes de degradado, textos chicos y centrados, cursor con nombre "Pyero" y cambios de imagen con saltito. Orden: Apertura (titular, caja tipo app de IA, pestañas Video ▪ Motion ▪ Diseño y fila de trabajos) → Trabajos (filas de cuatro por grupo: edición, motion y cada cliente) → Toma (un reel real a pantalla completa, en silencio, con una frase) → Casos de estudio → Proceso (cuatro pasos como líneas de texto grande que se encienden al bajar; el cursor señala el actual) → Marcas y creadores (mosaico de logos y creadores en texto) → Sobre mí → Cierre (punto naranja que llena la pantalla, pastillas de plataformas que el cursor marca y WhatsApp). Se quitaron a pedido: el diseño anterior (hero con foto y WebGL, abanico de reels, franja negra, tarjetas de servicios, pixeles, modo oscuro), las escenas de edición de video, motion y diseño, y la sección de cifras.
+Estilo "film de lanzamiento" con estructura limpia como la web de Base44: lienzo crema con grano, orbes de degradado, textos chicos y centrados, cursor con nombre "Pyero" y cambios de imagen con saltito. Orden: Apertura (titular, caja tipo app de IA, pestañas Video ▪ Motion ▪ Diseño y fila de trabajos) → Trabajos (filas de cuatro por grupo: edición, motion y cada cliente) → Casos de estudio → Proceso (cuatro pasos como líneas de texto grande que se encienden al bajar; el cursor señala el actual) → Marcas y creadores (mosaico de logos y creadores en texto) → Sobre mí → Cierre (punto naranja que llena la pantalla, pastillas de plataformas que el cursor marca y WhatsApp). Se quitaron a pedido: el diseño anterior (hero con foto y WebGL, abanico de reels, franja negra, tarjetas de servicios, pixeles, modo oscuro), las escenas de edición de video, motion y diseño, y la sección de cifras.
 
 ## Decisiones tomadas
 
