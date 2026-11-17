@@ -55,7 +55,10 @@ const categorias = await Promise.all(
   <div class="apertura-texto">
     <h1 id="apertura-titulo">
       <span>{t.titulo.a} {t.titulo.b}{t.titulo.b2 && ` ${t.titulo.b2}`}</span>
-      <span>{t.titulo.c} {t.titulo.d}</span>
+      <span>
+        {t.titulo.c}{' '}
+        <em class="alterna" data-palabras={JSON.stringify([t.titulo.d, ...t.alternativas.filter((p) => p !== t.titulo.d)])}>{t.titulo.d}</em>
+      </span>
     </h1>
     <p class="bajada">{t.bajada}</p>
 
@@ -155,6 +158,11 @@ const categorias = await Promise.all(
 
   const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let limpiar: (() => void) | null = null;
+  declare global {
+    interface Window {
+      __collageVisto?: boolean;
+    }
+  }
 
   document.addEventListener('astro:page-load', () => {
     limpiar?.();
@@ -163,13 +171,56 @@ const categorias = await Promise.all(
     const filas = [...(seccion?.querySelectorAll<HTMLElement>('.fila') ?? [])];
     if (!seccion || !form || !filas.length) return;
 
+    const relojes: number[] = [];
+    // Palabra final del titular: cambia cada 2.6 s con corte seco; su ancho queda fijo al de la palabra más larga
+    const alterna = seccion.querySelector<HTMLElement>('.alterna');
+    const palabras: string[] = JSON.parse(alterna?.dataset.palabras || '[]');
+    if (alterna && palabras.length > 1 && !reducir) {
+      const medir = document.createElement('span');
+      medir.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
+      alterna.after(medir);
+      alterna.style.minWidth = `${Math.max(...palabras.map((p) => ((medir.textContent = p), medir.offsetWidth)))}px`;
+      medir.remove();
+      let n = 0;
+      relojes.push(
+        window.setInterval(() => {
+          n = (n + 1) % palabras.length;
+          alterna.textContent = palabras[n];
+          salto(alterna);
+        }, 2600),
+      );
+    }
+
+    // Collage de entrada: cada pieza aparece suelta y girada, y un instante después cae en su sitio (solo la primera vez)
+    if (!reducir && !window.__collageVisto) {
+      window.__collageVisto = true;
+      const piezas = [...filas[0].children] as HTMLElement[];
+      piezas.forEach((pieza, i) => {
+        pieza.classList.add('oculta');
+        const dx = (i % 2 ? 1 : -1) * (30 + (i * 37) % 50);
+        const dy = -(40 + (i * 53) % 60);
+        const giro = ((i * 29) % 16) - 8;
+        relojes.push(
+          window.setTimeout(() => {
+            pieza.style.transform = `translate(${dx}px, ${dy}px) rotate(${giro}deg)`;
+            pieza.classList.remove('oculta');
+            relojes.push(
+              window.setTimeout(() => {
+                pieza.style.transform = '';
+                salto(pieza);
+              }, 150),
+            );
+          }, 350 + i * 110),
+        );
+      });
+    }
+
     const campo = form.querySelector('textarea')!;
     const ejemplo = form.querySelector<HTMLElement>('.ejemplo-texto')!;
     const cursor = form.querySelector<HTMLElement>('.cursor-pyero')!;
     const enviar = form.querySelector<HTMLElement>('.enviar')!;
     const pestanas = [...seccion.querySelectorAll<HTMLButtonElement>('.pestana')];
     const pedidos: string[] = JSON.parse(form.dataset.pedidos || '[]');
-    const relojes: number[] = [];
     const esperar = (ms: number) => new Promise<void>((r) => relojes.push(window.setTimeout(r, ms)));
     let vivo = true;
     let categoria = 0;
@@ -279,7 +330,7 @@ const categorias = await Promise.all(
     limpiar = () => {
       vivo = false;
       vista.disconnect();
-      relojes.forEach(clearTimeout);
+      relojes.forEach((r) => (clearTimeout(r), clearInterval(r)));
       form.removeEventListener('submit', alEnviar);
     };
   });
@@ -311,7 +362,16 @@ const categorias = await Promise.all(
   .orbe i {
     position: absolute;
     border-radius: 50%;
-    animation: orbe 18s ease-in-out infinite alternate;
+    animation:
+      orbe 18s ease-in-out infinite alternate,
+      aurora 40s linear infinite;
+  }
+
+  /* Aurora: el tono de los orbes deriva despacio, como el fondo de los videos de referencia */
+  @keyframes aurora {
+    to {
+      filter: hue-rotate(40deg);
+    }
   }
 
   .orbe i:nth-child(1) {
@@ -346,7 +406,7 @@ const categorias = await Promise.all(
   }
 
   h1 {
-    font-size: clamp(1.65rem, 3.1vw, 2.65rem);
+    font-size: clamp(1.85rem, 3.6vw, 3.1rem);
     font-weight: 560;
     letter-spacing: -0.045em;
     line-height: 1.08;
@@ -354,6 +414,14 @@ const categorias = await Promise.all(
 
   h1 span {
     display: block;
+  }
+
+  /* Palabra que alterna: en naranja, ancho fijo para que el titular no se mueva */
+  .alterna {
+    display: inline-block;
+    color: var(--acento);
+    font-style: normal;
+    text-align: left;
   }
 
   .bajada {

@@ -152,6 +152,12 @@ h2 em {
   translate: 0 0;
 }
 
+/* Los botones se hunden al pulsarlos */
+.boton:active,
+button:active {
+  scale: 0.97;
+}
+
 /* Botones */
 .boton {
   display: inline-flex;
@@ -460,12 +466,12 @@ h2 em {
 }
 
 .cabecera-chica h2 {
-  max-width: 30ch;
-  margin: 0.35rem auto 0;
-  font-size: clamp(1.15rem, 1.7vw, 1.45rem);
-  font-weight: 520;
-  letter-spacing: -0.025em;
-  line-height: 1.25;
+  max-width: 24ch;
+  margin: 0.5rem auto 0;
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  font-weight: 560;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
 }
 
 /* Cursor con nombre, estilo herramienta colaborativa. --c cambia el color según la tarea */
@@ -488,11 +494,13 @@ h2 em {
   fill: var(--c);
   stroke: var(--superficie);
   stroke-width: 1.2;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.25));
   transition: scale 0.12s ease;
 }
 
 .cursor-pyero span {
   margin-top: 12px;
+  box-shadow: 0 3px 10px -2px rgb(0 0 0 / 0.3);
   padding: 0.15rem 0.45rem;
   border-radius: 6px 6px 6px 2px;
   background: var(--c);

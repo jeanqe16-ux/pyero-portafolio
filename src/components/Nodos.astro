@@ -12,267 +12,154 @@ const titulo = [t.titulo.antes, t.titulo.destacado, t.titulo.despues].filter(Boo
 const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>';
 ---
 
-<section class="seccion nodos" id="proceso" aria-labelledby="proceso-titulo">
+<section class="seccion proceso" id="proceso" aria-labelledby="proceso-titulo">
   <header class="cabecera-chica">
     <p class="paso">{t.etiqueta}</p>
     <h2 id="proceso-titulo">{titulo}.</h2>
   </header>
 
-  {/* Diagrama de nodos: cada paso es un nodo y el cursor los conecta en orden */}
-  <div class="diagrama">
+  {/* Lista de pasos en texto grande: se encienden al bajar y el cursor señala el activo, como el árbol de archivos de las referencias */}
+  <div class="lineas">
     <ol>
       {
         pasos.map((p, i) => (
-          <li class="nodo">
-            <span class="puerto entrada" aria-hidden="true" />
-            <span class="numero">{i + 1}</span>
-            <h3>{tr(p, 'titulo', lang)}</h3>
-            <p>{tr(p, 'texto', lang)}</p>
-            <span class="puerto salida" aria-hidden="true" />
+          <li class="linea">
+            <span class="numero">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <h3>{tr(p, 'titulo', lang)}</h3>
+              <p>{tr(p, 'texto', lang)}</p>
+            </div>
           </li>
         ))
       }
     </ol>
-    <svg class="cables" aria-hidden="true"></svg>
     <div class="cursor-pyero" aria-hidden="true"><Fragment set:html={flecha} /><span>Pyero</span></div>
   </div>
 </section>
 
 <script>
-  // Dibuja cables curvos entre los puertos de los nodos; al entrar en pantalla el cursor los conecta uno por uno
-  import { moverCursor, punto } from '../scripts/escena';
-
+  // El paso que cruza el centro de la pantalla queda activo; los anteriores ya quedan encendidos
   document.addEventListener('astro:page-load', () => {
-    const diagrama = document.querySelector<HTMLElement>('.nodos .diagrama');
-    if (!diagrama) return;
-    const svg = diagrama.querySelector<SVGSVGElement>('.cables')!;
-    const cursor = diagrama.querySelector<HTMLElement>('.cursor-pyero')!;
-    const salidas = [...diagrama.querySelectorAll<HTMLElement>('.salida')];
-    const entradas = [...diagrama.querySelectorAll<HTMLElement>('.entrada')];
-    const nodos = [...diagrama.querySelectorAll<HTMLElement>('.nodo')];
-    const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let conectados = reducir ? nodos.length : 0;
-
-    // Cable de cada salida a la entrada del nodo siguiente; vertical en celular, horizontal en escritorio
-    const dibujar = () => {
-      svg.setAttribute('viewBox', `0 0 ${diagrama.clientWidth} ${diagrama.clientHeight}`);
-      svg.innerHTML = salidas
-        .slice(0, -1)
-        .map((s, i) => {
-          const a = punto(diagrama, s);
-          const b = punto(diagrama, entradas[i + 1]);
-          const vertical = Math.abs(b.x - a.x) < Math.abs(b.y - a.y);
-          const d = vertical
-            ? `M${a.x} ${a.y} C ${a.x} ${a.y + 40}, ${b.x} ${b.y - 40}, ${b.x} ${b.y}`
-            : `M${a.x} ${a.y} C ${a.x + 50} ${a.y}, ${b.x - 50} ${b.y}, ${b.x} ${b.y}`;
-          return `<path d="${d}" class="${i < conectados - 1 ? 'hecho' : ''}" pathLength="1"></path>`;
-        })
-        .join('');
+    const bloque = document.querySelector<HTMLElement>('.proceso .lineas');
+    if (!bloque) return;
+    const lineas = [...bloque.querySelectorAll<HTMLElement>('.linea')];
+    const cursor = bloque.querySelector<HTMLElement>('.cursor-pyero')!;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      lineas.forEach((l) => l.classList.add('activa'));
+      return;
+    }
+    const activar = (n: number) => {
+      lineas.forEach((l, i) => {
+        l.classList.toggle('activa', i <= n);
+        l.classList.toggle('actual', i === n);
+      });
+      const h3 = lineas[n].querySelector('h3')!;
+      const b = bloque.getBoundingClientRect();
+      const r = h3.getBoundingClientRect();
+      cursor.style.transform = `translate(${r.right - b.left + 10}px, ${r.top - b.top + r.height * 0.3}px)`;
+      cursor.classList.add('visible');
     };
-
-    nodos.forEach((n, i) => n.classList.toggle('activo', i < conectados));
-    dibujar();
-    window.addEventListener('resize', dibujar);
-    if (reducir) return;
-
-    // Secuencia: el cursor toca el primer nodo y luego lleva el cable de cada salida a la entrada siguiente
     const observador = new IntersectionObserver(
-      ([entrada]) => {
-        if (!entrada.isIntersecting) return;
-        observador.disconnect();
-        const paso = (i: number) => {
-          if (i >= nodos.length) {
-            cursor.classList.add('retirado');
-            return;
-          }
-          const destino = i === 0 ? punto(diagrama, nodos[0], 0.5, 0.3) : punto(diagrama, entradas[i]);
-          moverCursor(cursor, destino);
-          window.setTimeout(() => {
-            cursor.classList.add('clic');
-            conectados = i + 1;
-            nodos[i].classList.add('activo');
-            dibujar();
-            window.setTimeout(() => {
-              cursor.classList.remove('clic');
-              paso(i + 1);
-            }, 220);
-          }, 750);
-        };
-        cursor.classList.add('en-marcha');
-        window.setTimeout(() => paso(0), 100);
-      },
-      { threshold: 0.5 },
+      (entradas) => entradas.forEach((e) => e.isIntersecting && activar(lineas.indexOf(e.target as HTMLElement))),
+      { rootMargin: '-42% 0px -42% 0px' },
     );
-    observador.observe(diagrama);
+    lineas.forEach((l) => observador.observe(l));
   });
 </script>
 
 <style>
-  .nodos {
+  .proceso {
     text-align: center;
   }
 
-  .diagrama {
+  .lineas {
     position: relative;
-    max-width: var(--contenido);
-    margin: 2rem auto 0;
+    max-width: 44rem;
+    margin: 2.5rem auto 0;
+    text-align: left;
   }
 
   ol {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: clamp(1.75rem, 4vw, 3.25rem);
+    gap: clamp(1.5rem, 3vw, 2.25rem);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .nodo {
-    position: relative;
-    z-index: 1;
-    padding: 1rem 1.1rem 1.15rem;
-    border: 1px solid var(--linea);
-    border-radius: 14px;
-    background: var(--superficie);
-    box-shadow: 0 18px 40px -30px rgb(60 40 20 / 0.45);
-    text-align: left;
+  .linea {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: baseline;
+    color: var(--gris);
     opacity: 0.45;
+    transition: opacity 0.3s step-end;
   }
 
-  .nodo.activo {
-    border-color: color-mix(in srgb, var(--acento) 60%, var(--linea));
+  .linea.activa {
+    color: var(--texto);
     opacity: 1;
-    animation: salto 0.3s step-end;
   }
 
   .numero {
-    display: inline-grid;
-    place-items: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 7px;
-    background: var(--texto);
-    color: var(--superficie);
-    font-size: 0.75rem;
+    color: var(--acento-texto);
+    font-size: 0.875rem;
     font-weight: 600;
-  }
-
-  .activo .numero {
-    background: var(--acento);
-    color: var(--negro);
+    font-variant-numeric: tabular-nums;
   }
 
   h3 {
-    margin-top: 0.7rem;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    display: inline;
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    font-weight: 560;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
   }
 
-  .nodo p {
-    margin-top: 0.35rem;
+  .linea p {
+    max-width: 48ch;
+    margin-top: 0.5rem;
     color: var(--gris);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     line-height: 1.5;
+    visibility: hidden;
   }
 
-  /* Puertos de conexión a los lados de cada nodo */
-  .puerto {
-    position: absolute;
-    top: 50%;
-    width: 10px;
-    height: 10px;
-    border: 2px solid var(--linea);
-    border-radius: 50%;
-    background: var(--superficie);
-    translate: 0 -50%;
+  /* Solo el paso actual muestra su explicación; los demás quedan como índice */
+  .linea.actual p {
+    visibility: visible;
+    animation: salto 0.3s step-end;
   }
 
-  .entrada {
-    left: -6px;
-  }
-
-  .salida {
-    right: -6px;
-  }
-
-  .activo .puerto {
-    border-color: var(--acento);
-  }
-
-  .nodo:first-child .entrada,
-  .nodo:last-child .salida {
-    display: none;
-  }
-
-  .cables {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    pointer-events: none;
-  }
-
-  .cables :global(path) {
-    fill: none;
-    stroke: var(--linea);
-    stroke-width: 2;
-    stroke-dasharray: 0.03 0.02;
-  }
-
-  .cables :global(path.hecho) {
-    stroke: var(--acento);
-    stroke-dasharray: none;
-  }
-
-  /* El cursor aparece al empezar la secuencia y se desvanece al terminar */
-  .diagrama .cursor-pyero {
+  .lineas .cursor-pyero {
     opacity: 0;
     transition:
-      transform 0.7s cubic-bezier(0.65, 0, 0.25, 1),
-      opacity 0.4s ease;
+      transform 0.6s cubic-bezier(0.65, 0, 0.25, 1),
+      opacity 0.3s ease;
   }
 
-  .diagrama .cursor-pyero.en-marcha {
+  .lineas .cursor-pyero.visible {
     opacity: 1;
   }
 
-  .diagrama .cursor-pyero.retirado {
-    opacity: 0;
-  }
-
-  @media (max-width: 760px) {
-    ol {
-      grid-template-columns: 1fr;
-      max-width: 22rem;
-      margin-inline: auto;
+  @media (max-width: 640px) {
+    .linea {
+      grid-template-columns: 2.25rem minmax(0, 1fr);
     }
 
-    /* En celular los puertos van arriba y abajo de cada nodo */
-    .puerto {
-      top: auto;
-      left: 50%;
-      translate: -50% 0;
-    }
-
-    .entrada {
-      top: -6px;
-    }
-
-    .salida {
-      right: auto;
-      bottom: -6px;
+    .lineas .cursor-pyero {
+      display: none;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .diagrama .cursor-pyero {
-      display: none;
+    .linea p {
+      visibility: visible;
     }
 
-    .nodo.activo {
-      animation: none;
+    .lineas .cursor-pyero {
+      display: none;
     }
   }
 </style>

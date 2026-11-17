@@ -19,7 +19,12 @@
         "c": "Hagamos que tu marca",
         "d": "destaque."
       },
-      "bajada": "Edición de video, motion graphics y diseño que detienen el scroll y hacen que tu marca se recuerde."
+      "bajada": "Edición de video, motion graphics y diseño que detienen el scroll y hacen que tu marca se recuerde.",
+      "alternativas": [
+        "destaque.",
+        "se recuerde.",
+        "venda."
+      ]
     },
     "franja": {
       "etiqueta": "Marcas y creadores con los que he trabajado"
@@ -75,7 +80,14 @@
       },
       "texto": "Cuéntame qué quieres lograr y te respondo por WhatsApp.",
       "cta": "Escríbeme por WhatsApp",
-      "redes": "Sígueme"
+      "redes": "Sígueme",
+      "publicar": "Listo para publicar en",
+      "plataformas": [
+        "Instagram",
+        "TikTok",
+        "YouTube",
+        "LinkedIn"
+      ]
     },
     "pie": "Todos los derechos reservados.",
     "whatsapp": "Chatear por WhatsApp",
@@ -130,6 +142,10 @@
     "clientes": {
       "titulo": "Marcas y creadores que ya se mueven.",
       "creadores": "Creadores"
+    },
+    "toma": {
+      "frase": "Esto sí detiene el scroll.",
+      "descripcion": "Fragmento de un reel editado, en silencio"
     }
   },
   "en": {
@@ -152,7 +168,12 @@
         "c": "Let's make your brand",
         "d": "stand out."
       },
-      "bajada": "Video editing, motion graphics and design that stop the scroll and make your brand memorable."
+      "bajada": "Video editing, motion graphics and design that stop the scroll and make your brand memorable.",
+      "alternativas": [
+        "stand out.",
+        "be remembered.",
+        "sell."
+      ]
     },
     "franja": {
       "etiqueta": "Brands and creators I have worked with"
@@ -208,7 +229,14 @@
       },
       "texto": "Tell me what you want to achieve and I'll reply on WhatsApp.",
       "cta": "Message me on WhatsApp",
-      "redes": "Follow me"
+      "redes": "Follow me",
+      "publicar": "Ready to post on",
+      "plataformas": [
+        "Instagram",
+        "TikTok",
+        "YouTube",
+        "LinkedIn"
+      ]
     },
     "pie": "All rights reserved.",
     "whatsapp": "Chat on WhatsApp",
@@ -263,6 +291,10 @@
     "clientes": {
       "titulo": "Brands and creators already in motion.",
       "creadores": "Creators"
+    },
+    "toma": {
+      "frase": "This stops the scroll.",
+      "descripcion": "Clip from an edited reel, muted"
     }
   }
 }

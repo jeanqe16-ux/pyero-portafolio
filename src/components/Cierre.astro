@@ -9,6 +9,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = textosDe(lang).contacto;
+const flecha = '<svg viewBox="0 0 16 16"><path d="M1.5 1.2 14 7.3l-5.6 1.5-2.4 5.4z"></path></svg>';
 ---
 
 {/* Cierre: un punto naranja crece con el scroll hasta llenar la pantalla y deja la invitación a escribir */}
@@ -18,6 +19,14 @@ const t = textosDe(lang).contacto;
     <div class="contenido">
       <h2 id="cierre-titulo">{t.titulo.antes} {t.titulo.destacado}{t.titulo.cierre}</h2>
       <p>{t.texto}</p>
+      {/* Plataformas donde se publica: el cursor las va marcando mientras se baja */}
+      <div class="plataformas" aria-label={t.publicar}>
+        <span class="publicar">{t.publicar}</span>
+        {t.plataformas.map((p) => (
+          <span class="pastilla">{p}</span>
+        ))}
+        <div class="cursor-pyero oscuro" aria-hidden="true"><Fragment set:html={flecha} /><span>Pyero</span></div>
+      </div>
       <a class="boton boton-oscuro" href={enlaceWhatsapp(lang)} target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={iconoWhatsapp} fill="currentColor"></path></svg>
         {t.cta}
@@ -31,7 +40,7 @@ const t = textosDe(lang).contacto;
 </section>
 
 <script>
-  import { montarEscena, suave, tramo } from '../scripts/escena';
+  import { montarEscena, moverCursor, punto, suave, tramo } from '../scripts/escena';
 
   let limpiar: (() => void) | null = null;
 
@@ -40,14 +49,22 @@ const t = textosDe(lang).contacto;
     limpiar = null;
     const cierre = document.querySelector<HTMLElement>('.cierre');
     if (!cierre) return;
-    const punto = cierre.querySelector<HTMLElement>('.punto')!;
+    const puntoNaranja = cierre.querySelector<HTMLElement>('.punto')!;
+    const bloque = cierre.querySelector<HTMLElement>('.plataformas')!;
+    const pastillas = [...bloque.querySelectorAll<HTMLElement>('.pastilla')];
+    const cursor = bloque.querySelector<HTMLElement>('.cursor-pyero')!;
 
     const pintar = (p: number) => {
       // El punto se dibuja del tamaño final y se escala desde 16 px hasta cubrir la diagonal de la pantalla
       const diagonal = Math.hypot(window.innerWidth, window.innerHeight) + 40;
       const k = suave(tramo(p, 0.05, 0.6));
-      punto.style.transform = `translate(-50%, -50%) scale(${(16 + k * (diagonal - 16)) / punto.offsetWidth})`;
+      puntoNaranja.style.transform = `translate(-50%, -50%) scale(${(16 + k * (diagonal - 16)) / puntoNaranja.offsetWidth})`;
       cierre.classList.toggle('lleno', p > 0.55);
+      // Con la pantalla ya llena, el cursor marca una plataforma tras otra
+      const n = Math.min(pastillas.length - 1, Math.floor(tramo(p, 0.62, 0.98) * pastillas.length));
+      pastillas.forEach((x, i) => x.classList.toggle('marcada', p > 0.62 && i <= n));
+      if (p > 0.6) moverCursor(cursor, punto(bloque, pastillas[n], 0.7, 0.75), p > 0.62);
+      cursor.classList.toggle('visible', p > 0.6);
     };
 
     limpiar = montarEscena(cierre, pintar);
@@ -106,6 +123,50 @@ const t = textosDe(lang).contacto;
     font-size: 1rem;
   }
 
+  .plataformas {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .publicar {
+    margin-right: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .pastilla {
+    padding: 0.35rem 0.8rem;
+    border: 1px solid rgb(10 10 10 / 0.35);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .pastilla.marcada {
+    border-color: var(--negro);
+    background: var(--negro);
+    color: var(--acento);
+    animation: salto 0.3s step-end;
+  }
+
+  .plataformas .cursor-pyero {
+    --c: var(--negro);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.25, 1);
+  }
+
+  .plataformas .cursor-pyero span {
+    color: var(--acento);
+  }
+
+  .plataformas .cursor-pyero.visible {
+    opacity: 1;
+  }
+
   .boton {
     display: inline-flex;
     align-items: center;
@@ -131,7 +192,12 @@ const t = textosDe(lang).contacto;
     background: var(--acento);
   }
 
-  .cierre.estatica .punto {
+  .cierre.estatica .punto,
+  .cierre.estatica .cursor-pyero {
     display: none;
+  }
+
+  .cierre.estatica .pastilla {
+    border-color: var(--negro);
   }
 </style>

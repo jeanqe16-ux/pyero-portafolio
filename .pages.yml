@@ -238,6 +238,7 @@ content:
                   - { name: c, label: Segunda parte, type: string }
                   - { name: d, label: Segunda palabra en naranja, type: string }
               - { name: bajada, label: Subtítulo, type: text }
+              - { name: alternativas, label: Palabras que alternan al final del titular (con su punto), type: string, list: true }
           - name: franja
             label: Marcas y creadores
             type: object
@@ -300,6 +301,8 @@ content:
               - { name: texto, label: Texto, type: text }
               - { name: cta, label: Botón de WhatsApp, type: string }
               - { name: redes, label: Texto junto a las redes, type: string }
+              - { name: publicar, label: Texto antes de las plataformas, type: string }
+              - { name: plataformas, label: Plataformas donde se publica, type: string, list: true }
           - name: apertura
             label: Caja de pedido del inicio
             type: object
@@ -344,6 +347,12 @@ content:
             fields:
               - { name: titulo, label: Titular, type: string }
               - { name: creadores, label: Rótulo de creadores, type: string }
+          - name: toma
+            label: Toma de video entre secciones
+            type: object
+            fields:
+              - { name: frase, label: Frase sobre el video, type: string }
+              - { name: descripcion, label: Descripción para lectores de pantalla, type: string }
           - name: perdida
             label: Página 404
             type: object
