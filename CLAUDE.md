@@ -41,7 +41,7 @@ public/media/<cliente>/   logo.png y videos/*.mp4 (se sirven tal cual; ruta púb
 public/media/creadores/videos/   Reels de creadores
 public/og.png, og-en.png  Imágenes al compartir (1200x630), una por idioma
 public/favicon.*, icon-*.png, apple-touch-icon.png, site.webmanifest   Iconos del sitio
-scripts/generar-og.mjs     Regenera og.png y og-en.png con el titular del hero (usa Edge headless)
+scripts/generar-og.mjs     Regenera og.png y og-en.png con el estilo del inicio (usa Edge headless)
 .pages.yml           Configuración de Pages CMS sobre los JSON de src/data
 wrangler.jsonc       Despliegue en Cloudflare Workers: sirve ./dist como assets estáticos
 ```
@@ -73,7 +73,7 @@ Estilo "film de lanzamiento" con estructura limpia como la web de Base44: lienzo
 - **Apertura al estilo Base44**: la primera vez (`window.__collageVisto`) las piezas de la fila aparecen sueltas y giradas y caen a su sitio una por una; la última palabra del titular (`hero.titulo.d` y `hero.alternativas`) alterna en naranja con corte seco, con ancho fijo al de la palabra más larga para que el titular no se mueva; los orbes derivan de tono (aurora). Nada de esto corre con `prefers-reduced-motion`.
 - **Caja del inicio**: el cursor Pyero escribe pedidos de `textos.json > apertura.pedidos`, pulsa enviar y pasa a la siguiente pestaña (Video, Motion, Diseño); la fila cambia a las piezas de esa categoría. Si el visitante escribe y envía, se abre WhatsApp con su pedido y la categoría elegida.
 - **Espaciado**: las secciones usan `clamp(3rem, 5.5vw, 4.5rem)` de relleno vertical (48 px en celular, 72 px en escritorio) y unos 2rem entre titular y contenido. Mantenerlo compacto.
-- **SEO y compartir**: la dirección pública vive en `site.json > url` (hoy `https://pyero-portafolio.jeanqe16.workers.dev`); de ahí salen canonical, hreflang, Open Graph, Twitter, sitemap y robots. Si cambia el dominio, basta con editar ese campo. `Base.astro` incluye los datos estructurados (`ProfessionalService` con su `Person`, en Huancayo, Perú). Las imágenes og llevan el titular del hero: si cambia el titular, hay que regenerarlas con `node scripts/generar-og.mjs`.
+- **SEO y compartir**: la dirección pública vive en `site.json > url` (hoy `https://pyero-portafolio.jeanqe16.workers.dev`); de ahí salen canonical, hreflang, Open Graph, Twitter, sitemap y robots. Si cambia el dominio, basta con editar ese campo. `Base.astro` incluye los datos estructurados (`ProfessionalService` con su `Person`, en Huancayo, Perú). Las imágenes og reproducen el inicio (titular, caja y fila de trabajo): si cambia el titular o las piezas, regenerarlas con `node scripts/generar-og.mjs`.
 - **Imágenes**: las de `src/media` se nombran en los JSON por su ruta pública (`/media/...`) y `lib/imagenes.ts` las resuelve y optimiza en el build. `Imagen.astro` genera `<picture>` con AVIF y WebP en varios anchos; para una sola URL (miniaturas de 160 px, portadas de video de 640 px, imágenes grandes de 900 px) se usa `optimizar()`. Una ruta que no exista en `src/media` se usa tal cual, sin optimizar. Los estilos de un `<img>` que sale de `Imagen.astro` necesitan `:global(img)` en el componente padre.
 - **Menú**: barra flotante de vidrio compacta (Trabajos, Casos, Sobre mí, ES/EN y Hablemos). `.nav` no ocupa alto; una página que no empiece con la apertura debe dejarle sitio con `--alto-nav`, como hace la 404.
 - **Rendimiento (LCP)**: el LCP es el titular de la apertura, así que todo el CSS va dentro del HTML (`build.inlineStylesheets: 'always'`) y la única fuente es Inter (fontsource, precargada; la bit Silkscreen se quitó con los pixeles). Las imágenes de la fila del inicio van optimizadas a 280 px; GSAP solo se descarga cuando el cierre se acerca. Todo video usa `preload="none"`.
@@ -89,7 +89,6 @@ Estilo "film de lanzamiento" con estructura limpia como la web de Base44: lienzo
 
 - Revisar la redacción de los casos de estudio y la traducción al inglés.
 - "CERO Motion" y "CERO Ubicación" siguen sin audio (uno no tenía sound design); confirmar cuál y restaurar el del otro.
-- Regenerar las imágenes og (`node scripts/generar-og.mjs`) con el estilo nuevo; el script todavía apunta al hero anterior y hay que adaptarlo.
 - Pasar Lighthouse en una máquina con el paquete instalado (`npx lighthouse`): desde Claude Code no se pudo instalar.
 - Agregar los enlaces de @Even_Sales, @Loreimp y @Basee44 en `creadores.json`.
 - Si se conecta un dominio propio, actualizar `site.json > url`.
